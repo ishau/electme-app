@@ -18,6 +18,7 @@ export async function createRegistration(data: {
 
 export async function updateTransport(registrationId: string, data: {
   status: string;
+  mode?: string;
   notes?: string;
 }) {
   const groupId = getGroupId();

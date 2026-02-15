@@ -135,6 +135,19 @@ export function transportStatusLabel(status: string): string {
   }
 }
 
+export function transportModeLabel(mode: string): string {
+  switch (mode) {
+    case "air":
+      return "Air";
+    case "sea":
+      return "Sea";
+    case "vehicle":
+      return "Vehicle";
+    default:
+      return "—";
+  }
+}
+
 export function transportStatusColor(status: string): string {
   switch (status) {
     case "not_needed":

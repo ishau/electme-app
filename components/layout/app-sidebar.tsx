@@ -12,6 +12,7 @@ import {
   Settings,
   FolderOpen,
   ChevronRight,
+  MapPin,
 } from "lucide-react";
 import {
   Sidebar,
@@ -33,6 +34,7 @@ const navItems = [
   { label: "Team", href: "/team", icon: UserCog },
   { label: "Campaign", href: "/campaign", icon: Megaphone },
   { label: "Registrations", href: "/registrations", icon: ClipboardList },
+  { label: "Maps", href: "/maps", icon: MapPin },
   { label: "Voting Day", href: "/voting", icon: Vote },
 ];
 

@@ -22,7 +22,7 @@ import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/shared/empty-state";
 import { ClipboardList } from "lucide-react";
 import { updateTransport } from "@/lib/actions/voting";
-import { transportStatusLabel, transportStatusColor } from "@/lib/utils";
+import { transportStatusLabel, transportStatusColor, transportModeLabel } from "@/lib/utils";
 import { toast } from "sonner";
 import type { VoterRegistration, Constituency } from "@/lib/types";
 
@@ -58,11 +58,22 @@ export function RegistrationsView({
     router.push(`/registrations${qs ? `?${qs}` : ""}`);
   };
 
-  const handleTransportUpdate = (registrationId: string, status: string) => {
+  const handleTransportUpdate = (registrationId: string, status: string, mode?: string) => {
     startTransition(async () => {
       try {
-        await updateTransport(registrationId, { status });
+        await updateTransport(registrationId, { status, mode });
         toast.success("Transport status updated");
+      } catch (err) {
+        toast.error(`Failed: ${err instanceof Error ? err.message : "Unknown error"}`);
+      }
+    });
+  };
+
+  const handleModeUpdate = (registrationId: string, mode: string, currentStatus: string) => {
+    startTransition(async () => {
+      try {
+        await updateTransport(registrationId, { status: currentStatus, mode });
+        toast.success("Transport mode updated");
       } catch (err) {
         toast.error(`Failed: ${err instanceof Error ? err.message : "Unknown error"}`);
       }
@@ -103,7 +114,9 @@ export function RegistrationsView({
                 <TableHead>Constituent</TableHead>
                 <TableHead className="hidden sm:table-cell">Re-registered</TableHead>
                 <TableHead>Transport</TableHead>
-                <TableHead className="w-[140px]">Update</TableHead>
+                <TableHead>Mode</TableHead>
+                <TableHead className="w-[140px]">Update Status</TableHead>
+                <TableHead className="w-[140px]">Update Mode</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -125,9 +138,14 @@ export function RegistrationsView({
                     </span>
                   </TableCell>
                   <TableCell>
+                    <span className="text-xs">
+                      {transportModeLabel(reg.TransportMode)}
+                    </span>
+                  </TableCell>
+                  <TableCell>
                     <Select
                       value={reg.TransportStatus}
-                      onValueChange={(value) => handleTransportUpdate(reg.ID, value)}
+                      onValueChange={(value) => handleTransportUpdate(reg.ID, value, reg.TransportMode)}
                       disabled={isPending}
                     >
                       <SelectTrigger className="h-8 text-xs">
@@ -138,6 +156,23 @@ export function RegistrationsView({
                         <SelectItem value="needed">Needed</SelectItem>
                         <SelectItem value="arranged">Arranged</SelectItem>
                         <SelectItem value="confirmed">Confirmed</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </TableCell>
+                  <TableCell>
+                    <Select
+                      value={reg.TransportMode || "none"}
+                      onValueChange={(value) => handleModeUpdate(reg.ID, value === "none" ? "" : value, reg.TransportStatus)}
+                      disabled={isPending}
+                    >
+                      <SelectTrigger className="h-8 text-xs">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">None</SelectItem>
+                        <SelectItem value="air">Air</SelectItem>
+                        <SelectItem value="sea">Sea</SelectItem>
+                        <SelectItem value="vehicle">Vehicle</SelectItem>
                       </SelectContent>
                     </Select>
                   </TableCell>

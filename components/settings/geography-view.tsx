@@ -23,8 +23,9 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { EmptyState } from "@/components/shared/empty-state";
-import { Plus, Globe, MapPin } from "lucide-react";
-import { createAtoll, createIsland, createConstituency } from "@/lib/actions/geography";
+import { AddressLocationEditor } from "@/components/settings/address-location-editor";
+import { Plus, Globe, MapPin, Map } from "lucide-react";
+import { createAtoll, createIsland, createConstituency, getIslandsByAtoll } from "@/lib/actions/geography";
 import { toast } from "sonner";
 import type { Atoll, Island, Constituency } from "@/lib/types";
 
@@ -57,10 +58,7 @@ export function GeographyView({ atolls, constituencies }: GeographyViewProps) {
   const handleSelectAtoll = async (atollId: string) => {
     setSelectedAtoll(atollId);
     try {
-      const res = await fetch(`/api/v1/atolls/${atollId}/islands`);
-      if (res.ok) {
-        setIslands(await res.json());
-      }
+      setIslands(await getIslandsByAtoll(atollId));
     } catch {
       setIslands([]);
     }
@@ -127,12 +125,22 @@ export function GeographyView({ atolls, constituencies }: GeographyViewProps) {
 
   return (
     <Tabs defaultValue="atolls">
-      <TabsList>
-        <TabsTrigger value="atolls">Atolls & Islands</TabsTrigger>
-        <TabsTrigger value="constituencies">Constituencies</TabsTrigger>
+      <TabsList variant="line" className="border-b w-full justify-start px-0">
+        <TabsTrigger value="atolls" className="gap-1.5">
+          <Globe className="h-4 w-4" />
+          Atolls & Islands
+        </TabsTrigger>
+        <TabsTrigger value="constituencies" className="gap-1.5">
+          <MapPin className="h-4 w-4" />
+          Constituencies
+        </TabsTrigger>
+        <TabsTrigger value="address-locations" className="gap-1.5">
+          <Map className="h-4 w-4" />
+          Address Locations
+        </TabsTrigger>
       </TabsList>
 
-      <TabsContent value="atolls" className="space-y-4 mt-4">
+      <TabsContent value="atolls" className="space-y-4 mt-6">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
@@ -282,7 +290,7 @@ export function GeographyView({ atolls, constituencies }: GeographyViewProps) {
         </div>
       </TabsContent>
 
-      <TabsContent value="constituencies" className="space-y-4 mt-4">
+      <TabsContent value="constituencies" className="space-y-4 mt-6">
         <div className="flex justify-end">
           <Dialog open={constOpen} onOpenChange={setConstOpen}>
             <DialogTrigger asChild>
@@ -361,6 +369,10 @@ export function GeographyView({ atolls, constituencies }: GeographyViewProps) {
             </Table>
           </div>
         )}
+      </TabsContent>
+
+      <TabsContent value="address-locations" className="mt-6">
+        <AddressLocationEditor atolls={atolls} />
       </TabsContent>
     </Tabs>
   );

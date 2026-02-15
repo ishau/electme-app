@@ -1,5 +1,5 @@
 import { get, getGroupId } from "@/lib/api";
-import type { TurnoutStats, Constituency, Group } from "@/lib/types";
+import type { TurnoutStats, Constituency, Group, Constituent } from "@/lib/types";
 import { VotingView } from "@/components/voting/voting-view";
 import { Page } from "@/components/shared/page";
 
@@ -20,11 +20,13 @@ export default async function VotingDayPage({
 
   let turnout: TurnoutStats | null = null;
   let nonVoters: string[] | null = null;
+  let voters: Constituent[] = [];
 
   if (selectedConstituencyId) {
-    [turnout, nonVoters] = await Promise.all([
-      get<TurnoutStats>(`/groups/${groupId}/voting/turnout`, { constituency_id: selectedConstituencyId }),
-      get<string[]>(`/groups/${groupId}/voting/non-voters`, { constituency_id: selectedConstituencyId }),
+    [turnout, nonVoters, voters] = await Promise.all([
+      get<TurnoutStats>(`/groups/${groupId}/turnout`, { constituency_id: selectedConstituencyId }),
+      get<string[]>(`/groups/${groupId}/non-voters`, { constituency_id: selectedConstituencyId }),
+      get<Constituent[]>(`/groups/${groupId}/constituents`, { constituency_id: selectedConstituencyId }).catch(() => []),
     ]);
   }
 
@@ -35,6 +37,7 @@ export default async function VotingDayPage({
         constituencies={constituencies ?? []}
         turnout={turnout}
         nonVoters={nonVoters ?? []}
+        voters={voters ?? []}
         currentConstituencyId={selectedConstituencyId}
       />
     </Page>

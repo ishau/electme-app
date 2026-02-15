@@ -265,6 +265,7 @@ export interface VoterRegistration {
   IsReregistered: boolean;
   ReregSource: string;
   TransportStatus: string;
+  TransportMode: string;
   TransportNotes: string;
 }
 
@@ -361,6 +362,28 @@ export interface ImportResult {
   Updated: number;
   Skipped: number;
   Errors: { Entry: VoterImportEntry; Reason: string }[];
+}
+
+// Address Locations
+export interface AddressLocation {
+  ID: string;
+  IslandID: string;
+  AddressName: string;
+  Latitude: number;
+  Longitude: number;
+}
+
+export interface AddressWithCount {
+  AddressName: string;
+  Latitude: number | null;
+  Longitude: number | null;
+  Count: number;
+}
+
+export interface HeatMapPoint {
+  Latitude: number;
+  Longitude: number;
+  Weight: number;
 }
 
 // Workplace sectors

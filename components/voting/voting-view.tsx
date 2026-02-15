@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useTransition } from "react";
+import { useTransition, useState, useMemo } from "react";
 import {
   Select,
   SelectContent,
@@ -11,19 +11,21 @@ import {
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TurnoutCard } from "@/components/voting/turnout-card";
+import { VoterCombobox } from "@/components/voting/voter-combobox";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
 import { recordVote } from "@/lib/actions/voting";
 import { toast } from "sonner";
-import type { Group, Constituency, TurnoutStats } from "@/lib/types";
-import { useState } from "react";
+import type { Group, Constituency, TurnoutStats, Constituent } from "@/lib/types";
 
 interface VotingViewProps {
   group: Group;
   constituencies: Constituency[];
   turnout: TurnoutStats | null;
   nonVoters: string[];
+  voters: Constituent[];
   currentConstituencyId: string;
 }
 
@@ -32,6 +34,7 @@ export function VotingView({
   constituencies,
   turnout,
   nonVoters,
+  voters,
   currentConstituencyId,
 }: VotingViewProps) {
   const router = useRouter();
@@ -40,6 +43,16 @@ export function VotingView({
   const [constituentId, setConstituentId] = useState("");
   const [recordedBy, setRecordedBy] = useState("");
   const [notes, setNotes] = useState("");
+
+  const voterMap = useMemo(
+    () => Object.fromEntries(voters.map((v) => [v.ID, v])),
+    [voters]
+  );
+
+  const voterOptions = useMemo(
+    () => voters.map((v) => ({ id: v.ID, name: v.FullName, nationalId: v.MaskedNationalID })),
+    [voters]
+  );
 
   const handleConstituencyChange = (value: string) => {
     const params = new URLSearchParams();
@@ -57,7 +70,8 @@ export function VotingView({
           recorded_by: recordedBy || "Quick Record",
           notes: notes || undefined,
         });
-        toast.success("Vote recorded");
+        const voter = voterMap[cId];
+        toast.success(voter ? `Vote recorded for ${voter.FullName}` : "Vote recorded");
         setConstituentId("");
         setNotes("");
       } catch (err) {
@@ -70,6 +84,10 @@ export function VotingView({
     e.preventDefault();
     if (!currentConstituencyId) {
       toast.error("Please select a constituency first");
+      return;
+    }
+    if (!constituentId) {
+      toast.error("Please select a voter");
       return;
     }
     handleRecordVote(constituentId);
@@ -116,7 +134,10 @@ export function VotingView({
                             <span className="text-muted-foreground">{count} votes</span>
                           </div>
                           <div className="h-2 bg-muted rounded-full overflow-hidden">
-                            <div className="h-full bg-accent rounded-full" style={{ width: `${percent}%` }} />
+                            <div
+                              className="h-full bg-gradient-to-r from-accent/80 to-accent rounded-full"
+                              style={{ width: `${percent}%`, transition: "width 0.4s ease" }}
+                            />
                           </div>
                         </div>
                       );
@@ -135,12 +156,11 @@ export function VotingView({
             <CardContent>
               <form onSubmit={handleSubmitVote} className="space-y-3">
                 <div className="space-y-1">
-                  <Label>Constituent ID</Label>
-                  <Input
+                  <Label>Voter</Label>
+                  <VoterCombobox
+                    voters={voterOptions}
                     value={constituentId}
-                    onChange={(e) => setConstituentId(e.target.value)}
-                    placeholder="Paste constituent ID"
-                    required
+                    onSelect={setConstituentId}
                   />
                 </div>
                 <div className="space-y-1">
@@ -170,30 +190,42 @@ export function VotingView({
           <Card>
             <CardHeader>
               <CardTitle className="text-base">
-                Non-Voters ({nonVoters.length})
+                Non-Voters
+                <Badge variant="secondary" className="ml-2">{nonVoters.length}</Badge>
               </CardTitle>
             </CardHeader>
             <CardContent>
               {nonVoters.length === 0 ? (
                 <p className="text-sm text-muted-foreground">Everyone has voted!</p>
               ) : (
-                <div className="space-y-2 max-h-80 overflow-y-auto">
-                  {nonVoters.map((id) => (
-                    <div
-                      key={id}
-                      className="flex items-center justify-between p-2 border rounded"
-                    >
-                      <span className="font-mono text-xs">{id.slice(0, 12)}...</span>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleRecordVote(id)}
-                        disabled={isPending}
+                <div className="space-y-1.5 max-h-96 overflow-y-auto">
+                  {nonVoters.map((id) => {
+                    const voter = voterMap[id];
+                    return (
+                      <div
+                        key={id}
+                        className="flex items-center justify-between p-2 border rounded-md hover:bg-muted/50 transition-colors"
                       >
-                        Mark Voted
-                      </Button>
-                    </div>
-                  ))}
+                        <div className="min-w-0">
+                          <p className="text-sm font-medium truncate">
+                            {voter?.FullName ?? id.slice(0, 12) + "..."}
+                          </p>
+                          {voter && (
+                            <p className="text-xs text-muted-foreground">{voter.MaskedNationalID}</p>
+                          )}
+                        </div>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="shrink-0 ml-2"
+                          onClick={() => handleRecordVote(id)}
+                          disabled={isPending}
+                        >
+                          Mark Voted
+                        </Button>
+                      </div>
+                    );
+                  })}
                 </div>
               )}
             </CardContent>
