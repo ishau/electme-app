@@ -3,7 +3,6 @@
 import { useGroup } from "@/lib/hooks/use-group";
 import { useConstituencies } from "@/lib/hooks/use-constituencies";
 import { useConstituents } from "@/lib/hooks/use-constituents";
-import { useIslands } from "@/lib/hooks/use-geography";
 import { ConstituencySwitcher } from "@/components/constituents/constituency-switcher";
 import { ConstituentSearch } from "@/components/constituents/constituent-search";
 import { ConstituentTable } from "@/components/constituents/constituent-table";
@@ -51,7 +50,6 @@ export default function ConstituentsPage() {
   if (filters.address) apiParams.address = filters.address;
 
   const { data: result, isLoading: constituentsLoading } = useConstituents(apiParams);
-  const { data: islands } = useIslands(activeConstituency?.AtollID ?? "");
 
   const pageData = result?.data ?? [];
 
@@ -89,7 +87,6 @@ export default function ConstituentsPage() {
           limit={PAGE_SIZE}
           offset={offset}
           constituencyId={constituencyId}
-          islands={islands ?? []}
           candidates={group?.Candidates ?? []}
         />
       )}

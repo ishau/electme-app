@@ -11,15 +11,15 @@ import { Separator } from "@/components/ui/separator";
 import { updateProfile } from "@/lib/mutations";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { formatDate } from "@/lib/utils";
 import type { ConstituentProfile } from "@/lib/types";
 
 interface BasicInfo {
   nationalId: string;
   sex: string;
-  dob?: string;
+  age?: number;
   affiliationCode?: string | null;
   address?: string;
+  islandName?: string;
   nicknames?: { ID: string; Name: string; IsPrimary: boolean }[];
 }
 
@@ -33,12 +33,10 @@ export function ProfileForm({ constituentId, profile, basicInfo }: ProfileFormPr
   const queryClient = useQueryClient();
   const [editing, setEditing] = useState(false);
   const [fullNationalId, setFullNationalId] = useState(profile?.FullNationalID ?? "");
-  const [dob, setDob] = useState(profile?.DOB ? profile.DOB.split("T")[0] : "");
-  const [mobile, setMobile] = useState(
-    profile?.ContactInfo?.MobileNumbers?.join(", ") ?? ""
+  const [phone, setPhone] = useState(
+    profile?.ContactInfo?.PhoneNumbers?.join(", ") ?? ""
   );
   const [email, setEmail] = useState(profile?.ContactInfo?.Email ?? "");
-  const [viber, setViber] = useState(profile?.ContactInfo?.Viber ?? "");
   const [notes, setNotes] = useState(profile?.Notes ?? "");
   const [isPending, startTransition] = useTransition();
 
@@ -48,11 +46,9 @@ export function ProfileForm({ constituentId, profile, basicInfo }: ProfileFormPr
       try {
         await updateProfile(constituentId, {
           full_national_id: fullNationalId || undefined,
-          dob: dob || undefined,
           contact_info: {
-            mobile_numbers: mobile ? mobile.split(",").map((s) => s.trim()) : [],
+            phone_numbers: phone ? phone.split(",").map((s) => s.trim()) : [],
             email: email || undefined,
-            viber: viber || undefined,
           },
           notes: notes || undefined,
         });
@@ -65,6 +61,12 @@ export function ProfileForm({ constituentId, profile, basicInfo }: ProfileFormPr
     });
   };
 
+  const addressDisplay = basicInfo.address
+    ? basicInfo.islandName
+      ? `${basicInfo.address} / ${basicInfo.islandName}`
+      : basicInfo.address
+    : undefined;
+
   const basicInfoRows = (
     <div className="space-y-2 text-sm">
       <div className="flex justify-between">
@@ -75,10 +77,10 @@ export function ProfileForm({ constituentId, profile, basicInfo }: ProfileFormPr
         <span className="text-muted-foreground">Gender</span>
         <Badge variant="outline">{basicInfo.sex}</Badge>
       </div>
-      {basicInfo.dob && (
+      {basicInfo.age != null && (
         <div className="flex justify-between">
-          <span className="text-muted-foreground">Date of Birth</span>
-          <span>{formatDate(basicInfo.dob)}</span>
+          <span className="text-muted-foreground">Age</span>
+          <span>{basicInfo.age} yrs</span>
         </div>
       )}
       <div className="flex justify-between">
@@ -89,10 +91,10 @@ export function ProfileForm({ constituentId, profile, basicInfo }: ProfileFormPr
           <span className="text-muted-foreground">Independent</span>
         )}
       </div>
-      {basicInfo.address && (
+      {addressDisplay && (
         <div className="flex justify-between">
           <span className="text-muted-foreground">Address</span>
-          <span>{basicInfo.address}</span>
+          <span>{addressDisplay}</span>
         </div>
       )}
       {basicInfo.nicknames && basicInfo.nicknames.length > 0 && (
@@ -132,28 +134,16 @@ export function ProfileForm({ constituentId, profile, basicInfo }: ProfileFormPr
                     <span>{profile.FullNationalID}</span>
                   </div>
                 )}
-                {profile.DOB && (
+                {profile.ContactInfo?.PhoneNumbers?.length > 0 && (
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Date of Birth (Profile)</span>
-                    <span>{profile.DOB.split("T")[0]}</span>
-                  </div>
-                )}
-                {profile.ContactInfo?.MobileNumbers?.length > 0 && (
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Mobile</span>
-                    <span>{profile.ContactInfo.MobileNumbers.join(", ")}</span>
+                    <span className="text-muted-foreground">Phone</span>
+                    <span>{profile.ContactInfo.PhoneNumbers.join(", ")}</span>
                   </div>
                 )}
                 {profile.ContactInfo?.Email && (
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Email</span>
                     <span>{profile.ContactInfo.Email}</span>
-                  </div>
-                )}
-                {profile.ContactInfo?.Viber && (
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Viber</span>
-                    <span>{profile.ContactInfo.Viber}</span>
                   </div>
                 )}
                 {profile.Notes && (
@@ -186,49 +176,29 @@ export function ProfileForm({ constituentId, profile, basicInfo }: ProfileFormPr
         {basicInfoRows}
         <Separator />
         <form onSubmit={handleSubmit} className="space-y-3">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div className="space-y-1">
-              <Label>Full National ID</Label>
-              <Input
-                value={fullNationalId}
-                onChange={(e) => setFullNationalId(e.target.value)}
-                placeholder="A123456"
-              />
-            </div>
-            <div className="space-y-1">
-              <Label>Date of Birth</Label>
-              <Input
-                type="date"
-                value={dob}
-                onChange={(e) => setDob(e.target.value)}
-              />
-            </div>
+          <div className="space-y-1">
+            <Label>Full National ID</Label>
+            <Input
+              value={fullNationalId}
+              onChange={(e) => setFullNationalId(e.target.value)}
+              placeholder="A123456"
+            />
           </div>
           <div className="space-y-1">
-            <Label>Mobile Numbers (comma separated)</Label>
+            <Label>Phone Numbers (comma separated)</Label>
             <Input
-              value={mobile}
-              onChange={(e) => setMobile(e.target.value)}
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
               placeholder="+960..."
             />
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div className="space-y-1">
-              <Label>Email</Label>
-              <Input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-            </div>
-            <div className="space-y-1">
-              <Label>Viber</Label>
-              <Input
-                value={viber}
-                onChange={(e) => setViber(e.target.value)}
-                placeholder="+960..."
-              />
-            </div>
+          <div className="space-y-1">
+            <Label>Email</Label>
+            <Input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
           </div>
           <div className="space-y-1">
             <Label>Notes</Label>

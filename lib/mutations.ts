@@ -22,12 +22,9 @@ import type {
 
 export async function updateProfile(constituentId: string, data: {
   full_national_id?: string;
-  dob?: string;
   contact_info?: {
-    mobile_numbers?: string[];
     phone_numbers?: string[];
     email?: string;
-    viber?: string;
     notes?: string;
   };
   notes?: string;
@@ -180,10 +177,8 @@ export async function addTeamMember(data: {
   constituent_id?: string;
   assigned_area?: string;
   contact_info?: {
-    mobile_numbers?: string[];
     phone_numbers?: string[];
     email?: string;
-    viber?: string;
     notes?: string;
   };
   is_active?: boolean;
@@ -198,10 +193,8 @@ export async function updateTeamMember(memberId: string, data: {
   role?: string;
   assigned_area?: string;
   contact_info?: {
-    mobile_numbers?: string[];
     phone_numbers?: string[];
     email?: string;
-    viber?: string;
     notes?: string;
   };
   is_active?: boolean;

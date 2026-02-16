@@ -23,9 +23,8 @@ export function TeamView({ members }: TeamViewProps) {
     name: string;
     role: string;
     contact_info?: {
-      mobile_numbers?: string[];
+      phone_numbers?: string[];
       email?: string;
-      viber?: string;
       notes?: string;
     };
     is_active?: boolean;

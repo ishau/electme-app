@@ -71,18 +71,10 @@ export default function ConstituentDetailPage() {
   const activeAffiliation = constituent.Affiliations?.find((a) => !a.Period.EndDate);
   const affiliationParty = activeAffiliation ? parties?.find((p) => p.ID === activeAffiliation.PartyID) : null;
 
-  const age = constituent.DOB ? (() => {
-    const [year, month, day] = constituent.DOB!.split("T")[0].split("-").map(Number);
-    const now = new Date(Date.now() + 5 * 60 * 60 * 1000);
-    let a = now.getUTCFullYear() - year;
-    if (now.getUTCMonth() + 1 < month || (now.getUTCMonth() + 1 === month && now.getUTCDate() < day)) a--;
-    return a;
-  })() : null;
-
   return (
     <Page
       title={constituent.FullName}
-      description={`${constituent.FullNationalID ?? constituent.MaskedNationalID} | ${constituent.Sex === "M" ? "Male" : "Female"}${age !== null ? ` | ${age} yrs` : ""}`}
+      description={`${constituent.FullNationalID ?? constituent.MaskedNationalID} | ${constituent.Sex === "M" ? "Male" : "Female"}${constituent.Age != null ? ` | ${constituent.Age} yrs` : ""}`}
     >
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
@@ -92,9 +84,10 @@ export default function ConstituentDetailPage() {
             basicInfo={{
               nationalId: constituent.FullNationalID ?? constituent.MaskedNationalID,
               sex: constituent.Sex,
-              dob: constituent.DOB ?? undefined,
+              age: constituent.Age ?? undefined,
               affiliationCode: affiliationParty?.Code ?? null,
               address: address?.Name,
+              islandName: address?.IslandName,
               nicknames: constituent.Nicknames,
             }}
           />
@@ -112,7 +105,7 @@ export default function ConstituentDetailPage() {
             latestSupport={neighborSupport ?? {}}
             address={address?.Name}
             islandId={address?.IslandID}
-            islandName={address?.IslandID}
+            islandName={address?.IslandName}
             constituencyId={baseConstituent?.ConstituencyID}
             candidates={group?.Candidates ?? []}
           />
