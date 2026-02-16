@@ -5,7 +5,7 @@ import type {
   EnrichedConstituent,
   SupportAssessment,
   OutreachLog,
-  Relationship,
+  RelationshipView,
   PaginatedResponse,
   ConstituentSearchResult,
 } from "@/lib/types";
@@ -64,7 +64,7 @@ export function useRelationships(constituentId: string) {
   return useQuery({
     queryKey: ["relationships", groupId, constituentId],
     queryFn: () =>
-      get<Relationship[]>(`/groups/${groupId}/constituents/${constituentId}/relationships`),
+      get<RelationshipView[]>(`/groups/${groupId}/constituents/${constituentId}/relationships`),
     enabled: !!constituentId,
   });
 }
@@ -87,6 +87,7 @@ export function useNeighbors(address: string | undefined, islandId: string | und
       get<PaginatedResponse<Constituent>>(`/groups/${groupId}/constituents`, {
         address: address!,
         island_id: islandId!,
+        exact_address: "true",
       }),
     enabled: !!address && !!islandId,
     select: (data) => data?.data ?? [],

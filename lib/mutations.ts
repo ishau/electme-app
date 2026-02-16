@@ -6,7 +6,6 @@ import type {
   WorkplaceAssignment,
   Tag,
   PersonalTrait,
-  Relationship,
   SupportAssessment,
   OutreachLog,
   Atoll,
@@ -75,12 +74,12 @@ export async function updateTraits(constituentId: string, data: {
 export async function createRelationship(constituentId: string, data: {
   to_id: string;
   type: string;
-  subtype: string;
+  role?: string;
   influence_score: number;
   notes?: string;
 }) {
   const groupId = getGroupId();
-  return post<Relationship[]>(`/groups/${groupId}/constituents/${constituentId}/relationships`, data);
+  return post<{ status: string }>(`/groups/${groupId}/constituents/${constituentId}/relationships`, data);
 }
 
 // ── Campaign ──
