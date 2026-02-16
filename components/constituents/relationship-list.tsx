@@ -22,17 +22,14 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Rating } from "@/components/ui/rating";
-import { SupportLevelBadge } from "@/components/campaign/support-level-badge";
 import { createRelationship } from "@/lib/mutations";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import type { Relationship, SupportAssessment } from "@/lib/types";
+import type { Relationship } from "@/lib/types";
 
 interface RelationshipListProps {
   constituentId: string;
   relationships: Relationship[];
-  latestSupport?: Record<string, SupportAssessment>;
-  relatedNames?: Record<string, string>;
 }
 
 const relationshipTypes = [
@@ -42,7 +39,7 @@ const relationshipTypes = [
   { type: "colleague", subtypes: [] },
 ];
 
-export function RelationshipList({ constituentId, relationships, latestSupport = {}, relatedNames = {} }: RelationshipListProps) {
+export function RelationshipList({ constituentId, relationships }: RelationshipListProps) {
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
   const [toId, setToId] = useState("");
@@ -93,38 +90,40 @@ export function RelationshipList({ constituentId, relationships, latestSupport =
           {relationships.length > 0 ? (
             <div className="space-y-2">
               {relationships.map((rel) => {
-                const otherId = rel.FromID === constituentId ? rel.ToID : rel.FromID;
-                const support = latestSupport[otherId];
+                const isFrom = rel.FromID === constituentId;
+                const otherId = isFrom ? rel.ToID : rel.FromID;
+                const otherName = isFrom ? rel.ToName : rel.FromName;
+                const otherAddress = isFrom ? rel.ToAddress : rel.FromAddress;
                 return (
                   <div key={rel.ID} className="flex items-center justify-between p-2 border rounded">
-                    <div className="flex items-center gap-2">
-                      <Badge variant="outline" className="capitalize">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <Badge variant="outline" className="capitalize shrink-0">
                         {rel.Type}
                       </Badge>
                       {rel.Subtype && rel.Subtype !== rel.Type && (
-                        <Badge variant="secondary" className="capitalize">
+                        <Badge variant="secondary" className="capitalize shrink-0">
                           {rel.Subtype.replace(/_/g, " ")}
                         </Badge>
                       )}
-                      <Link
-                        href={`/constituents/${otherId}`}
-                        className="text-sm hover:underline"
-                      >
-                        {relatedNames[otherId] ?? otherId.slice(0, 8) + "..."}
-                      </Link>
+                      <div className="min-w-0">
+                        <Link
+                          href={`/constituents/${otherId}`}
+                          className="text-sm font-medium hover:underline"
+                        >
+                          {otherName}
+                        </Link>
+                        {otherAddress?.Name && (
+                          <p className="text-xs text-muted-foreground truncate">
+                            {otherAddress.IslandName ? `${otherAddress.Name} / ${otherAddress.IslandName}` : otherAddress.Name}
+                          </p>
+                        )}
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      {support ? (
-                        <SupportLevelBadge level={support.Level} />
-                      ) : (
-                        <span className="text-xs text-muted-foreground">—</span>
-                      )}
-                      {rel.InfluenceScore > 0 && (
-                        <span className="text-xs text-muted-foreground">
-                          Inf: {rel.InfluenceScore}/10
-                        </span>
-                      )}
-                    </div>
+                    {rel.InfluenceScore > 0 && (
+                      <span className="text-xs text-muted-foreground shrink-0">
+                        Inf: {rel.InfluenceScore}/10
+                      </span>
+                    )}
                   </div>
                 );
               })}

@@ -181,7 +181,11 @@ export interface Relationship {
   ID: string;
   GroupID: string;
   FromID: string;
+  FromName: string;
+  FromAddress: PermanentAddress;
   ToID: string;
+  ToName: string;
+  ToAddress: PermanentAddress;
   Type: string;
   Subtype: string;
   InfluenceScore: number;

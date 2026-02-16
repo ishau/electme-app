@@ -11,7 +11,6 @@ import {
 } from "@/lib/hooks/use-constituents";
 import { useParties } from "@/lib/hooks/use-parties";
 import { useGroup } from "@/lib/hooks/use-group";
-import { get } from "@/lib/api";
 import { ProfileForm } from "@/components/constituents/profile-form";
 import { SupportForm } from "@/components/constituents/support-form";
 import { OutreachForm } from "@/components/constituents/outreach-form";
@@ -19,8 +18,6 @@ import { RelationshipList } from "@/components/constituents/relationship-list";
 import { HouseholdCard } from "@/components/constituents/household-card";
 import { Page } from "@/components/shared/page";
 import { PageSkeleton } from "@/components/shared/loading-skeleton";
-import { useQuery } from "@tanstack/react-query";
-import type { Constituent } from "@/lib/types";
 
 export default function ConstituentDetailPage() {
   const { constituentId } = useParams<{ constituentId: string }>();
@@ -39,30 +36,6 @@ export default function ConstituentDetailPage() {
     .filter((n) => n.ID !== constituentId)
     .map((n) => n.ID);
   const { data: neighborSupport } = useLatestSupport(neighborIds);
-
-  const rels = relationships ?? [];
-  const relatedIds = rels.map((r) =>
-    r.FromID === constituentId ? r.ToID : r.FromID
-  );
-  const { data: relatedSupport } = useLatestSupport(relatedIds);
-
-  // Fetch names for related constituents
-  const { data: relatedNames } = useQuery({
-    queryKey: ["relatedNames", relatedIds],
-    queryFn: async () => {
-      const names: Record<string, string> = {};
-      await Promise.all(
-        relatedIds.map(async (rid) => {
-          try {
-            const c = await get<Constituent>(`/constituents/${rid}`);
-            if (c) names[rid] = c.FullName;
-          } catch { /* skip */ }
-        })
-      );
-      return names;
-    },
-    enabled: relatedIds.length > 0,
-  });
 
   if (!constituent) return <Page title="Loading..." description=""><PageSkeleton /></Page>;
 
@@ -97,9 +70,7 @@ export default function ConstituentDetailPage() {
 
           <RelationshipList
             constituentId={constituentId}
-            relationships={rels}
-            latestSupport={relatedSupport ?? {}}
-            relatedNames={relatedNames ?? {}}
+            relationships={relationships ?? []}
           />
         </div>
 
