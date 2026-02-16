@@ -5,7 +5,7 @@ import type {
   EnrichedConstituent,
   SupportAssessment,
   OutreachLog,
-  Relationship,
+  RelationshipView,
   PaginatedResponse,
   ConstituentSearchResult,
 } from "@/lib/types";
@@ -64,7 +64,7 @@ export function useRelationships(constituentId: string) {
   return useQuery({
     queryKey: ["relationships", groupId, constituentId],
     queryFn: () =>
-      get<Relationship[]>(`/groups/${groupId}/constituents/${constituentId}/relationships`),
+      get<RelationshipView[]>(`/groups/${groupId}/constituents/${constituentId}/relationships`),
     enabled: !!constituentId,
   });
 }

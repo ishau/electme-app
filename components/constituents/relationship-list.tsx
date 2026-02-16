@@ -25,18 +25,19 @@ import { Rating } from "@/components/ui/rating";
 import { createRelationship } from "@/lib/mutations";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import type { Relationship } from "@/lib/types";
+import type { RelationshipView } from "@/lib/types";
 
 interface RelationshipListProps {
   constituentId: string;
-  relationships: Relationship[];
+  relationships: RelationshipView[];
 }
 
 const relationshipTypes = [
-  { type: "family", subtypes: ["spouse", "parent", "child", "sibling", "in_law", "relative"] },
-  { type: "influence", subtypes: ["influencer", "follower"] },
-  { type: "friend", subtypes: [] },
-  { type: "colleague", subtypes: [] },
+  { value: "parent_child", label: "Parent / Child" },
+  { value: "spouse", label: "Spouse" },
+  { value: "influencer", label: "Influencer" },
+  { value: "friend", label: "Friend" },
+  { value: "colleague", label: "Colleague" },
 ];
 
 export function RelationshipList({ constituentId, relationships }: RelationshipListProps) {
@@ -44,13 +45,10 @@ export function RelationshipList({ constituentId, relationships }: RelationshipL
   const [open, setOpen] = useState(false);
   const [toId, setToId] = useState("");
   const [type, setType] = useState("");
-  const [subtype, setSubtype] = useState("");
+  const [role, setRole] = useState("parent");
   const [influenceScore, setInfluenceScore] = useState(0);
   const [notes, setNotes] = useState("");
   const [isPending, startTransition] = useTransition();
-
-  const availableSubtypes =
-    relationshipTypes.find((r) => r.type === type)?.subtypes ?? [];
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -59,7 +57,7 @@ export function RelationshipList({ constituentId, relationships }: RelationshipL
         await createRelationship(constituentId, {
           to_id: toId,
           type,
-          subtype: subtype || type,
+          role: type === "parent_child" ? role : undefined,
           influence_score: influenceScore,
           notes: notes || undefined,
         });
@@ -68,7 +66,7 @@ export function RelationshipList({ constituentId, relationships }: RelationshipL
         setOpen(false);
         setToId("");
         setType("");
-        setSubtype("");
+        setRole("parent");
         setInfluenceScore(0);
         setNotes("");
       } catch (err) {
@@ -89,44 +87,38 @@ export function RelationshipList({ constituentId, relationships }: RelationshipL
         <CardContent>
           {relationships.length > 0 ? (
             <div className="space-y-2">
-              {relationships.map((rel) => {
-                const isFrom = rel.FromID === constituentId;
-                const otherId = isFrom ? rel.ToID : rel.FromID;
-                const otherName = isFrom ? rel.ToName : rel.FromName;
-                const otherAddress = isFrom ? rel.ToAddress : rel.FromAddress;
-                return (
-                  <div key={rel.ID} className="flex items-center justify-between p-2 border rounded">
-                    <div className="flex items-center gap-2 min-w-0">
-                      <Badge variant="outline" className="capitalize shrink-0">
-                        {rel.Type}
-                      </Badge>
-                      {rel.Subtype && rel.Subtype !== rel.Type && (
-                        <Badge variant="secondary" className="capitalize shrink-0">
-                          {rel.Subtype.replace(/_/g, " ")}
-                        </Badge>
+              {relationships.map((rel, i) => (
+                <div key={rel.ID || `derived-${i}`} className="flex items-center justify-between p-2 border rounded">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <Badge variant={rel.Derived ? "secondary" : "outline"} className="capitalize shrink-0">
+                      {rel.RelLabel.replace(/_/g, " ")}
+                    </Badge>
+                    <div className="min-w-0">
+                      <Link
+                        href={`/constituents/${rel.PersonID}`}
+                        className="text-sm font-medium hover:underline"
+                      >
+                        {rel.Name}
+                      </Link>
+                      {rel.Address?.Name && (
+                        <p className="text-xs text-muted-foreground truncate">
+                          {rel.Address.IslandName ? `${rel.Address.Name} / ${rel.Address.IslandName}` : rel.Address.Name}
+                        </p>
                       )}
-                      <div className="min-w-0">
-                        <Link
-                          href={`/constituents/${otherId}`}
-                          className="text-sm font-medium hover:underline"
-                        >
-                          {otherName}
-                        </Link>
-                        {otherAddress?.Name && (
-                          <p className="text-xs text-muted-foreground truncate">
-                            {otherAddress.IslandName ? `${otherAddress.Name} / ${otherAddress.IslandName}` : otherAddress.Name}
-                          </p>
-                        )}
-                      </div>
                     </div>
-                    {rel.InfluenceScore > 0 && (
-                      <span className="text-xs text-muted-foreground shrink-0">
-                        Inf: {rel.InfluenceScore}/10
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    {rel.Derived && (
+                      <span className="text-xs text-muted-foreground italic">derived</span>
+                    )}
+                    {rel.Score > 0 && (
+                      <span className="text-xs text-muted-foreground">
+                        {rel.Score}/10
                       </span>
                     )}
                   </div>
-                );
-              })}
+                </div>
+              ))}
             </div>
           ) : (
             <p className="text-sm text-muted-foreground">No relationships recorded.</p>
@@ -148,48 +140,42 @@ export function RelationshipList({ constituentId, relationships }: RelationshipL
                 excludeId={constituentId}
               />
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1">
+              <Label>Type</Label>
+              <Select
+                value={type}
+                onValueChange={setType}
+                required
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select type" />
+                </SelectTrigger>
+                <SelectContent>
+                  {relationshipTypes.map((r) => (
+                    <SelectItem key={r.value} value={r.value}>
+                      {r.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            {type === "parent_child" && (
               <div className="space-y-1">
-                <Label>Type</Label>
-                <Select
-                  value={type}
-                  onValueChange={(v) => {
-                    setType(v);
-                    setSubtype("");
-                  }}
-                  required
-                >
+                <Label>This person is the...</Label>
+                <Select value={role} onValueChange={setRole}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select type" />
+                    <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {relationshipTypes.map((r) => (
-                      <SelectItem key={r.type} value={r.type}>
-                        {r.type.charAt(0).toUpperCase() + r.type.slice(1)}
-                      </SelectItem>
-                    ))}
+                    <SelectItem value="parent">Parent (selected person is the child)</SelectItem>
+                    <SelectItem value="child">Child (selected person is the parent)</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
-              {availableSubtypes.length > 0 && (
-                <div className="space-y-1">
-                  <Label>Subtype</Label>
-                  <Select value={subtype} onValueChange={setSubtype}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select subtype" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {availableSubtypes.map((s) => (
-                        <SelectItem key={s} value={s}>
-                          {s.charAt(0).toUpperCase() + s.slice(1).replace(/_/g, " ")}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
-            </div>
-            <Rating value={influenceScore} onChange={setInfluenceScore} max={10} label="Influence Score" />
+            )}
+            {type === "influencer" && (
+              <Rating value={influenceScore} onChange={setInfluenceScore} max={10} label="Influence Score" />
+            )}
             <div className="space-y-1">
               <Label>Notes</Label>
               <Textarea

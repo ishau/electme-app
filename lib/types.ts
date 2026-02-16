@@ -177,20 +177,15 @@ export interface PersonalTrait {
   Notes: string;
 }
 
-export interface Relationship {
+export interface RelationshipView {
   ID: string;
-  GroupID: string;
-  FromID: string;
-  FromName: string;
-  FromAddress: PermanentAddress;
-  ToID: string;
-  ToName: string;
-  ToAddress: PermanentAddress;
-  Type: string;
-  Subtype: string;
-  InfluenceScore: number;
+  PersonID: string;
+  Name: string;
+  Address: PermanentAddress;
+  RelLabel: string;
   Notes: string;
-  CreatedAt: string;
+  Derived: boolean;
+  Score: number;
 }
 
 export interface EnrichedConstituent {
