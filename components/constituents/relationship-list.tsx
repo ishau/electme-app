@@ -34,6 +34,7 @@ interface RelationshipListProps {
 
 const relationshipTypes = [
   { value: "parent_child", label: "Parent / Child" },
+  { value: "sibling", label: "Sibling" },
   { value: "spouse", label: "Spouse" },
   { value: "influencer", label: "Influencer" },
   { value: "friend", label: "Friend" },

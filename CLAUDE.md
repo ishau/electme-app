@@ -34,5 +34,8 @@
 - `PermanentAddress` includes `IslandName` — display as "Address / IslandName"
 - `ContactInfo` has only `PhoneNumbers` and `Email` (no MobileNumbers/Viber)
 - `ConstituentSearchResult.PermanentAddress` is a plain string (not the nested object)
+- Relationships use `RelationshipView` — API returns `PersonID`, `Name`, `Address`, `RelLabel`, `Derived`, `Score` (no N+1 queries needed)
+- Relationship input types: `parent_child`, `spouse`, `influencer`, `friend`, `colleague` — siblings/in-laws/grandparents are derived server-side
+- Enriched constituent (`/groups/{gid}/constituents/{cid}`) includes `PermanentAddress` — no separate base constituent fetch needed
 - Multi-constituency types: `["president", "mayor", "wdc_president"]` are global — always normalize with `type.toLowerCase().replace(/\s+/g, "_")` before comparing
 - Voter add/import and party management are backend-only — no frontend CRUD for these
