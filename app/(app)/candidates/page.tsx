@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { get, getGroupId } from "@/lib/api";
-import type { Group, CandidateSupportSummary, Constituency, CandidateView } from "@/lib/types";
+import type { Group, CandidateSupportSummary, Constituency, CandidateView, Party } from "@/lib/types";
 import { Page } from "@/components/shared/page";
 import { EmptyState } from "@/components/shared/empty-state";
 import { Card, CardContent } from "@/components/ui/card";
@@ -26,10 +26,11 @@ interface CandidateGroup {
 
 export default async function CandidatesPage() {
   const groupId = getGroupId();
-  const [group, summaries, constituencies] = await Promise.all([
+  const [group, summaries, constituencies, parties] = await Promise.all([
     get<Group>(`/groups/${groupId}`),
     get<CandidateSupportSummary[]>(`/groups/${groupId}/support-by-candidate`).catch(() => [] as CandidateSupportSummary[]),
     get<Constituency[]>("/constituencies"),
+    get<Party[]>("/parties"),
   ]);
 
   const summaryMap = Object.fromEntries(
@@ -38,6 +39,10 @@ export default async function CandidatesPage() {
 
   const constituencyMap = Object.fromEntries(
     constituencies.map((c) => [c.ID, c])
+  );
+
+  const partyMap = Object.fromEntries(
+    (parties ?? []).map((p) => [p.ID, p])
   );
 
   const candidates = group.Candidates ?? [];
@@ -120,47 +125,86 @@ export default async function CandidatesPage() {
           </h3>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {ownCandidates.map((c) => (
-              <Link key={c.ID} href={`/candidates/${c.ID}`}>
-                <Card className="border-accent/30 hover:border-accent transition-colors cursor-pointer">
-                  <CardContent className="p-4 flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">{c.Name}</p>
-                      <p className="text-sm text-muted-foreground capitalize">{c.CandidateType.replace(/_/g, " ")}</p>
-                      {c.Notes && <p className="text-xs text-muted-foreground mt-1">{c.Notes}</p>}
-                      {summaryMap[c.ID] && (
-                        <p className="text-xs text-muted-foreground mt-1">
-                          {summaryMap[c.ID].TotalAssessed} assessed
-                        </p>
-                      )}
-                    </div>
-                    <div className="text-right">
-                      <span className="text-2xl font-bold text-accent">#{c.Number}</span>
-                      <Badge variant="default" className="ml-2">Own</Badge>
-                    </div>
-                  </CardContent>
-                </Card>
-              </Link>
-            ))}
+            {ownCandidates.map((c) => {
+              const party = c.PartyID ? partyMap[c.PartyID] : null;
+              return (
+                <Link key={c.ID} href={`/candidates/${c.ID}`}>
+                  <Card className="border-accent/30 hover:border-accent transition-colors cursor-pointer">
+                    <CardContent className="p-4 flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        {party ? (
+                          <div
+                            className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0"
+                            style={{ backgroundColor: party.Color }}
+                            title={party.Name}
+                          >
+                            {party.Code}
+                          </div>
+                        ) : (
+                          <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-xs font-medium text-muted-foreground shrink-0">
+                            IND
+                          </div>
+                        )}
+                        <div>
+                          <p className="font-medium">{c.Name}</p>
+                          <p className="text-sm text-muted-foreground">
+                            {party ? party.Name : "Independent"}
+                          </p>
+                          {summaryMap[c.ID] && (
+                            <p className="text-xs text-muted-foreground mt-1">
+                              {summaryMap[c.ID].TotalAssessed} assessed
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <span className="text-2xl font-bold text-accent">#{c.Number}</span>
+                        <Badge variant="default" className="ml-2">Own</Badge>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
+              );
+            })}
 
-            {opponents.map((c) => (
-              <Link key={c.ID} href={`/candidates/${c.ID}`}>
-                <Card className="hover:border-muted-foreground/30 transition-colors cursor-pointer">
-                  <CardContent className="p-4 flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">{c.Name}</p>
-                      <p className="text-sm text-muted-foreground capitalize">{c.CandidateType.replace(/_/g, " ")}</p>
-                      {summaryMap[c.ID] && (
-                        <p className="text-xs text-muted-foreground mt-1">
-                          {summaryMap[c.ID].TotalAssessed} assessed
-                        </p>
-                      )}
-                    </div>
-                    <span className="text-2xl font-bold text-muted-foreground">#{c.Number}</span>
-                  </CardContent>
-                </Card>
-              </Link>
-            ))}
+            {opponents.map((c) => {
+              const party = c.PartyID ? partyMap[c.PartyID] : null;
+              return (
+                <Link key={c.ID} href={`/candidates/${c.ID}`}>
+                  <Card className="hover:border-muted-foreground/30 transition-colors cursor-pointer">
+                    <CardContent className="p-4 flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        {party ? (
+                          <div
+                            className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0"
+                            style={{ backgroundColor: party.Color }}
+                            title={party.Name}
+                          >
+                            {party.Code}
+                          </div>
+                        ) : (
+                          <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-xs font-medium text-muted-foreground shrink-0">
+                            IND
+                          </div>
+                        )}
+                        <div>
+                          <p className="font-medium">{c.Name}</p>
+                          <p className="text-sm text-muted-foreground">
+                            {party ? party.Name : "Independent"}
+                          </p>
+                          {summaryMap[c.ID] && (
+                            <p className="text-xs text-muted-foreground mt-1">
+                              {summaryMap[c.ID].TotalAssessed} assessed
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                      <span className="text-2xl font-bold text-muted-foreground">#{c.Number}</span>
+                    </CardContent>
+                  </Card>
+                </Link>
+              );
+            })}
           </div>
         </div>
       ))}

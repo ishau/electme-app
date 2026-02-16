@@ -27,6 +27,8 @@ export interface Party {
   ID: string;
   Code: string;
   Name: string;
+  Color: string;
+  LogoPath: string | null;
 }
 
 // Constituent (base)
