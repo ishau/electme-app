@@ -36,8 +36,12 @@ export interface ConstituentSearchResult {
   ID: string;
   FullName: string;
   MaskedNationalID: string;
-  PermanentAddress: PermanentAddress;
-  PrimaryNickname: string | null;
+  FullNationalID: string | null;
+  Age: number | null;
+  PermanentAddress: string;
+  IslandName: string;
+  Nicknames: string[] | null;
+  ContactInfo: ContactInfo | null;
 }
 
 // Constituent (base)

@@ -90,21 +90,28 @@ export function ConstituentSearchCombobox({
 
       {open && results.length > 0 && (
         <div className="absolute z-50 mt-1 w-full rounded-md border bg-popover shadow-md max-h-60 overflow-y-auto">
-          {results.map((r) => (
-            <button
-              key={r.ID}
-              type="button"
-              onClick={() => handleSelect(r)}
-              className="w-full text-left px-3 py-2 text-sm hover:bg-accent transition-colors"
-            >
-              <div className="font-medium">{r.FullName}</div>
-              <div className="text-xs text-muted-foreground">
-                {r.MaskedNationalID}
-                {r.PrimaryNickname && ` · ${r.PrimaryNickname}`}
-                {r.PermanentAddress?.Name && ` · ${r.PermanentAddress.Name}`}
-              </div>
-            </button>
-          ))}
+          {results.map((r) => {
+            const idDisplay = r.FullNationalID ?? r.MaskedNationalID;
+            const addressParts = [r.PermanentAddress, r.IslandName].filter(Boolean);
+            return (
+              <button
+                key={r.ID}
+                type="button"
+                onClick={() => handleSelect(r)}
+                className="w-full text-left px-3 py-2 text-sm hover:bg-accent transition-colors"
+              >
+                <div className="flex items-baseline justify-between gap-2">
+                  <span className="font-medium">{r.FullName}</span>
+                  {r.Age != null && <span className="text-xs text-muted-foreground shrink-0">{r.Age} yrs</span>}
+                </div>
+                <div className="text-xs text-muted-foreground">
+                  {idDisplay}
+                  {r.Nicknames?.length ? ` · ${r.Nicknames.join(", ")}` : ""}
+                  {addressParts.length > 0 && ` · ${addressParts.join(" / ")}`}
+                </div>
+              </button>
+            );
+          })}
         </div>
       )}
 
