@@ -39,7 +39,6 @@ const relationshipTypes = [
   { type: "family", subtypes: ["spouse", "parent", "child", "sibling", "in_law", "relative"] },
   { type: "influence", subtypes: ["influencer", "follower"] },
   { type: "friend", subtypes: [] },
-  { type: "neighbor", subtypes: [] },
   { type: "colleague", subtypes: [] },
 ];
 
