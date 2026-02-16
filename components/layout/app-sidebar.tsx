@@ -39,7 +39,6 @@ const navItems = [
 ];
 
 const settingsNavItems = [
-  { label: "Parties", href: "/settings/parties", icon: FolderOpen },
   { label: "Geography", href: "/settings/geography", icon: FolderOpen },
 ];
 

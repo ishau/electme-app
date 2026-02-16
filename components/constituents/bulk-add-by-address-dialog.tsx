@@ -24,11 +24,10 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Rating } from "@/components/ui/rating";
 import { SupportLevelBadge } from "@/components/campaign/support-level-badge";
-import {
-  fetchVotersByAddress,
-  bulkLogSupport,
-  bulkLogOutreach,
-} from "@/lib/actions/campaign";
+import { bulkLogSupport, bulkLogOutreach } from "@/lib/mutations";
+import { get, getGroupId } from "@/lib/api";
+import { useQueryClient } from "@tanstack/react-query";
+import type { PaginatedResponse } from "@/lib/types";
 import type { Constituent, CandidateView } from "@/lib/types";
 import { Check, Loader2 } from "lucide-react";
 
@@ -67,6 +66,7 @@ export function AddressSupportDialog({
   constituencyId,
   candidates,
 }: AddressSupportDialogProps) {
+  const queryClient = useQueryClient();
   const [voters, setVoters] = useState<Constituent[]>([]);
   const [loading, setLoading] = useState(false);
   const [selected, setSelected] = useState<Set<string>>(new Set());
@@ -89,7 +89,11 @@ export function AddressSupportDialog({
     if (open && address && islandId) {
       setLoading(true);
       setDone(false);
-      fetchVotersByAddress(address, islandId, constituencyId).then((v) => {
+      const groupId = getGroupId();
+      const params: Record<string, string> = { address, island_id: islandId };
+      if (constituencyId) params.constituency_id = constituencyId;
+      get<PaginatedResponse<Constituent>>(`/groups/${groupId}/constituents`, params).then((result) => {
+        const v = result?.data ?? [];
         setVoters(v);
         setSelected(new Set(v.map((voter) => voter.ID)));
         setLoading(false);
@@ -164,6 +168,9 @@ export function AddressSupportDialog({
           });
         }
 
+        queryClient.invalidateQueries({ queryKey: ["supportSummary"] });
+        queryClient.invalidateQueries({ queryKey: ["outreachStats"] });
+        queryClient.invalidateQueries({ queryKey: ["latestSupport"] });
         const msg = `${supportResult.Succeeded} voter${supportResult.Succeeded === 1 ? "" : "s"} assessed`;
         toast.success(msg);
         setDone(true);
@@ -243,7 +250,7 @@ export function AddressSupportDialog({
                     >
                       <div>
                         <span className="font-medium">{v.FullName}</span>
-                        <span className="text-muted-foreground ml-2">{v.MaskedNationalID}</span>
+                        <span className="text-muted-foreground ml-2">{v.FullNationalID ?? v.MaskedNationalID}</span>
                       </div>
                       <Badge variant="outline">{v.Sex}</Badge>
                     </button>

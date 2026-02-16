@@ -16,12 +16,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { recordVote } from "@/lib/actions/voting";
+import { recordVote } from "@/lib/mutations";
+import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import type { Group, Constituency, TurnoutStats, Constituent } from "@/lib/types";
 
 interface VotingViewProps {
-  group: Group;
+  group: Group | null;
   constituencies: Constituency[];
   turnout: TurnoutStats | null;
   nonVoters: string[];
@@ -38,6 +39,7 @@ export function VotingView({
   currentConstituencyId,
 }: VotingViewProps) {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [isPending, startTransition] = useTransition();
 
   const [constituentId, setConstituentId] = useState("");
@@ -50,7 +52,7 @@ export function VotingView({
   );
 
   const voterOptions = useMemo(
-    () => voters.map((v) => ({ id: v.ID, name: v.FullName, nationalId: v.MaskedNationalID })),
+    () => voters.map((v) => ({ id: v.ID, name: v.FullName, nationalId: v.FullNationalID ?? v.MaskedNationalID })),
     [voters]
   );
 
@@ -70,6 +72,8 @@ export function VotingView({
           recorded_by: recordedBy || "Quick Record",
           notes: notes || undefined,
         });
+        queryClient.invalidateQueries({ queryKey: ["turnout"] });
+        queryClient.invalidateQueries({ queryKey: ["nonVoters"] });
         const voter = voterMap[cId];
         toast.success(voter ? `Vote recorded for ${voter.FullName}` : "Vote recorded");
         setConstituentId("");
@@ -211,7 +215,7 @@ export function VotingView({
                             {voter?.FullName ?? id.slice(0, 12) + "..."}
                           </p>
                           {voter && (
-                            <p className="text-xs text-muted-foreground">{voter.MaskedNationalID}</p>
+                            <p className="text-xs text-muted-foreground">{voter.FullNationalID ?? voter.MaskedNationalID}</p>
                           )}
                         </div>
                         <Button

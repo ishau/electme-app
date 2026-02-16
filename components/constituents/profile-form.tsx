@@ -8,7 +8,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { updateProfile } from "@/lib/actions/enrichment";
+import { updateProfile } from "@/lib/mutations";
+import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { formatDate } from "@/lib/utils";
 import type { ConstituentProfile } from "@/lib/types";
@@ -29,6 +30,7 @@ interface ProfileFormProps {
 }
 
 export function ProfileForm({ constituentId, profile, basicInfo }: ProfileFormProps) {
+  const queryClient = useQueryClient();
   const [editing, setEditing] = useState(false);
   const [fullNationalId, setFullNationalId] = useState(profile?.FullNationalID ?? "");
   const [dob, setDob] = useState(profile?.DOB ? profile.DOB.split("T")[0] : "");
@@ -54,6 +56,7 @@ export function ProfileForm({ constituentId, profile, basicInfo }: ProfileFormPr
           },
           notes: notes || undefined,
         });
+        queryClient.invalidateQueries({ queryKey: ["constituent"] });
         toast.success("Profile updated");
         setEditing(false);
       } catch (err) {

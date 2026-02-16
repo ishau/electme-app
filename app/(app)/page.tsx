@@ -1,6 +1,9 @@
+"use client";
+
 import Link from "next/link";
-import { get, getGroupId } from "@/lib/api";
-import type { Group, SupportSummary, OutreachStats, OutreachLog, CandidateSupportSummary } from "@/lib/types";
+import { useGroup } from "@/lib/hooks/use-group";
+import { useSupportSummary, useOutreachStats, useCandidateSupport } from "@/lib/hooks/use-campaign";
+import { useFollowUps } from "@/lib/hooks/use-campaign";
 import { Page } from "@/components/shared/page";
 import { StatCard } from "@/components/shared/stat-card";
 import { SupportSummaryChart } from "@/components/groups/support-summary-chart";
@@ -19,16 +22,14 @@ import {
   ArrowRight,
 } from "lucide-react";
 import { outreachMethodLabel, outreachOutcomeLabel, formatDate } from "@/lib/utils";
+import { PageSkeleton } from "@/components/shared/loading-skeleton";
 
-export default async function DashboardPage() {
-  const groupId = getGroupId();
-  const [group, supportSummary, outreachStats, followUps, candidateSupport] = await Promise.all([
-    get<Group>(`/groups/${groupId}`),
-    get<SupportSummary>(`/groups/${groupId}/support-summary`),
-    get<OutreachStats>(`/groups/${groupId}/outreach/stats`),
-    get<OutreachLog[]>(`/groups/${groupId}/outreach/follow-ups`),
-    get<CandidateSupportSummary[]>(`/groups/${groupId}/support-by-candidate`),
-  ]);
+export default function DashboardPage() {
+  const { data: group, isLoading: groupLoading } = useGroup();
+  const { data: supportSummary } = useSupportSummary();
+  const { data: outreachStats } = useOutreachStats();
+  const { data: followUps } = useFollowUps();
+  const { data: candidateSupport } = useCandidateSupport();
 
   const totalVoters = supportSummary
     ? supportSummary.TotalAssessed + supportSummary.NotAssessed
@@ -44,14 +45,18 @@ export default async function DashboardPage() {
   const supportive =
     (supportSummary?.StrongSupporter ?? 0) + (supportSummary?.Leaning ?? 0);
   const ownCandidates =
-    group.Candidates?.filter((c) => c.IsOwnCandidate) ?? [];
-  const allCandidates = group.Candidates ?? [];
+    group?.Candidates?.filter((c) => c.IsOwnCandidate) ?? [];
+  const allCandidates = group?.Candidates ?? [];
   const candidateMap = Object.fromEntries(allCandidates.map((c) => [c.ID, c]));
   const candidateStats = candidateSupport ?? [];
   const pendingFollowUps = followUps ?? [];
 
+  if (groupLoading) {
+    return <Page title="Dashboard" description="Loading..."><PageSkeleton /></Page>;
+  }
+
   return (
-    <Page title="Dashboard" description={group.Name}>
+    <Page title="Dashboard" description={group?.Name}>
       {/* Key Metrics */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <StatCard
@@ -266,7 +271,7 @@ export default async function DashboardPage() {
             <div>
               <div className="flex items-center justify-between mb-2">
                 <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                  Team ({group.TeamMembers?.length ?? 0})
+                  Team ({group?.TeamMembers?.length ?? 0})
                 </p>
                 <Link href="/team">
                   <Button variant="ghost" size="sm">
@@ -274,15 +279,15 @@ export default async function DashboardPage() {
                   </Button>
                 </Link>
               </div>
-              {(group.TeamMembers?.length ?? 0) > 0 ? (
+              {(group?.TeamMembers?.length ?? 0) > 0 ? (
                 <div className="flex flex-wrap gap-1.5">
-                  {group.TeamMembers!.slice(0, 8).map((m) => (
+                  {group!.TeamMembers!.slice(0, 8).map((m) => (
                     <Badge key={m.ID} variant="secondary">
                       {m.Name}
                     </Badge>
                   ))}
-                  {group.TeamMembers!.length > 8 && (
-                    <Badge variant="outline">+{group.TeamMembers!.length - 8} more</Badge>
+                  {group!.TeamMembers!.length > 8 && (
+                    <Badge variant="outline">+{group!.TeamMembers!.length - 8} more</Badge>
                   )}
                 </div>
               ) : (

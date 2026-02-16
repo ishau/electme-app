@@ -1,6 +1,7 @@
+"use client";
+
 import Link from "next/link";
-import { get, getGroupId } from "@/lib/api";
-import type { OutreachStats, OutreachLog } from "@/lib/types";
+import { useOutreachStats, useFollowUps } from "@/lib/hooks/use-campaign";
 import { OutreachStatsDisplay } from "@/components/campaign/outreach-stats";
 import { FollowUpList } from "@/components/campaign/follow-up-list";
 import { Page } from "@/components/shared/page";
@@ -8,13 +9,15 @@ import { StatCard } from "@/components/shared/stat-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Phone, Users, CalendarClock, ArrowRight } from "lucide-react";
+import { PageSkeleton } from "@/components/shared/loading-skeleton";
 
-export default async function CampaignPage() {
-  const groupId = getGroupId();
-  const [stats, followUps] = await Promise.all([
-    get<OutreachStats>(`/groups/${groupId}/outreach/stats`),
-    get<OutreachLog[]>(`/groups/${groupId}/outreach/follow-ups`),
-  ]);
+export default function CampaignPage() {
+  const { data: stats, isLoading } = useOutreachStats();
+  const { data: followUps } = useFollowUps();
+
+  if (isLoading) {
+    return <Page title="Campaign" description="Loading..."><PageSkeleton /></Page>;
+  }
 
   return (
     <Page title="Campaign" description="Outreach statistics and follow-ups">

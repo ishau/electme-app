@@ -20,7 +20,8 @@ import {
 } from "@/components/ui/dialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { logOutreach } from "@/lib/actions/campaign";
+import { logOutreach } from "@/lib/mutations";
+import { useQueryClient } from "@tanstack/react-query";
 import { formatDateTime, outreachMethodLabel, outreachOutcomeLabel } from "@/lib/utils";
 import { toast } from "sonner";
 import type { OutreachLog } from "@/lib/types";
@@ -46,6 +47,7 @@ function outcomeBadgeVariant(outcome: string) {
 }
 
 export function OutreachForm({ constituentId, history }: OutreachFormProps) {
+  const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
   const [method, setMethod] = useState("");
   const [outcome, setOutcome] = useState("");
@@ -65,6 +67,9 @@ export function OutreachForm({ constituentId, history }: OutreachFormProps) {
           follow_up_date: followUpDate ? new Date(followUpDate).toISOString() : undefined,
           notes: notes || undefined,
         });
+        queryClient.invalidateQueries({ queryKey: ["outreachHistory"] });
+        queryClient.invalidateQueries({ queryKey: ["outreachStats"] });
+        queryClient.invalidateQueries({ queryKey: ["followUps"] });
         toast.success("Outreach logged");
         setOpen(false);
         setMethod("");

@@ -1,15 +1,9 @@
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ChevronRight, Building2, Globe } from "lucide-react";
+import { ChevronRight, Globe } from "lucide-react";
 import { Page } from "@/components/shared/page";
 
 const settingsItems = [
-  {
-    title: "Parties",
-    description: "Manage political parties",
-    href: "/settings/parties",
-    icon: Building2,
-  },
   {
     title: "Geography",
     description: "Atolls, islands, and constituencies",

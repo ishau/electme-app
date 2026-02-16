@@ -5,7 +5,8 @@ import { TeamMemberCard } from "@/components/team/team-member-card";
 import { TeamMemberForm } from "@/components/team/team-member-form";
 import { EmptyState } from "@/components/shared/empty-state";
 import { Users } from "lucide-react";
-import { updateTeamMember, deleteTeamMember } from "@/lib/actions/groups";
+import { updateTeamMember, deleteTeamMember } from "@/lib/mutations";
+import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import type { TeamMember } from "@/lib/types";
 
@@ -14,6 +15,7 @@ interface TeamViewProps {
 }
 
 export function TeamView({ members }: TeamViewProps) {
+  const queryClient = useQueryClient();
   const [editingMember, setEditingMember] = useState<TeamMember | null>(null);
   const [isPending, startTransition] = useTransition();
 
@@ -33,6 +35,7 @@ export function TeamView({ members }: TeamViewProps) {
     startTransition(async () => {
       try {
         await updateTeamMember(editingMember.ID, data);
+        queryClient.invalidateQueries({ queryKey: ["group"] });
         toast.success("Team member updated");
         setEditingMember(null);
       } catch (err) {
@@ -46,6 +49,7 @@ export function TeamView({ members }: TeamViewProps) {
     startTransition(async () => {
       try {
         await deleteTeamMember(memberId);
+        queryClient.invalidateQueries({ queryKey: ["group"] });
         toast.success("Team member removed");
       } catch (err) {
         toast.error(`Failed: ${err instanceof Error ? err.message : "Unknown error"}`);

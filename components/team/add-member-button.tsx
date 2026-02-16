@@ -4,10 +4,12 @@ import { useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { TeamMemberForm } from "@/components/team/team-member-form";
-import { addTeamMember } from "@/lib/actions/groups";
+import { addTeamMember } from "@/lib/mutations";
+import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 export function AddMemberButton() {
+  const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
 
@@ -26,6 +28,7 @@ export function AddMemberButton() {
     startTransition(async () => {
       try {
         await addTeamMember(data);
+        queryClient.invalidateQueries({ queryKey: ["group"] });
         toast.success("Team member added");
         setOpen(false);
       } catch (err) {

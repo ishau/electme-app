@@ -1,34 +1,41 @@
-import { notFound } from "next/navigation";
-import { get, getGroupId } from "@/lib/api";
-import type { Group, CandidateSupportSummary, AssessedVoter } from "@/lib/types";
+"use client";
+
+import { useParams } from "next/navigation";
+import { useGroup } from "@/lib/hooks/use-group";
+import { useCandidateSummaries, useCandidateVoters } from "@/lib/hooks/use-candidates";
 import { Page } from "@/components/shared/page";
 import { StatCard } from "@/components/shared/stat-card";
 import { Badge } from "@/components/ui/badge";
 import { CandidateVoterSearch } from "@/components/candidates/candidate-voter-search";
 import { CandidateVoterTable } from "@/components/candidates/candidate-voter-table";
 import { AssessVoterDialog } from "@/components/candidates/assess-voter-dialog";
+import { PageSkeleton } from "@/components/shared/loading-skeleton";
+import { useQueryStates, parseAsString } from "nuqs";
 
-interface Props {
-  params: Promise<{ candidateId: string }>;
-  searchParams: Promise<{ level?: string; name?: string; page?: string }>;
-}
+export default function CandidateDetailPage() {
+  const { candidateId } = useParams<{ candidateId: string }>();
 
-export default async function CandidateDetailPage({ params, searchParams }: Props) {
-  const { candidateId } = await params;
-  const { level = "", name = "" } = await searchParams;
-  const groupId = getGroupId();
+  const [filters] = useQueryStates(
+    {
+      level: parseAsString.withDefault(""),
+      name: parseAsString.withDefault(""),
+    },
+    { shallow: false }
+  );
 
-  const [group, summaries, voters] = await Promise.all([
-    get<Group>(`/groups/${groupId}`),
-    get<CandidateSupportSummary[]>(`/groups/${groupId}/support-by-candidate`).catch(() => [] as CandidateSupportSummary[]),
-    get<AssessedVoter[]>(`/groups/${groupId}/candidates/${candidateId}/voters`, level ? { level } : undefined).catch(() => [] as AssessedVoter[]),
-  ]);
+  const { data: group } = useGroup();
+  const { data: summaries } = useCandidateSummaries();
 
-  const candidate = group.Candidates?.find((c) => c.ID === candidateId);
-  if (!candidate) notFound();
+  const voterParams: Record<string, string> = {};
+  if (filters.level) voterParams.level = filters.level;
 
+  const { data: voters } = useCandidateVoters(candidateId, Object.keys(voterParams).length > 0 ? voterParams : undefined);
+
+  const candidate = group?.Candidates?.find((c) => c.ID === candidateId);
   const summary = (summaries ?? []).find((s) => s.CandidateID === candidateId);
   const total = summary?.TotalAssessed ?? 0;
+
+  if (!candidate) return <Page title="Loading..." description=""><PageSkeleton /></Page>;
 
   return (
     <Page
@@ -93,11 +100,7 @@ export default async function CandidateDetailPage({ params, searchParams }: Prop
       )}
 
       {/* Filter bar */}
-      <CandidateVoterSearch
-        candidateId={candidateId}
-        currentLevel={level}
-        currentName={name}
-      />
+      <CandidateVoterSearch />
 
       {/* Voter table */}
       <CandidateVoterTable voters={voters ?? []} candidateId={candidateId} />

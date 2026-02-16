@@ -20,7 +20,8 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Rating } from "@/components/ui/rating";
-import { logSupport } from "@/lib/actions/campaign";
+import { logSupport } from "@/lib/mutations";
+import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { ClipboardPlus } from "lucide-react";
 
@@ -37,6 +38,7 @@ const supportLevels = [
 ];
 
 export function AssessVoterDialog({ candidateId }: AssessVoterDialogProps) {
+  const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
   const [constituentId, setConstituentId] = useState("");
   const [level, setLevel] = useState("");
@@ -66,6 +68,8 @@ export function AssessVoterDialog({ candidateId }: AssessVoterDialogProps) {
           assessed_by: assessedBy.trim(),
           notes: notes || undefined,
         });
+        queryClient.invalidateQueries({ queryKey: ["candidateSummaries"] });
+        queryClient.invalidateQueries({ queryKey: ["candidateVoters"] });
         toast.success("Assessment logged");
         setOpen(false);
         resetForm();

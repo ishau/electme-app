@@ -27,6 +27,17 @@ export interface Party {
   ID: string;
   Code: string;
   Name: string;
+  Color: string;
+  LogoPath: string | null;
+}
+
+// Constituent search result (lightweight)
+export interface ConstituentSearchResult {
+  ID: string;
+  FullName: string;
+  MaskedNationalID: string;
+  PermanentAddress: PermanentAddress;
+  PrimaryNickname: string | null;
 }
 
 // Constituent (base)
@@ -240,6 +251,7 @@ export interface AssessedVoter {
   ConstituentID: string;
   FullName: string;
   MaskedNationalID: string;
+  FullNationalID: string | null;
   Sex: string;
   Level: string;
   Confidence: number;

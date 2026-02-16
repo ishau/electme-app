@@ -1,63 +1,88 @@
-import { get, getGroupId } from "@/lib/api";
-import type { Constituent, EnrichedConstituent, SupportAssessment, OutreachLog, Relationship, Party, Group } from "@/lib/types";
-import { fetchVotersByAddress, fetchLatestSupport } from "@/lib/actions/campaign";
+"use client";
+
+import { useParams } from "next/navigation";
+import {
+  useEnrichedConstituent,
+  useBaseConstituent,
+  useSupportHistory,
+  useOutreachHistory,
+  useRelationships,
+  useNeighbors,
+  useLatestSupport,
+} from "@/lib/hooks/use-constituents";
+import { useParties } from "@/lib/hooks/use-parties";
+import { useGroup } from "@/lib/hooks/use-group";
+import { get } from "@/lib/api";
 import { ProfileForm } from "@/components/constituents/profile-form";
 import { SupportForm } from "@/components/constituents/support-form";
 import { OutreachForm } from "@/components/constituents/outreach-form";
 import { RelationshipList } from "@/components/constituents/relationship-list";
 import { HouseholdCard } from "@/components/constituents/household-card";
 import { Page } from "@/components/shared/page";
+import { PageSkeleton } from "@/components/shared/loading-skeleton";
+import { useQuery } from "@tanstack/react-query";
+import type { Constituent } from "@/lib/types";
 
-export default async function ConstituentDetailPage({
-  params,
-}: {
-  params: Promise<{ constituentId: string }>;
-}) {
-  const { constituentId } = await params;
-  const groupId = getGroupId();
+export default function ConstituentDetailPage() {
+  const { constituentId } = useParams<{ constituentId: string }>();
 
-  const [constituent, baseConstituent, supportHistory, outreachHistory, relationships, parties, group] = await Promise.all([
-    get<EnrichedConstituent>(`/groups/${groupId}/constituents/${constituentId}`),
-    get<Constituent>(`/constituents/${constituentId}`),
-    get<SupportAssessment[]>(`/groups/${groupId}/constituents/${constituentId}/support`),
-    get<OutreachLog[]>(`/groups/${groupId}/constituents/${constituentId}/outreach`),
-    get<Relationship[]>(`/groups/${groupId}/constituents/${constituentId}/relationships`),
-    get<Party[]>("/parties"),
-    get<Group>(`/groups/${groupId}`),
-  ]);
+  const { data: constituent } = useEnrichedConstituent(constituentId);
+  const { data: baseConstituent } = useBaseConstituent(constituentId);
+  const { data: supportHistory } = useSupportHistory(constituentId);
+  const { data: outreachHistory } = useOutreachHistory(constituentId);
+  const { data: relationships } = useRelationships(constituentId);
+  const { data: parties } = useParties();
+  const { data: group } = useGroup();
 
-  const activeAffiliation = constituent.Affiliations?.find((a) => !a.Period.EndDate);
-  const affiliationParty = activeAffiliation ? parties?.find((p) => p.ID === activeAffiliation.PartyID) : null;
-
-  // Fetch neighbors (same address) and their support levels
   const address = baseConstituent?.PermanentAddress;
-  let neighbors: Constituent[] = [];
-  let neighborSupport: Record<string, SupportAssessment> = {};
+  const { data: neighbors } = useNeighbors(address?.Name, address?.IslandID);
 
-  if (address?.Name && address?.IslandID) {
-    neighbors = await fetchVotersByAddress(address.Name, address.IslandID);
-    const neighborIds = neighbors
-      .filter((n) => n.ID !== constituentId)
-      .map((n) => n.ID);
-    if (neighborIds.length > 0) {
-      neighborSupport = await fetchLatestSupport(neighborIds);
-    }
-  }
+  const neighborIds = (neighbors ?? [])
+    .filter((n) => n.ID !== constituentId)
+    .map((n) => n.ID);
+  const { data: neighborSupport } = useLatestSupport(neighborIds);
 
-  // Fetch support levels for related persons
   const rels = relationships ?? [];
   const relatedIds = rels.map((r) =>
     r.FromID === constituentId ? r.ToID : r.FromID
   );
-  let relatedSupport: Record<string, SupportAssessment> = {};
-  if (relatedIds.length > 0) {
-    relatedSupport = await fetchLatestSupport(relatedIds);
-  }
+  const { data: relatedSupport } = useLatestSupport(relatedIds);
+
+  // Fetch names for related constituents
+  const { data: relatedNames } = useQuery({
+    queryKey: ["relatedNames", relatedIds],
+    queryFn: async () => {
+      const names: Record<string, string> = {};
+      await Promise.all(
+        relatedIds.map(async (rid) => {
+          try {
+            const c = await get<Constituent>(`/constituents/${rid}`);
+            if (c) names[rid] = c.FullName;
+          } catch { /* skip */ }
+        })
+      );
+      return names;
+    },
+    enabled: relatedIds.length > 0,
+  });
+
+  if (!constituent) return <Page title="Loading..." description=""><PageSkeleton /></Page>;
+
+  const activeAffiliation = constituent.Affiliations?.find((a) => !a.Period.EndDate);
+  const affiliationParty = activeAffiliation ? parties?.find((p) => p.ID === activeAffiliation.PartyID) : null;
+
+  const age = constituent.DOB ? (() => {
+    const [year, month, day] = constituent.DOB!.split("T")[0].split("-").map(Number);
+    const now = new Date(Date.now() + 5 * 60 * 60 * 1000);
+    let a = now.getUTCFullYear() - year;
+    if (now.getUTCMonth() + 1 < month || (now.getUTCMonth() + 1 === month && now.getUTCDate() < day)) a--;
+    return a;
+  })() : null;
 
   return (
     <Page
       title={constituent.FullName}
-      description={`${constituent.MaskedNationalID} | ${constituent.Sex === "M" ? "Male" : "Female"}`}
+      description={`${constituent.FullNationalID ?? constituent.MaskedNationalID} | ${constituent.Sex === "M" ? "Male" : "Female"}${age !== null ? ` | ${age} yrs` : ""}`}
     >
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
@@ -75,7 +100,7 @@ export default async function ConstituentDetailPage({
           />
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <SupportForm constituentId={constituentId} history={supportHistory ?? []} candidates={group?.Candidates ?? []} />
+            <SupportForm constituentId={constituentId} constituencyId={baseConstituent?.ConstituencyID ?? ""} history={supportHistory ?? []} candidates={group?.Candidates ?? []} />
             <OutreachForm constituentId={constituentId} history={outreachHistory ?? []} />
           </div>
         </div>
@@ -83,8 +108,8 @@ export default async function ConstituentDetailPage({
         <div className="space-y-6">
           <HouseholdCard
             currentConstituentId={constituentId}
-            neighbors={neighbors}
-            latestSupport={neighborSupport}
+            neighbors={neighbors ?? []}
+            latestSupport={neighborSupport ?? {}}
             address={address?.Name}
             islandId={address?.IslandID}
             islandName={address?.IslandID}
@@ -95,7 +120,8 @@ export default async function ConstituentDetailPage({
           <RelationshipList
             constituentId={constituentId}
             relationships={rels}
-            latestSupport={relatedSupport}
+            latestSupport={relatedSupport ?? {}}
+            relatedNames={relatedNames ?? {}}
           />
         </div>
       </div>
