@@ -50,8 +50,18 @@ export default async function ConstituentDetailPage({
     r.FromID === constituentId ? r.ToID : r.FromID
   );
   let relatedSupport: Record<string, SupportAssessment> = {};
+  const relatedNames: Record<string, string> = {};
   if (relatedIds.length > 0) {
     relatedSupport = await fetchLatestSupport(relatedIds);
+    // Fetch names for related constituents
+    await Promise.all(
+      relatedIds.map(async (rid) => {
+        try {
+          const c = await get<Constituent>(`/constituents/${rid}`);
+          if (c) relatedNames[rid] = c.FullName;
+        } catch { /* skip */ }
+      })
+    );
   }
 
   const age = constituent.DOB ? (() => {
@@ -104,6 +114,7 @@ export default async function ConstituentDetailPage({
             constituentId={constituentId}
             relationships={rels}
             latestSupport={relatedSupport}
+            relatedNames={relatedNames}
           />
         </div>
       </div>

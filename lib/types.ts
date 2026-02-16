@@ -31,6 +31,15 @@ export interface Party {
   LogoPath: string | null;
 }
 
+// Constituent search result (lightweight)
+export interface ConstituentSearchResult {
+  ID: string;
+  FullName: string;
+  MaskedNationalID: string;
+  PermanentAddress: PermanentAddress;
+  PrimaryNickname: string | null;
+}
+
 // Constituent (base)
 export interface PermanentAddress {
   IslandID: string;

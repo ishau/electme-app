@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { ConstituentSearchCombobox } from "@/components/constituents/constituent-search-combobox";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -31,6 +31,7 @@ interface RelationshipListProps {
   constituentId: string;
   relationships: Relationship[];
   latestSupport?: Record<string, SupportAssessment>;
+  relatedNames?: Record<string, string>;
 }
 
 const relationshipTypes = [
@@ -41,7 +42,7 @@ const relationshipTypes = [
   { type: "colleague", subtypes: [] },
 ];
 
-export function RelationshipList({ constituentId, relationships, latestSupport = {} }: RelationshipListProps) {
+export function RelationshipList({ constituentId, relationships, latestSupport = {}, relatedNames = {} }: RelationshipListProps) {
   const [open, setOpen] = useState(false);
   const [toId, setToId] = useState("");
   const [type, setType] = useState("");
@@ -105,9 +106,9 @@ export function RelationshipList({ constituentId, relationships, latestSupport =
                       )}
                       <Link
                         href={`/constituents/${otherId}`}
-                        className="text-sm text-muted-foreground hover:underline"
+                        className="text-sm hover:underline"
                       >
-                        {otherId.slice(0, 8)}...
+                        {relatedNames[otherId] ?? otherId.slice(0, 8) + "..."}
                       </Link>
                     </div>
                     <div className="flex items-center gap-2">
@@ -139,12 +140,11 @@ export function RelationshipList({ constituentId, relationships, latestSupport =
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-3">
             <div className="space-y-1">
-              <Label>Related Person ID</Label>
-              <Input
+              <Label>Related Person</Label>
+              <ConstituentSearchCombobox
                 value={toId}
-                onChange={(e) => setToId(e.target.value)}
-                placeholder="Constituent ID"
-                required
+                onSelect={(id) => setToId(id)}
+                excludeId={constituentId}
               />
             </div>
             <div className="grid grid-cols-2 gap-3">

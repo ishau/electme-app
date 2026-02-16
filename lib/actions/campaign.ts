@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { get, post, getGroupId } from "@/lib/api";
-import type { Constituent, SupportAssessment, OutreachLog, PaginatedResponse } from "@/lib/types";
+import type { Constituent, ConstituentSearchResult, SupportAssessment, OutreachLog, PaginatedResponse } from "@/lib/types";
 
 export async function logSupport(constituentId: string, data: {
   candidate_id?: string;
@@ -54,6 +54,13 @@ export async function fetchLatestSupport(constituentIds: string[]): Promise<Reco
     })
   );
   return result;
+}
+
+export async function searchConstituents(query: string): Promise<ConstituentSearchResult[]> {
+  if (!query || query.length < 2) return [];
+  const groupId = getGroupId();
+  const results = await get<ConstituentSearchResult[]>(`/groups/${groupId}/constituents/search`, { q: query });
+  return results ?? [];
 }
 
 export async function fetchVotersByAddress(address: string, islandId: string, constituencyId?: string) {
