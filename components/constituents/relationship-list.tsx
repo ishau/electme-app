@@ -36,7 +36,7 @@ interface RelationshipListProps {
 }
 
 const relationshipTypes = [
-  { type: "family", subtypes: ["spouse", "parent", "child", "sibling", "in_law"] },
+  { type: "family", subtypes: ["spouse", "parent", "child", "sibling", "in_law", "grandparent", "grandchild", "relative"] },
   { type: "influence", subtypes: ["influencer", "follower"] },
   { type: "friend", subtypes: [] },
   { type: "neighbor", subtypes: [] },

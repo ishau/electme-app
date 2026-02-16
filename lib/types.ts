@@ -196,6 +196,7 @@ export interface EnrichedConstituent {
   FullName: string;
   Sex: string;
   Age: number | null;
+  PermanentAddress: PermanentAddress;
   ConstituencyID: string;
   Profile: ConstituentProfile | null;
   Nicknames: Nickname[];

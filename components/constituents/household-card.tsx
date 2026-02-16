@@ -61,14 +61,19 @@ export function HouseholdCard({
                   key={n.ID}
                   className="flex items-center justify-between p-2 border rounded"
                 >
-                  <div className="flex items-center gap-2">
+                  <div>
                     <Link
                       href={`/constituents/${n.ID}`}
                       className="text-sm font-medium hover:underline"
                     >
                       {n.FullName}
                     </Link>
-                    <Badge variant="outline">{n.Sex}</Badge>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      <Badge variant="outline">{n.Sex}</Badge>
+                      {n.Age != null && (
+                        <span className="text-xs text-muted-foreground">{n.Age} yrs</span>
+                      )}
+                    </div>
                   </div>
                   <div className="flex items-center gap-2">
                     {support ? (
