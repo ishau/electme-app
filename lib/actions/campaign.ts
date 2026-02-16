@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { get, post, getGroupId } from "@/lib/api";
-import type { Constituent, SupportAssessment, OutreachLog } from "@/lib/types";
+import type { Constituent, SupportAssessment, OutreachLog, PaginatedResponse } from "@/lib/types";
 
 export async function logSupport(constituentId: string, data: {
   candidate_id?: string;
@@ -60,8 +60,8 @@ export async function fetchVotersByAddress(address: string, islandId: string, co
   const groupId = getGroupId();
   const params: Record<string, string> = { address, island_id: islandId };
   if (constituencyId) params.constituency_id = constituencyId;
-  const voters = await get<Constituent[]>(`/groups/${groupId}/constituents`, params);
-  return voters ?? [];
+  const result = await get<PaginatedResponse<Constituent>>(`/groups/${groupId}/constituents`, params);
+  return result?.data ?? [];
 }
 
 export async function bulkLogSupport(data: {

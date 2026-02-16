@@ -1,7 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useCallback, useState } from "react";
+import { useQueryStates, parseAsString } from "nuqs";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -13,46 +12,20 @@ import {
 import { Button } from "@/components/ui/button";
 import { Search, MapPin } from "lucide-react";
 
-interface ConstituentSearchProps {
-  currentName: string;
-  currentConstituencyId: string;
-  currentSex: string;
-  currentAddress: string;
-}
-
-export function ConstituentSearch({
-  currentName,
-  currentConstituencyId,
-  currentSex,
-  currentAddress,
-}: ConstituentSearchProps) {
-  const router = useRouter();
-  const [name, setName] = useState(currentName);
-  const [address, setAddress] = useState(currentAddress);
-
-  const navigate = useCallback(
-    (overrides: Record<string, string>) => {
-      const params = new URLSearchParams();
-      const merged = {
-        name,
-        address,
-        constituency_id: currentConstituencyId,
-        sex: currentSex,
-        ...overrides,
-      };
-      Object.entries(merged).forEach(([key, value]) => {
-        if (value && value !== "all") params.set(key, value);
-      });
-      params.delete("page");
-      const qs = params.toString();
-      router.push(`/constituents${qs ? `?${qs}` : ""}`);
+export function ConstituentSearch() {
+  const [filters, setFilters] = useQueryStates(
+    {
+      name: parseAsString.withDefault(""),
+      address: parseAsString.withDefault(""),
+      sex: parseAsString.withDefault(""),
+      page: parseAsString,
     },
-    [router, name, address, currentConstituencyId, currentSex]
+    { shallow: false }
   );
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    navigate({ name, address });
+    setFilters({ ...filters, page: null });
   };
 
   return (
@@ -61,8 +34,8 @@ export function ConstituentSearch({
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
           placeholder="Search by name..."
-          value={name}
-          onChange={(e) => setName(e.target.value)}
+          value={filters.name}
+          onChange={(e) => setFilters({ name: e.target.value || null, page: null })}
           className="pl-9"
         />
       </div>
@@ -70,14 +43,16 @@ export function ConstituentSearch({
         <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
           placeholder="Filter by address..."
-          value={address}
-          onChange={(e) => setAddress(e.target.value)}
+          value={filters.address}
+          onChange={(e) => setFilters({ address: e.target.value || null, page: null })}
           className="pl-9"
         />
       </div>
       <Select
-        value={currentSex || "all"}
-        onValueChange={(value) => navigate({ sex: value })}
+        value={filters.sex || "all"}
+        onValueChange={(value) =>
+          setFilters({ sex: value === "all" ? null : value, page: null })
+        }
       >
         <SelectTrigger className="w-full sm:w-[140px]">
           <SelectValue placeholder="Gender" />

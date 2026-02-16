@@ -1,6 +1,7 @@
 import { get, getGroupId } from "@/lib/api";
 import type { Group, Party } from "@/lib/types";
 import { AppShell } from "@/components/layout/app-shell";
+import { NuqsAdapter } from "nuqs/adapters/next/app";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const groupId = getGroupId();
@@ -11,8 +12,10 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const party = parties?.find((p) => p.ID === group?.PartyID);
 
   return (
-    <AppShell groupName={group.Name} partyCode={party?.Code}>
-      {children}
-    </AppShell>
+    <NuqsAdapter>
+      <AppShell groupName={group.Name} partyCode={party?.Code}>
+        {children}
+      </AppShell>
+    </NuqsAdapter>
   );
 }

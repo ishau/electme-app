@@ -1,7 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useCallback, useState } from "react";
+import { useQueryStates, parseAsString } from "nuqs";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -13,12 +12,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Search } from "lucide-react";
 
-interface CandidateVoterSearchProps {
-  candidateId: string;
-  currentLevel: string;
-  currentName: string;
-}
-
 const supportLevels = [
   { value: "all", label: "All Levels" },
   { value: "strong_supporter", label: "Strong Supporter" },
@@ -28,42 +21,28 @@ const supportLevels = [
   { value: "hard_opposition", label: "Hard Opposition" },
 ];
 
-export function CandidateVoterSearch({
-  candidateId,
-  currentLevel,
-  currentName,
-}: CandidateVoterSearchProps) {
-  const router = useRouter();
-  const [name, setName] = useState(currentName);
-
-  const navigate = useCallback(
-    (overrides: Record<string, string>) => {
-      const params = new URLSearchParams();
-      const merged = {
-        name,
-        level: currentLevel,
-        ...overrides,
-      };
-      Object.entries(merged).forEach(([key, value]) => {
-        if (value && value !== "all") params.set(key, value);
-      });
-      params.delete("page");
-      const qs = params.toString();
-      router.push(`/candidates/${candidateId}${qs ? `?${qs}` : ""}`);
+export function CandidateVoterSearch() {
+  const [filters, setFilters] = useQueryStates(
+    {
+      level: parseAsString.withDefault(""),
+      name: parseAsString.withDefault(""),
+      page: parseAsString,
     },
-    [router, name, currentLevel, candidateId]
+    { shallow: false }
   );
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    navigate({ name });
+    setFilters({ ...filters, page: null });
   };
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3">
       <Select
-        value={currentLevel || "all"}
-        onValueChange={(value) => navigate({ level: value })}
+        value={filters.level || "all"}
+        onValueChange={(value) =>
+          setFilters({ level: value === "all" ? null : value, page: null })
+        }
       >
         <SelectTrigger className="w-full sm:w-[180px]">
           <SelectValue placeholder="Support Level" />
@@ -80,8 +59,8 @@ export function CandidateVoterSearch({
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
           placeholder="Search by name..."
-          value={name}
-          onChange={(e) => setName(e.target.value)}
+          value={filters.name}
+          onChange={(e) => setFilters({ name: e.target.value || null, page: null })}
           className="pl-9"
         />
       </div>

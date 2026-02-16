@@ -38,7 +38,6 @@ interface BulkAddState {
 
 interface ConstituentTableProps {
   constituents: Constituent[];
-  total: number;
   limit: number;
   offset: number;
   constituencyId: string;
@@ -48,7 +47,6 @@ interface ConstituentTableProps {
 
 export function ConstituentTable({
   constituents,
-  total,
   limit,
   offset,
   constituencyId,
@@ -69,7 +67,7 @@ export function ConstituentTable({
 
   const islandMap = Object.fromEntries(islands.map((isl) => [isl.ID, isl]));
   const currentPage = Math.floor(offset / limit) + 1;
-  const totalPages = Math.ceil(total / limit);
+  const hasNextPage = constituents.length === limit;
 
   const buildPageUrl = (page: number) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -142,7 +140,7 @@ export function ConstituentTable({
 
       <div className="flex items-center justify-between mt-4">
         <p className="text-sm text-muted-foreground">
-          Showing {offset + 1}–{Math.min(offset + limit, total)} of {total}
+          Showing {offset + 1}–{offset + constituents.length}
         </p>
         <div className="flex items-center gap-2">
           <Link href={buildPageUrl(currentPage - 1)}>
@@ -152,17 +150,19 @@ export function ConstituentTable({
               disabled={currentPage <= 1}
             >
               <ChevronLeft className="h-4 w-4" />
+              Previous
             </Button>
           </Link>
           <span className="text-sm">
-            Page {currentPage} of {totalPages}
+            Page {currentPage}
           </span>
           <Link href={buildPageUrl(currentPage + 1)}>
             <Button
               variant="outline"
               size="sm"
-              disabled={currentPage >= totalPages}
+              disabled={!hasNextPage}
             >
+              Next
               <ChevronRight className="h-4 w-4" />
             </Button>
           </Link>

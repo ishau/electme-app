@@ -93,11 +93,7 @@ export default async function CandidateDetailPage({ params, searchParams }: Prop
       )}
 
       {/* Filter bar */}
-      <CandidateVoterSearch
-        candidateId={candidateId}
-        currentLevel={level}
-        currentName={name}
-      />
+      <CandidateVoterSearch />
 
       {/* Voter table */}
       <CandidateVoterTable voters={voters ?? []} candidateId={candidateId} />

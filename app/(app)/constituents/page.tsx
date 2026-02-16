@@ -1,5 +1,5 @@
 import { get, getGroupId } from "@/lib/api";
-import type { Constituent, Constituency, Group, Island } from "@/lib/types";
+import type { Constituent, Constituency, Group, Island, PaginatedResponse } from "@/lib/types";
 import { ConstituencySwitcher } from "@/components/constituents/constituency-switcher";
 import { ConstituentSearch } from "@/components/constituents/constituent-search";
 import { ConstituentTable } from "@/components/constituents/constituent-table";
@@ -51,25 +51,24 @@ export default async function ConstituentsPage({
     ? (await get<Island[]>(`/atolls/${activeConstituency.AtollID}/islands`)) ?? []
     : [];
 
-  // API returns a plain array — pagination params are passed but the backend
-  // may ignore them, so we handle pagination client-side as a fallback
+  const page = params.page ? parseInt(params.page) : 1;
+  const offset = (page - 1) * PAGE_SIZE;
+
   const apiParams: Record<string, string> = {
     constituency_id: constituencyId,
+    offset: String(offset),
+    limit: String(PAGE_SIZE),
   };
   if (params.name) apiParams.name = params.name;
   if (params.sex) apiParams.sex = params.sex;
   if (params.address) apiParams.address = params.address;
 
-  const allConstituents = await get<Constituent[]>(
+  const result = await get<PaginatedResponse<Constituent>>(
     `/groups/${groupId}/constituents`,
     apiParams
   );
 
-  const constituents = allConstituents ?? [];
-  const total = constituents.length;
-  const page = params.page ? parseInt(params.page) : 1;
-  const offset = (page - 1) * PAGE_SIZE;
-  const pageData = constituents.slice(offset, offset + PAGE_SIZE);
+  const pageData = result?.data ?? [];
 
   return (
     <Page
@@ -81,12 +80,7 @@ export default async function ConstituentsPage({
         currentConstituencyId={constituencyId}
       />
 
-      <ConstituentSearch
-        currentName={params.name ?? ""}
-        currentConstituencyId={constituencyId}
-        currentSex={params.sex ?? ""}
-        currentAddress={params.address ?? ""}
-      />
+      <ConstituentSearch />
 
       {pageData.length === 0 ? (
         <EmptyState
@@ -97,7 +91,6 @@ export default async function ConstituentsPage({
       ) : (
         <ConstituentTable
           constituents={pageData}
-          total={total}
           limit={PAGE_SIZE}
           offset={offset}
           constituencyId={constituencyId}

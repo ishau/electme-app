@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
+import { useQueryState, parseAsString } from "nuqs";
 import { Button } from "@/components/ui/button";
 import type { Constituency } from "@/lib/types";
 
@@ -13,15 +13,12 @@ export function ConstituencySwitcher({
   constituencies,
   currentConstituencyId,
 }: ConstituencySwitcherProps) {
-  const router = useRouter();
-  const searchParams = useSearchParams();
+  const [, setConstituencyId] = useQueryState("constituency_id", parseAsString.withDefault(currentConstituencyId));
+  const [, setPage] = useQueryState("page");
 
-  const handleSwitch = (constituencyId: string) => {
-    const params = new URLSearchParams(searchParams.toString());
-    params.set("constituency_id", constituencyId);
-    // Reset to page 1 when switching
-    params.delete("page");
-    router.push(`/constituents?${params.toString()}`);
+  const handleSwitch = (id: string) => {
+    setConstituencyId(id);
+    setPage(null);
   };
 
   return (
