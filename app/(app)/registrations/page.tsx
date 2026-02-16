@@ -1,26 +1,31 @@
-import { get, getGroupId } from "@/lib/api";
-import type { VoterRegistration, Constituency, Group } from "@/lib/types";
+"use client";
+
+import { useGroup } from "@/lib/hooks/use-group";
+import { useConstituencies } from "@/lib/hooks/use-constituencies";
+import { useRegistrations, useTransportNeeded } from "@/lib/hooks/use-voting";
 import { RegistrationsView } from "@/components/voting/registrations-view";
 import { Page } from "@/components/shared/page";
 import { StatCard } from "@/components/shared/stat-card";
 import { EmptyState } from "@/components/shared/empty-state";
+import { PageSkeleton } from "@/components/shared/loading-skeleton";
 import { ClipboardList, Bus, CheckCircle, MapPin } from "lucide-react";
+import { useQueryState, parseAsString } from "nuqs";
 
-export default async function RegistrationsPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ constituency_id?: string; transport_only?: string }>;
-}) {
-  const params = await searchParams;
-  const groupId = getGroupId();
+export default function RegistrationsPage() {
+  const [constituencyParam] = useQueryState("constituency_id", parseAsString.withDefault(""));
+  const [transportOnly] = useQueryState("transport_only", parseAsString.withDefault(""));
 
-  const [group, constituencies] = await Promise.all([
-    get<Group>(`/groups/${groupId}`),
-    get<Constituency[]>("/constituencies"),
-  ]);
+  const { data: group, isLoading: groupLoading } = useGroup();
+  const { data: constituencies } = useConstituencies();
 
-  const constituencyId =
-    params.constituency_id || (group?.Constituencies?.[0] ?? "");
+  const constituencyId = constituencyParam || (group?.Constituencies?.[0] ?? "");
+
+  const { data: registrations } = useRegistrations(constituencyId);
+  const { data: transportNeeded } = useTransportNeeded();
+
+  if (groupLoading) {
+    return <Page title="Voter Registrations" description="Loading..."><PageSkeleton /></Page>;
+  }
 
   if (!constituencyId) {
     return (
@@ -34,15 +39,7 @@ export default async function RegistrationsPage({
     );
   }
 
-  const [registrations, transportNeeded] = await Promise.all([
-    get<VoterRegistration[]>(
-      `/groups/${groupId}/registrations`,
-      { constituency_id: constituencyId }
-    ),
-    get<VoterRegistration[]>(`/groups/${groupId}/registrations/transport-needed`),
-  ]);
-
-  const showTransportOnly = params.transport_only === "true";
+  const showTransportOnly = transportOnly === "true";
   const displayed = showTransportOnly ? transportNeeded : registrations;
 
   return (

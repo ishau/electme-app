@@ -21,7 +21,8 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Rating } from "@/components/ui/rating";
 import { SupportLevelBadge } from "@/components/campaign/support-level-badge";
-import { logSupport } from "@/lib/actions/campaign";
+import { logSupport } from "@/lib/mutations";
+import { useQueryClient } from "@tanstack/react-query";
 import { formatDateTime } from "@/lib/utils";
 import { toast } from "sonner";
 import type { SupportAssessment, CandidateView } from "@/lib/types";
@@ -45,6 +46,7 @@ const supportLevels = [
 ];
 
 export function SupportForm({ constituentId, constituencyId, history, candidates: allCandidates }: SupportFormProps) {
+  const queryClient = useQueryClient();
   const candidates = allCandidates.filter(
     (c) =>
       GLOBAL_TYPES.includes(normalizeType(c.CandidateType)) ||
@@ -96,6 +98,10 @@ export function SupportForm({ constituentId, constituencyId, history, candidates
             )
           );
         }
+        queryClient.invalidateQueries({ queryKey: ["supportHistory"] });
+        queryClient.invalidateQueries({ queryKey: ["supportSummary"] });
+        queryClient.invalidateQueries({ queryKey: ["candidateSummaries"] });
+        queryClient.invalidateQueries({ queryKey: ["candidateSupport"] });
         const count = Math.max(candidateIds.length, 1);
         toast.success(`${count} assessment${count > 1 ? "s" : ""} logged`);
         setOpen(false);

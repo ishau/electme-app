@@ -22,13 +22,8 @@ import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/shared/empty-state";
 import { AddressMap } from "@/components/shared/address-map";
 import { MapPin, Trash2, Check } from "lucide-react";
-import {
-  getIslandsByAtoll,
-  getAddressLocationsByIsland,
-  getUniqueAddresses,
-  saveAddressLocation,
-  deleteAddressLocation,
-} from "@/lib/actions/geography";
+import { saveAddressLocation, deleteAddressLocation } from "@/lib/mutations";
+import { get } from "@/lib/api";
 import { toast } from "sonner";
 import type { Atoll, Island, AddressLocation, AddressWithCount } from "@/lib/types";
 
@@ -53,7 +48,7 @@ export function AddressLocationEditor({ atolls }: AddressLocationEditorProps) {
     setAddresses([]);
     setSelectedAddress(null);
     try {
-      setIslands(await getIslandsByAtoll(atollId));
+      setIslands((await get<Island[]>(`/atolls/${atollId}/islands`)) ?? []);
     } catch {
       setIslands([]);
     }
@@ -62,8 +57,8 @@ export function AddressLocationEditor({ atolls }: AddressLocationEditorProps) {
   const loadIslandData = async (islandId: string) => {
     try {
       const [locs, addrs] = await Promise.all([
-        getAddressLocationsByIsland(islandId),
-        getUniqueAddresses(islandId),
+        get<AddressLocation[]>(`/islands/${islandId}/address-locations`).then((r) => r ?? []),
+        get<AddressWithCount[]>(`/islands/${islandId}/unique-addresses`).then((r) => r ?? []),
       ]);
       setLocations(locs);
       setAddresses(addrs);

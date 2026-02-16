@@ -3,7 +3,7 @@
 import { useState, useEffect, useTransition } from "react";
 import { Search, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { searchConstituents } from "@/lib/actions/campaign";
+import { get, getGroupId } from "@/lib/api";
 import type { ConstituentSearchResult } from "@/lib/types";
 
 interface ConstituentSearchComboboxProps {
@@ -33,7 +33,8 @@ export function ConstituentSearchCombobox({
 
     const timeout = setTimeout(() => {
       startTransition(async () => {
-        const data = await searchConstituents(query);
+        const groupId = getGroupId();
+        const data = (await get<ConstituentSearchResult[]>(`/groups/${groupId}/constituents/search`, { q: query })) ?? [];
         setResults(excludeId ? data.filter((r) => r.ID !== excludeId) : data);
       });
     }, 300);

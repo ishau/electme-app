@@ -3,7 +3,8 @@
 import { useTransition } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { recordVote } from "@/lib/actions/voting";
+import { recordVote } from "@/lib/mutations";
+import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 interface NonVotersListProps {
@@ -12,6 +13,7 @@ interface NonVotersListProps {
 }
 
 export function NonVotersList({ nonVoterIds, constituencyId }: NonVotersListProps) {
+  const queryClient = useQueryClient();
   const [isPending, startTransition] = useTransition();
 
   const handleQuickRecord = (constituentId: string) => {
@@ -26,6 +28,8 @@ export function NonVotersList({ nonVoterIds, constituencyId }: NonVotersListProp
           constituency_id: constituencyId,
           recorded_by: "Quick Record",
         });
+        queryClient.invalidateQueries({ queryKey: ["turnout"] });
+        queryClient.invalidateQueries({ queryKey: ["nonVoters"] });
         toast.success("Vote recorded");
       } catch (err) {
         toast.error(`Failed: ${err instanceof Error ? err.message : "Unknown error"}`);

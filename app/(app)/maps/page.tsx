@@ -1,29 +1,34 @@
-import { get, getGroupId } from "@/lib/api";
-import type { Atoll, Constituency, Group, Island } from "@/lib/types";
+"use client";
+
+import { useGroup } from "@/lib/hooks/use-group";
+import { useAtolls } from "@/lib/hooks/use-geography";
+import { getGroupId, get } from "@/lib/api";
 import { MapView } from "@/components/maps/map-view";
 import { Page } from "@/components/shared/page";
 import { EmptyState } from "@/components/shared/empty-state";
+import { PageSkeleton } from "@/components/shared/loading-skeleton";
 import { MapPin } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import type { Atoll, Constituency, Island } from "@/lib/types";
 
-export default async function MapsPage() {
+export default function MapsPage() {
   const groupId = getGroupId();
-
-  const [group, allAtolls] = await Promise.all([
-    get<Group>(`/groups/${groupId}`),
-    get<Atoll[]>("/atolls"),
-  ]);
+  const { data: group, isLoading: groupLoading } = useGroup();
+  const { data: allAtolls, isLoading: atollsLoading } = useAtolls();
 
   const groupConstituencyIds = group?.Constituencies ?? [];
 
   // Fetch each constituency individually (list endpoint doesn't include Islands)
-  const groupConstituencies = await Promise.all(
-    groupConstituencyIds.map((id) => get<Constituency>(`/constituencies/${id}`))
-  );
+  const { data: groupConstituencies } = useQuery({
+    queryKey: ["groupConstituenciesDetailed", groupConstituencyIds],
+    queryFn: () =>
+      Promise.all(groupConstituencyIds.map((id) => get<Constituency>(`/constituencies/${id}`))),
+    enabled: groupConstituencyIds.length > 0,
+  });
 
-  // Collect unique island IDs and atoll IDs from the group's constituencies
   const allowedIslandIds = new Set<string>();
   const allowedAtollIds = new Set<string>();
-  for (const c of groupConstituencies) {
+  for (const c of groupConstituencies ?? []) {
     if (!c) continue;
     allowedAtollIds.add(c.AtollID);
     for (const islandId of c.Islands ?? []) {
@@ -33,16 +38,25 @@ export default async function MapsPage() {
 
   const atolls = (allAtolls ?? []).filter((a) => allowedAtollIds.has(a.ID));
 
-  // Pre-fetch islands for each relevant atoll, filtered to allowed islands
-  const islandsByAtoll: Record<string, Island[]> = {};
-  await Promise.all(
-    atolls.map(async (atoll) => {
-      const islands = await get<Island[]>(`/atolls/${atoll.ID}/islands`);
-      islandsByAtoll[atoll.ID] = (islands ?? []).filter((i) =>
-        allowedIslandIds.has(i.ID)
+  // Pre-fetch islands for each relevant atoll
+  const { data: islandsByAtoll } = useQuery({
+    queryKey: ["islandsByAtoll", Array.from(allowedAtollIds), Array.from(allowedIslandIds)],
+    queryFn: async () => {
+      const result: Record<string, Island[]> = {};
+      await Promise.all(
+        atolls.map(async (atoll) => {
+          const islands = await get<Island[]>(`/atolls/${atoll.ID}/islands`);
+          result[atoll.ID] = (islands ?? []).filter((i) => allowedIslandIds.has(i.ID));
+        })
       );
-    })
-  );
+      return result;
+    },
+    enabled: atolls.length > 0,
+  });
+
+  if (groupLoading || atollsLoading) {
+    return <Page title="Maps" description="Loading..."><PageSkeleton /></Page>;
+  }
 
   if (atolls.length === 0) {
     return (
@@ -60,7 +74,7 @@ export default async function MapsPage() {
     <Page title="Maps" description="Address locations and voter density maps">
       <MapView
         atolls={atolls}
-        islandsByAtoll={islandsByAtoll}
+        islandsByAtoll={islandsByAtoll ?? {}}
         groupId={groupId}
       />
     </Page>

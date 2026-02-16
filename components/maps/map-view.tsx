@@ -23,15 +23,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { EmptyState } from "@/components/shared/empty-state";
 import { AddressMap } from "@/components/shared/address-map";
 import { MapPin, Flame, Map, Layers, Check, Trash2 } from "lucide-react";
-import {
-  getAddressLocationsByIsland,
-  getAddressesWithCounts,
-  getHeatMapData,
-  saveAddressLocation,
-  deleteAddressLocation,
-} from "@/lib/actions/geography";
+import { saveAddressLocation, deleteAddressLocation } from "@/lib/mutations";
+import { get } from "@/lib/api";
 import { toast } from "sonner";
-import type { Atoll, Island, AddressLocation, AddressWithCount } from "@/lib/types";
+import type { Atoll, Island, AddressLocation, AddressWithCount, HeatMapPoint } from "@/lib/types";
 
 interface MapViewProps {
   atolls: Atoll[];
@@ -62,9 +57,9 @@ export function MapView({ atolls, islandsByAtoll, groupId }: MapViewProps) {
   const loadIslandData = async (islandId: string) => {
     try {
       const [addrs, locs, heat] = await Promise.all([
-        getAddressesWithCounts(islandId, groupId),
-        getAddressLocationsByIsland(islandId),
-        getHeatMapData(islandId, groupId),
+        get<AddressWithCount[]>(`/islands/${islandId}/addresses`, { group_id: groupId }).then((r) => r ?? []),
+        get<AddressLocation[]>(`/islands/${islandId}/address-locations`).then((r) => r ?? []),
+        get<HeatMapPoint[]>(`/islands/${islandId}/heat-map`, { group_id: groupId }).then((r) => r ?? []),
       ]);
       setAddresses(addrs);
       setLocations(locs);

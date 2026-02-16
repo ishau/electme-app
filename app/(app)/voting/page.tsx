@@ -1,41 +1,35 @@
-import { get, getGroupId } from "@/lib/api";
-import type { TurnoutStats, Constituency, Group, Constituent } from "@/lib/types";
+"use client";
+
+import { useGroup } from "@/lib/hooks/use-group";
+import { useConstituencies } from "@/lib/hooks/use-constituencies";
+import { useTurnout, useNonVoters, useVotersForConstituency } from "@/lib/hooks/use-voting";
 import { VotingView } from "@/components/voting/voting-view";
 import { Page } from "@/components/shared/page";
+import { PageSkeleton } from "@/components/shared/loading-skeleton";
+import { useQueryState, parseAsString } from "nuqs";
 
-export default async function VotingDayPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ constituency_id?: string }>;
-}) {
-  const params = await searchParams;
-  const groupId = getGroupId();
+export default function VotingDayPage() {
+  const [constituencyId] = useQueryState("constituency_id", parseAsString.withDefault(""));
 
-  const [group, constituencies] = await Promise.all([
-    get<Group>(`/groups/${groupId}`),
-    get<Constituency[]>("/constituencies"),
-  ]);
+  const { data: group, isLoading: groupLoading } = useGroup();
+  const { data: constituencies } = useConstituencies();
 
-  const selectedConstituencyId = params.constituency_id || group?.Constituencies?.[0] || "";
+  const selectedConstituencyId = constituencyId || group?.Constituencies?.[0] || "";
 
-  let turnout: TurnoutStats | null = null;
-  let nonVoters: string[] | null = null;
-  let voters: Constituent[] = [];
+  const { data: turnout } = useTurnout(selectedConstituencyId);
+  const { data: nonVoters } = useNonVoters(selectedConstituencyId);
+  const { data: voters } = useVotersForConstituency(selectedConstituencyId);
 
-  if (selectedConstituencyId) {
-    [turnout, nonVoters, voters] = await Promise.all([
-      get<TurnoutStats>(`/groups/${groupId}/turnout`, { constituency_id: selectedConstituencyId }),
-      get<string[]>(`/groups/${groupId}/non-voters`, { constituency_id: selectedConstituencyId }),
-      get<Constituent[]>(`/groups/${groupId}/constituents`, { constituency_id: selectedConstituencyId }).catch(() => []),
-    ]);
+  if (groupLoading) {
+    return <Page title="Voting Day" description="Loading..."><PageSkeleton /></Page>;
   }
 
   return (
     <Page title="Voting Day" description="Live turnout tracking and vote recording">
       <VotingView
-        group={group}
+        group={group ?? null}
         constituencies={constituencies ?? []}
-        turnout={turnout}
+        turnout={turnout ?? null}
         nonVoters={nonVoters ?? []}
         voters={voters ?? []}
         currentConstituencyId={selectedConstituencyId}

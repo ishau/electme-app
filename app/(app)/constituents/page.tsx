@@ -1,36 +1,67 @@
-import { get, getGroupId } from "@/lib/api";
-import type { Constituent, Constituency, Group, Island, PaginatedResponse } from "@/lib/types";
+"use client";
+
+import { useGroup } from "@/lib/hooks/use-group";
+import { useConstituencies } from "@/lib/hooks/use-constituencies";
+import { useConstituents } from "@/lib/hooks/use-constituents";
+import { useIslands } from "@/lib/hooks/use-geography";
 import { ConstituencySwitcher } from "@/components/constituents/constituency-switcher";
 import { ConstituentSearch } from "@/components/constituents/constituent-search";
 import { ConstituentTable } from "@/components/constituents/constituent-table";
 import { Page } from "@/components/shared/page";
 import { EmptyState } from "@/components/shared/empty-state";
+import { TableSkeleton } from "@/components/shared/loading-skeleton";
 import { Users } from "lucide-react";
+import { useQueryStates, parseAsString } from "nuqs";
 
 const PAGE_SIZE = 50;
 
-export default async function ConstituentsPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ name?: string; constituency_id?: string; sex?: string; address?: string; page?: string }>;
-}) {
-  const params = await searchParams;
-  const groupId = getGroupId();
+export default function ConstituentsPage() {
+  const [filters] = useQueryStates(
+    {
+      name: parseAsString.withDefault(""),
+      address: parseAsString.withDefault(""),
+      sex: parseAsString.withDefault(""),
+      page: parseAsString.withDefault(""),
+      constituency_id: parseAsString.withDefault(""),
+    },
+    { shallow: false }
+  );
 
-  const [group, allConstituencies] = await Promise.all([
-    get<Group>(`/groups/${groupId}`),
-    get<Constituency[]>("/constituencies"),
-  ]);
+  const { data: group, isLoading: groupLoading } = useGroup();
+  const { data: allConstituencies } = useConstituencies();
 
-  // Only show the group's constituencies
   const groupConstituencyIds = group?.Constituencies ?? [];
   const groupConstituencies = (allConstituencies ?? []).filter((c) =>
     groupConstituencyIds.includes(c.ID)
   );
 
-  // Backend requires constituency_id — default to the group's first constituency
-  const constituencyId =
-    params.constituency_id || groupConstituencyIds[0] || "";
+  const constituencyId = filters.constituency_id || groupConstituencyIds[0] || "";
+  const activeConstituency = groupConstituencies.find((c) => c.ID === constituencyId);
+
+  const page = filters.page ? parseInt(filters.page) : 1;
+  const offset = (page - 1) * PAGE_SIZE;
+
+  const apiParams: Record<string, string> = {
+    constituency_id: constituencyId,
+    offset: String(offset),
+    limit: String(PAGE_SIZE),
+  };
+  if (filters.name) apiParams.name = filters.name;
+  if (filters.sex) apiParams.sex = filters.sex;
+  if (filters.address) apiParams.address = filters.address;
+
+  const { data: result, isLoading: constituentsLoading } = useConstituents(apiParams);
+  const { data: islands } = useIslands(activeConstituency?.AtollID ?? "");
+
+  const pageData = result?.data ?? [];
+
+  if (groupLoading) {
+    return (
+      <Page title="Voters" description="Loading...">
+        <TableSkeleton rows={10} />
+      </Page>
+    );
+  }
 
   if (!constituencyId || groupConstituencies.length === 0) {
     return (
@@ -44,32 +75,6 @@ export default async function ConstituentsPage({
     );
   }
 
-  const activeConstituency = groupConstituencies.find((c) => c.ID === constituencyId);
-
-  // Fetch islands for the active constituency's atoll
-  const islands = activeConstituency?.AtollID
-    ? (await get<Island[]>(`/atolls/${activeConstituency.AtollID}/islands`)) ?? []
-    : [];
-
-  const page = params.page ? parseInt(params.page) : 1;
-  const offset = (page - 1) * PAGE_SIZE;
-
-  const apiParams: Record<string, string> = {
-    constituency_id: constituencyId,
-    offset: String(offset),
-    limit: String(PAGE_SIZE),
-  };
-  if (params.name) apiParams.name = params.name;
-  if (params.sex) apiParams.sex = params.sex;
-  if (params.address) apiParams.address = params.address;
-
-  const result = await get<PaginatedResponse<Constituent>>(
-    `/groups/${groupId}/constituents`,
-    apiParams
-  );
-
-  const pageData = result?.data ?? [];
-
   return (
     <Page
       title="Voters"
@@ -82,11 +87,13 @@ export default async function ConstituentsPage({
 
       <ConstituentSearch />
 
-      {pageData.length === 0 ? (
+      {constituentsLoading ? (
+        <TableSkeleton rows={10} />
+      ) : pageData.length === 0 ? (
         <EmptyState
           icon={Users}
           title="No voters found"
-          description={params.name ? "Try a different search term." : "No voters in this constituency yet."}
+          description={filters.name ? "Try a different search term." : "No voters in this constituency yet."}
         />
       ) : (
         <ConstituentTable
@@ -94,7 +101,7 @@ export default async function ConstituentsPage({
           limit={PAGE_SIZE}
           offset={offset}
           constituencyId={constituencyId}
-          islands={islands}
+          islands={islands ?? []}
           candidates={group?.Candidates ?? []}
         />
       )}

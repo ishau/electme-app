@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { recordVote } from "@/lib/actions/voting";
+import { recordVote } from "@/lib/mutations";
+import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 interface RecordVoteFormProps {
@@ -13,6 +14,7 @@ interface RecordVoteFormProps {
 }
 
 export function RecordVoteForm({ constituencyId }: RecordVoteFormProps) {
+  const queryClient = useQueryClient();
   const [constituentId, setConstituentId] = useState("");
   const [recordedBy, setRecordedBy] = useState("");
   const [notes, setNotes] = useState("");
@@ -32,6 +34,8 @@ export function RecordVoteForm({ constituencyId }: RecordVoteFormProps) {
           recorded_by: recordedBy,
           notes: notes || undefined,
         });
+        queryClient.invalidateQueries({ queryKey: ["turnout"] });
+        queryClient.invalidateQueries({ queryKey: ["nonVoters"] });
         toast.success("Vote recorded");
         setConstituentId("");
         setNotes("");

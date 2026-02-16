@@ -1,14 +1,12 @@
-import "server-only";
-
 function getApiUrl(): string {
-  const url = process.env.API_URL;
-  if (!url) throw new Error("API_URL is not set in environment variables");
+  const url = process.env.NEXT_PUBLIC_API_URL;
+  if (!url) throw new Error("NEXT_PUBLIC_API_URL is not set in environment variables");
   return url;
 }
 
 export function getGroupId(): string {
-  const id = process.env.GROUP_ID;
-  if (!id) throw new Error("GROUP_ID is not set in environment variables");
+  const id = process.env.NEXT_PUBLIC_GROUP_ID;
+  if (!id) throw new Error("NEXT_PUBLIC_GROUP_ID is not set in environment variables");
   return id;
 }
 
@@ -51,7 +49,7 @@ export async function get<T>(path: string, params?: Record<string, string>): Pro
     const qs = search.toString();
     if (qs) url += `?${qs}`;
   }
-  const response = await fetch(url, { cache: "no-store" });
+  const response = await fetch(url);
   return handleResponse<T>(response);
 }
 

@@ -21,7 +21,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/shared/empty-state";
 import { ClipboardList } from "lucide-react";
-import { updateTransport } from "@/lib/actions/voting";
+import { updateTransport } from "@/lib/mutations";
+import { useQueryClient } from "@tanstack/react-query";
 import { transportStatusLabel, transportStatusColor, transportModeLabel } from "@/lib/utils";
 import { toast } from "sonner";
 import type { VoterRegistration, Constituency } from "@/lib/types";
@@ -40,6 +41,7 @@ export function RegistrationsView({
   showTransportOnly,
 }: RegistrationsViewProps) {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [isPending, startTransition] = useTransition();
 
   const handleConstituencyChange = (value: string) => {
@@ -62,6 +64,8 @@ export function RegistrationsView({
     startTransition(async () => {
       try {
         await updateTransport(registrationId, { status, mode });
+        queryClient.invalidateQueries({ queryKey: ["registrations"] });
+        queryClient.invalidateQueries({ queryKey: ["transportNeeded"] });
         toast.success("Transport status updated");
       } catch (err) {
         toast.error(`Failed: ${err instanceof Error ? err.message : "Unknown error"}`);
@@ -73,6 +77,7 @@ export function RegistrationsView({
     startTransition(async () => {
       try {
         await updateTransport(registrationId, { status: currentStatus, mode });
+        queryClient.invalidateQueries({ queryKey: ["registrations"] });
         toast.success("Transport mode updated");
       } catch (err) {
         toast.error(`Failed: ${err instanceof Error ? err.message : "Unknown error"}`);

@@ -1,13 +1,18 @@
+"use client";
+
 import Link from "next/link";
-import { get, getGroupId } from "@/lib/api";
-import type { Group, CandidateSupportSummary, Constituency, CandidateView, Party } from "@/lib/types";
+import { useGroup } from "@/lib/hooks/use-group";
+import { useCandidateSummaries } from "@/lib/hooks/use-candidates";
+import { useConstituencies } from "@/lib/hooks/use-constituencies";
+import { useParties } from "@/lib/hooks/use-parties";
 import { Page } from "@/components/shared/page";
 import { EmptyState } from "@/components/shared/empty-state";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { UserCog } from "lucide-react";
+import { PageSkeleton } from "@/components/shared/loading-skeleton";
+import type { CandidateView } from "@/lib/types";
 
-// Candidate types that span multiple constituencies — grouped by type instead
 const MULTI_CONSTITUENCY_TYPES = ["president", "mayor", "wdc_president"];
 const MULTI_CONSTITUENCY_SORT_ORDER: Record<string, number> = {
   mayor: 0,
@@ -24,38 +29,33 @@ interface CandidateGroup {
   opponents: CandidateView[];
 }
 
-export default async function CandidatesPage() {
-  const groupId = getGroupId();
-  const [group, summaries, constituencies, parties] = await Promise.all([
-    get<Group>(`/groups/${groupId}`),
-    get<CandidateSupportSummary[]>(`/groups/${groupId}/support-by-candidate`).catch(() => [] as CandidateSupportSummary[]),
-    get<Constituency[]>("/constituencies"),
-    get<Party[]>("/parties"),
-  ]);
+const normalizeType = (type: string) => type.toLowerCase().replace(/\s+/g, "_");
+const isMultiConstituencyType = (type: string) =>
+  MULTI_CONSTITUENCY_TYPES.includes(normalizeType(type));
+
+export default function CandidatesPage() {
+  const { data: group, isLoading: groupLoading } = useGroup();
+  const { data: summaries } = useCandidateSummaries();
+  const { data: constituencies } = useConstituencies();
+  const { data: parties } = useParties();
 
   const summaryMap = Object.fromEntries(
     (summaries ?? []).map((s) => [s.CandidateID, s])
   );
 
   const constituencyMap = Object.fromEntries(
-    constituencies.map((c) => [c.ID, c])
+    (constituencies ?? []).map((c) => [c.ID, c])
   );
 
   const partyMap = Object.fromEntries(
     (parties ?? []).map((p) => [p.ID, p])
   );
 
-  const candidates = group.Candidates ?? [];
+  const candidates = group?.Candidates ?? [];
 
-  const normalizeType = (type: string) => type.toLowerCase().replace(/\s+/g, "_");
-  const isMultiConstituencyType = (type: string) =>
-    MULTI_CONSTITUENCY_TYPES.includes(normalizeType(type));
-
-  // Separate multi-constituency candidates (President, Mayor, WDC President)
   const multiConstCandidates = candidates.filter((c) => isMultiConstituencyType(c.CandidateType));
   const regularCandidates = candidates.filter((c) => !isMultiConstituencyType(c.CandidateType));
 
-  // Build groups for multi-constituency types
   const candidateGroups: CandidateGroup[] = [];
   const seenTypes = new Set<string>();
 
@@ -79,7 +79,6 @@ export default async function CandidatesPage() {
     }
   }
 
-  // Build groups for regular candidates by constituency
   const seenConstituencies = new Set<string>();
 
   for (const candidate of regularCandidates) {
@@ -105,12 +104,15 @@ export default async function CandidatesPage() {
     }
   }
 
-  // Sort: Mayor, President, WDC President first, then constituencies by Code alphabetically
   candidateGroups.sort((a, b) =>
     a.sortOrder !== b.sortOrder
       ? a.sortOrder - b.sortOrder
       : a.sortKey.localeCompare(b.sortKey)
   );
+
+  if (groupLoading) {
+    return <Page title="Candidates" description="Loading..."><PageSkeleton /></Page>;
+  }
 
   return (
     <Page title="Candidates" description="Own and competing candidates by constituency">

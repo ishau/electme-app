@@ -23,7 +23,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Rating } from "@/components/ui/rating";
 import { SupportLevelBadge } from "@/components/campaign/support-level-badge";
-import { createRelationship } from "@/lib/actions/enrichment";
+import { createRelationship } from "@/lib/mutations";
+import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import type { Relationship, SupportAssessment } from "@/lib/types";
 
@@ -43,6 +44,7 @@ const relationshipTypes = [
 ];
 
 export function RelationshipList({ constituentId, relationships, latestSupport = {}, relatedNames = {} }: RelationshipListProps) {
+  const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
   const [toId, setToId] = useState("");
   const [type, setType] = useState("");
@@ -65,6 +67,7 @@ export function RelationshipList({ constituentId, relationships, latestSupport =
           influence_score: influenceScore,
           notes: notes || undefined,
         });
+        queryClient.invalidateQueries({ queryKey: ["relationships"] });
         toast.success("Relationship added");
         setOpen(false);
         setToId("");

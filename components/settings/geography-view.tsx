@@ -25,7 +25,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { EmptyState } from "@/components/shared/empty-state";
 import { AddressLocationEditor } from "@/components/settings/address-location-editor";
 import { Plus, Globe, MapPin, Map } from "lucide-react";
-import { createAtoll, createIsland, createConstituency, getIslandsByAtoll } from "@/lib/actions/geography";
+import { createAtoll, createIsland, createConstituency } from "@/lib/mutations";
+import { get } from "@/lib/api";
+import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import type { Atoll, Island, Constituency } from "@/lib/types";
 
@@ -58,7 +60,7 @@ export function GeographyView({ atolls, constituencies }: GeographyViewProps) {
   const handleSelectAtoll = async (atollId: string) => {
     setSelectedAtoll(atollId);
     try {
-      setIslands(await getIslandsByAtoll(atollId));
+      setIslands((await get<Island[]>(`/atolls/${atollId}/islands`)) ?? []);
     } catch {
       setIslands([]);
     }
