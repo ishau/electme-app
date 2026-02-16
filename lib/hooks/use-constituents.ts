@@ -16,7 +16,6 @@ export function useConstituents(params: Record<string, string>) {
     queryKey: ["constituents", groupId, params],
     queryFn: () =>
       get<PaginatedResponse<Constituent>>(`/groups/${groupId}/constituents`, params),
-    enabled: !!params.constituency_id,
     placeholderData: keepPreviousData,
   });
 }

@@ -35,17 +35,17 @@ export default function ConstituentsPage() {
     groupConstituencyIds.includes(c.ID)
   );
 
-  const constituencyId = filters.constituency_id || groupConstituencyIds[0] || "";
+  const constituencyId = filters.constituency_id;
   const activeConstituency = groupConstituencies.find((c) => c.ID === constituencyId);
 
   const page = filters.page ? parseInt(filters.page) : 1;
   const offset = (page - 1) * PAGE_SIZE;
 
   const apiParams: Record<string, string> = {
-    constituency_id: constituencyId,
     offset: String(offset),
     limit: String(PAGE_SIZE),
   };
+  if (constituencyId) apiParams.constituency_id = constituencyId;
   if (filters.name) apiParams.name = filters.name;
   if (filters.sex) apiParams.sex = filters.sex;
   if (filters.address) apiParams.address = filters.address;
@@ -63,22 +63,10 @@ export default function ConstituentsPage() {
     );
   }
 
-  if (!constituencyId || groupConstituencies.length === 0) {
-    return (
-      <Page title="Voters" description="Browse and search constituent records">
-        <EmptyState
-          icon={Users}
-          title="No constituencies"
-          description="This group has no constituencies assigned yet."
-        />
-      </Page>
-    );
-  }
-
   return (
     <Page
       title="Voters"
-      description={activeConstituency ? `${activeConstituency.Code} — ${activeConstituency.Name}` : "Browse and search constituent records"}
+      description={activeConstituency ? `${activeConstituency.Code} — ${activeConstituency.Name}` : "All constituencies"}
     >
       <ConstituencySwitcher
         constituencies={groupConstituencies}

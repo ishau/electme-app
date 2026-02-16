@@ -29,6 +29,7 @@
 - `useSearchParams()`/nuqs requires a `<Suspense>` boundary — the layout handles this, don't make `layout.tsx` a client component
 - API enum/type values (e.g., `CandidateType`) use inconsistent casing — can be `"Mayor"`, `"WDC President"`, or `"council_member"`. Always normalize (lowercase + replace spaces with underscores) before comparing.
 - `/groups/{groupId}/constituents` returns `PaginatedResponse<T>` (`{ data, total, limit, offset }`), not a plain array
+- `/groups/{groupId}/constituents` supports optional `constituency_id` param — omit it to fetch across all constituencies
 - All date/age calculations use GMT+5 (Maldives timezone)
 - Multi-constituency types: `["president", "mayor", "wdc_president"]` are global — always normalize with `type.toLowerCase().replace(/\s+/g, "_")` before comparing
 - Voter add/import and party management are backend-only — no frontend CRUD for these
