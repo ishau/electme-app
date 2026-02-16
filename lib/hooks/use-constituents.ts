@@ -87,6 +87,7 @@ export function useNeighbors(address: string | undefined, islandId: string | und
       get<PaginatedResponse<Constituent>>(`/groups/${groupId}/constituents`, {
         address: address!,
         island_id: islandId!,
+        exact_address: "true",
       }),
     enabled: !!address && !!islandId,
     select: (data) => data?.data ?? [],
