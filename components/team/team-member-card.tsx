@@ -40,9 +40,9 @@ export function TeamMemberCard({ member, onEdit, onDelete }: TeamMemberCardProps
             </Button>
           </div>
         </div>
-        {(member.ContactInfo?.MobileNumbers?.length > 0 || member.ContactInfo?.Email) && (
+        {(member.ContactInfo?.PhoneNumbers?.length > 0 || member.ContactInfo?.Email) && (
           <div className="mt-2 space-y-1 text-sm text-muted-foreground">
-            {member.ContactInfo.MobileNumbers?.map((num) => (
+            {member.ContactInfo.PhoneNumbers?.map((num) => (
               <div key={num} className="flex items-center gap-1">
                 <Phone className="h-3 w-3" />
                 {num}

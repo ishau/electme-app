@@ -36,13 +36,18 @@ export interface ConstituentSearchResult {
   ID: string;
   FullName: string;
   MaskedNationalID: string;
-  PermanentAddress: PermanentAddress;
-  PrimaryNickname: string | null;
+  FullNationalID: string | null;
+  Age: number | null;
+  PermanentAddress: string;
+  IslandName: string;
+  Nicknames: string[] | null;
+  ContactInfo: ContactInfo | null;
 }
 
 // Constituent (base)
 export interface PermanentAddress {
   IslandID: string;
+  IslandName: string;
   Name: string;
 }
 
@@ -52,11 +57,9 @@ export interface Constituent {
   FullNationalID: string | null;
   FullName: string;
   Sex: string;
-  DOB: string | null;
+  Age: number | null;
   PermanentAddress: PermanentAddress;
   ConstituencyID: string;
-  CreatedAt: string;
-  UpdatedAt: string;
 }
 
 export interface PaginatedResponse<T> {
@@ -68,10 +71,8 @@ export interface PaginatedResponse<T> {
 
 // Group
 export interface ContactInfo {
-  MobileNumbers: string[];
   PhoneNumbers: string[];
   Email: string;
-  Viber: string;
   Notes: string;
 }
 
@@ -117,7 +118,6 @@ export interface ConstituentProfile {
   GroupID: string;
   ConstituentID: string;
   FullNationalID: string | null;
-  DOB: string | null;
   ContactInfo: ContactInfo;
   Notes: string;
 }
@@ -195,7 +195,7 @@ export interface EnrichedConstituent {
   FullNationalID: string | null;
   FullName: string;
   Sex: string;
-  DOB: string | null;
+  Age: number | null;
   ConstituencyID: string;
   Profile: ConstituentProfile | null;
   Nicknames: Nickname[];

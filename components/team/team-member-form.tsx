@@ -40,9 +40,8 @@ interface TeamMemberFormProps {
     name: string;
     role: string;
     contact_info?: {
-      mobile_numbers?: string[];
+      phone_numbers?: string[];
       email?: string;
-      viber?: string;
       notes?: string;
     };
     is_active?: boolean;
@@ -60,7 +59,7 @@ export function TeamMemberForm({
 }: TeamMemberFormProps) {
   const [name, setName] = useState(member?.Name ?? "");
   const [role, setRole] = useState<string>(member?.Role ?? "volunteer");
-  const [mobile, setMobile] = useState(member?.ContactInfo?.MobileNumbers?.join(", ") ?? "");
+  const [phone, setPhone] = useState(member?.ContactInfo?.PhoneNumbers?.join(", ") ?? "");
   const [email, setEmail] = useState(member?.ContactInfo?.Email ?? "");
   const [notes, setNotes] = useState(member?.Notes ?? "");
 
@@ -70,7 +69,7 @@ export function TeamMemberForm({
       name,
       role,
       contact_info: {
-        mobile_numbers: mobile ? mobile.split(",").map((s) => s.trim()) : [],
+        phone_numbers: phone ? phone.split(",").map((s) => s.trim()) : [],
         email: email || undefined,
       },
       notes: notes || undefined,
@@ -104,8 +103,8 @@ export function TeamMemberForm({
             </Select>
           </div>
           <div className="space-y-2">
-            <Label>Mobile Numbers (comma separated)</Label>
-            <Input value={mobile} onChange={(e) => setMobile(e.target.value)} placeholder="+960..." />
+            <Label>Phone Numbers (comma separated)</Label>
+            <Input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+960..." />
           </div>
           <div className="space-y-2">
             <Label>Email</Label>

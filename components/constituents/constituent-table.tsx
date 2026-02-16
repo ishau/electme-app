@@ -16,19 +16,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { AddressSupportDialog } from "@/components/constituents/bulk-add-by-address-dialog";
-import type { Constituent, Island, CandidateView } from "@/lib/types";
-
-function calculateAge(dob: string): number {
-  const [year, month, day] = dob.split("T")[0].split("-").map(Number);
-  // Current date in GMT+5
-  const now = new Date(Date.now() + 5 * 60 * 60 * 1000);
-  const nowY = now.getUTCFullYear();
-  const nowM = now.getUTCMonth() + 1;
-  const nowD = now.getUTCDate();
-  let age = nowY - year;
-  if (nowM < month || (nowM === month && nowD < day)) age--;
-  return age;
-}
+import type { Constituent, CandidateView } from "@/lib/types";
 
 interface BulkAddState {
   address: string;
@@ -41,7 +29,6 @@ interface ConstituentTableProps {
   limit: number;
   offset: number;
   constituencyId: string;
-  islands: Island[];
   candidates: CandidateView[];
 }
 
@@ -50,7 +37,6 @@ export function ConstituentTable({
   limit,
   offset,
   constituencyId,
-  islands,
   candidates,
 }: ConstituentTableProps) {
   const searchParams = useSearchParams();
@@ -65,7 +51,6 @@ export function ConstituentTable({
       (c.Constituencies ?? []).includes(constituencyId)
   );
 
-  const islandMap = Object.fromEntries(islands.map((isl) => [isl.ID, isl]));
   const currentPage = Math.floor(offset / limit) + 1;
   const hasNextPage = constituents.length === limit;
 
@@ -108,7 +93,7 @@ export function ConstituentTable({
                   {c.FullNationalID ?? c.MaskedNationalID}
                 </TableCell>
                 <TableCell className="hidden lg:table-cell text-muted-foreground">
-                  {c.DOB ? calculateAge(c.DOB) : "—"}
+                  {c.Age ?? "—"}
                 </TableCell>
                 <TableCell className="hidden md:table-cell">
                   <Badge variant="outline">{c.Sex}</Badge>
@@ -122,11 +107,13 @@ export function ConstituentTable({
                         setBulkAdd({
                           address: c.PermanentAddress.Name,
                           islandId: c.PermanentAddress.IslandID,
-                          islandName: islandMap[c.PermanentAddress.IslandID]?.Name ?? c.PermanentAddress.IslandID,
+                          islandName: c.PermanentAddress.IslandName ?? c.PermanentAddress.IslandID,
                         });
                       }}
                     >
-                      {c.PermanentAddress.Name}
+                      {c.PermanentAddress.IslandName
+                        ? `${c.PermanentAddress.Name} / ${c.PermanentAddress.IslandName}`
+                        : c.PermanentAddress.Name}
                     </button>
                   ) : (
                     "—"
