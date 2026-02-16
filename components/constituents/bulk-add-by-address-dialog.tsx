@@ -243,7 +243,7 @@ export function AddressSupportDialog({
                     >
                       <div>
                         <span className="font-medium">{v.FullName}</span>
-                        <span className="text-muted-foreground ml-2">{v.MaskedNationalID}</span>
+                        <span className="text-muted-foreground ml-2">{v.FullNationalID ?? v.MaskedNationalID}</span>
                       </div>
                       <Badge variant="outline">{v.Sex}</Badge>
                     </button>

@@ -50,7 +50,7 @@ export function VotingView({
   );
 
   const voterOptions = useMemo(
-    () => voters.map((v) => ({ id: v.ID, name: v.FullName, nationalId: v.MaskedNationalID })),
+    () => voters.map((v) => ({ id: v.ID, name: v.FullName, nationalId: v.FullNationalID ?? v.MaskedNationalID })),
     [voters]
   );
 
@@ -211,7 +211,7 @@ export function VotingView({
                             {voter?.FullName ?? id.slice(0, 12) + "..."}
                           </p>
                           {voter && (
-                            <p className="text-xs text-muted-foreground">{voter.MaskedNationalID}</p>
+                            <p className="text-xs text-muted-foreground">{voter.FullNationalID ?? voter.MaskedNationalID}</p>
                           )}
                         </div>
                         <Button

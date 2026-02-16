@@ -3,8 +3,6 @@ import type { Constituent, Constituency, Group, Island } from "@/lib/types";
 import { ConstituencySwitcher } from "@/components/constituents/constituency-switcher";
 import { ConstituentSearch } from "@/components/constituents/constituent-search";
 import { ConstituentTable } from "@/components/constituents/constituent-table";
-import { AddVoterForm } from "@/components/constituents/add-voter-form";
-import { ImportVotersDialog } from "@/components/constituents/import-voters-dialog";
 import { Page } from "@/components/shared/page";
 import { EmptyState } from "@/components/shared/empty-state";
 import { Users } from "lucide-react";
@@ -48,7 +46,7 @@ export default async function ConstituentsPage({
 
   const activeConstituency = groupConstituencies.find((c) => c.ID === constituencyId);
 
-  // Fetch islands for the active constituency's atoll (for the add-voter form)
+  // Fetch islands for the active constituency's atoll
   const islands = activeConstituency?.AtollID
     ? (await get<Island[]>(`/atolls/${activeConstituency.AtollID}/islands`)) ?? []
     : [];
@@ -77,12 +75,6 @@ export default async function ConstituentsPage({
     <Page
       title="Voters"
       description={activeConstituency ? `${activeConstituency.Code} — ${activeConstituency.Name}` : "Browse and search constituent records"}
-      actions={
-        <>
-          <ImportVotersDialog constituencyId={constituencyId} />
-          <AddVoterForm constituencyId={constituencyId} islands={islands} />
-        </>
-      }
     >
       <ConstituencySwitcher
         constituencies={groupConstituencies}

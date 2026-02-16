@@ -54,10 +54,18 @@ export default async function ConstituentDetailPage({
     relatedSupport = await fetchLatestSupport(relatedIds);
   }
 
+  const age = constituent.DOB ? (() => {
+    const [year, month, day] = constituent.DOB!.split("T")[0].split("-").map(Number);
+    const now = new Date(Date.now() + 5 * 60 * 60 * 1000);
+    let a = now.getUTCFullYear() - year;
+    if (now.getUTCMonth() + 1 < month || (now.getUTCMonth() + 1 === month && now.getUTCDate() < day)) a--;
+    return a;
+  })() : null;
+
   return (
     <Page
       title={constituent.FullName}
-      description={`${constituent.MaskedNationalID} | ${constituent.Sex === "M" ? "Male" : "Female"}`}
+      description={`${constituent.FullNationalID ?? constituent.MaskedNationalID} | ${constituent.Sex === "M" ? "Male" : "Female"}${age !== null ? ` | ${age} yrs` : ""}`}
     >
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
@@ -75,7 +83,7 @@ export default async function ConstituentDetailPage({
           />
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <SupportForm constituentId={constituentId} history={supportHistory ?? []} candidates={group?.Candidates ?? []} />
+            <SupportForm constituentId={constituentId} constituencyId={baseConstituent?.ConstituencyID ?? ""} history={supportHistory ?? []} candidates={group?.Candidates ?? []} />
             <OutreachForm constituentId={constituentId} history={outreachHistory ?? []} />
           </div>
         </div>

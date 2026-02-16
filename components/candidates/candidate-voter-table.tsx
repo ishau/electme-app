@@ -84,7 +84,7 @@ export function CandidateVoterTable({ voters, candidateId }: CandidateVoterTable
                   </Link>
                 </TableCell>
                 <TableCell className="hidden sm:table-cell text-muted-foreground">
-                  {v.MaskedNationalID}
+                  {v.FullNationalID ?? v.MaskedNationalID}
                 </TableCell>
                 <TableCell className="hidden md:table-cell">
                   <Badge variant="outline">{v.Sex}</Badge>

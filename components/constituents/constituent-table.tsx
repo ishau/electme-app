@@ -18,6 +18,18 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { AddressSupportDialog } from "@/components/constituents/bulk-add-by-address-dialog";
 import type { Constituent, Island, CandidateView } from "@/lib/types";
 
+function calculateAge(dob: string): number {
+  const [year, month, day] = dob.split("T")[0].split("-").map(Number);
+  // Current date in GMT+5
+  const now = new Date(Date.now() + 5 * 60 * 60 * 1000);
+  const nowY = now.getUTCFullYear();
+  const nowM = now.getUTCMonth() + 1;
+  const nowD = now.getUTCDate();
+  let age = nowY - year;
+  if (nowM < month || (nowM === month && nowD < day)) age--;
+  return age;
+}
+
 interface BulkAddState {
   address: string;
   islandId: string;
@@ -46,6 +58,15 @@ export function ConstituentTable({
   const searchParams = useSearchParams();
   const [bulkAdd, setBulkAdd] = useState<BulkAddState | null>(null);
 
+  const GLOBAL_TYPES = ["president", "mayor", "wdc_president"];
+  const normalizeType = (t: string) => t.toLowerCase().replace(/\s+/g, "_");
+
+  const eligibleCandidates = candidates.filter(
+    (c) =>
+      GLOBAL_TYPES.includes(normalizeType(c.CandidateType)) ||
+      (c.Constituencies ?? []).includes(constituencyId)
+  );
+
   const islandMap = Object.fromEntries(islands.map((isl) => [isl.ID, isl]));
   const currentPage = Math.floor(offset / limit) + 1;
   const totalPages = Math.ceil(total / limit);
@@ -69,6 +90,7 @@ export function ConstituentTable({
             <TableRow>
               <TableHead>Name</TableHead>
               <TableHead className="hidden sm:table-cell">National ID</TableHead>
+              <TableHead className="hidden lg:table-cell w-16">Age</TableHead>
               <TableHead className="hidden md:table-cell w-16">Gender</TableHead>
               <TableHead className="hidden md:table-cell">Address</TableHead>
             </TableRow>
@@ -85,7 +107,10 @@ export function ConstituentTable({
                   </Link>
                 </TableCell>
                 <TableCell className="hidden sm:table-cell text-muted-foreground">
-                  {c.MaskedNationalID}
+                  {c.FullNationalID ?? c.MaskedNationalID}
+                </TableCell>
+                <TableCell className="hidden lg:table-cell text-muted-foreground">
+                  {c.DOB ? calculateAge(c.DOB) : "—"}
                 </TableCell>
                 <TableCell className="hidden md:table-cell">
                   <Badge variant="outline">{c.Sex}</Badge>
@@ -152,7 +177,7 @@ export function ConstituentTable({
           islandId={bulkAdd.islandId}
           islandName={bulkAdd.islandName}
           constituencyId={constituencyId}
-          candidates={candidates}
+          candidates={eligibleCandidates}
         />
       )}
     </div>

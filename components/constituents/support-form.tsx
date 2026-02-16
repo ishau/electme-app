@@ -26,8 +26,12 @@ import { formatDateTime } from "@/lib/utils";
 import { toast } from "sonner";
 import type { SupportAssessment, CandidateView } from "@/lib/types";
 
+const GLOBAL_TYPES = ["president", "mayor", "wdc_president"];
+const normalizeType = (t: string) => t.toLowerCase().replace(/\s+/g, "_");
+
 interface SupportFormProps {
   constituentId: string;
+  constituencyId: string;
   history: SupportAssessment[];
   candidates: CandidateView[];
 }
@@ -40,7 +44,12 @@ const supportLevels = [
   { value: "hard_opposition", label: "Hard Opposition" },
 ];
 
-export function SupportForm({ constituentId, history, candidates }: SupportFormProps) {
+export function SupportForm({ constituentId, constituencyId, history, candidates: allCandidates }: SupportFormProps) {
+  const candidates = allCandidates.filter(
+    (c) =>
+      GLOBAL_TYPES.includes(normalizeType(c.CandidateType)) ||
+      (c.Constituencies ?? []).includes(constituencyId)
+  );
   const [open, setOpen] = useState(false);
   const [level, setLevel] = useState("");
   const [selectedCandidates, setSelectedCandidates] = useState<Set<string>>(new Set());
@@ -112,7 +121,7 @@ export function SupportForm({ constituentId, history, candidates }: SupportFormP
         </CardHeader>
         <CardContent>
           {history.length > 0 ? (
-            <div className="space-y-2">
+            <div className="space-y-2 max-h-60 overflow-y-auto">
               {history.map((assessment) => (
                 <div
                   key={assessment.ID}
@@ -166,7 +175,7 @@ export function SupportForm({ constituentId, history, candidates }: SupportFormP
             {candidates.length > 0 && (
               <div className="space-y-1">
                 <Label>Candidates {selectedCandidates.size > 0 && `(${selectedCandidates.size})`}</Label>
-                <div className="flex flex-wrap gap-1.5">
+                <div className="flex flex-wrap gap-1.5 max-h-32 overflow-y-auto">
                   {candidates.map((c) => (
                     <button
                       key={c.ID}
