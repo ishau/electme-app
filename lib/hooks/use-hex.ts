@@ -5,58 +5,42 @@ import { get, getGroupId } from "@/lib/api";
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type GeoJSON = any;
 
-export function useHexDominant(islandId: string | undefined) {
+export function useHexDominant() {
   const groupId = getGroupId();
   return useQuery<GeoJSON>({
-    queryKey: ["hexDominant", islandId],
-    queryFn: () =>
-      get<GeoJSON>(`/groups/${groupId}/hex/dominant`, {
-        island_id: islandId!,
-      }),
-    enabled: !!islandId,
+    queryKey: ["hexDominant", groupId],
+    queryFn: () => get<GeoJSON>(`/groups/${groupId}/hex/dominant`),
     placeholderData: keepPreviousData,
   });
 }
 
-export function useHexLeaning(islandId: string | undefined) {
+export function useHexLeaning() {
   const groupId = getGroupId();
   return useQuery<GeoJSON>({
-    queryKey: ["hexLeaning", islandId],
-    queryFn: () =>
-      get<GeoJSON>(`/groups/${groupId}/hex/leaning`, {
-        island_id: islandId!,
-      }),
-    enabled: !!islandId,
+    queryKey: ["hexLeaning", groupId],
+    queryFn: () => get<GeoJSON>(`/groups/${groupId}/hex/leaning`),
     placeholderData: keepPreviousData,
   });
 }
 
-export function useHexCandidateSupport(
-  islandId: string | undefined,
-  candidateId: string | undefined
-) {
+export function useHexCandidateSupport(candidateId: string | undefined) {
   const groupId = getGroupId();
   return useQuery<GeoJSON>({
-    queryKey: ["hexCandidateSupport", islandId, candidateId],
+    queryKey: ["hexCandidateSupport", groupId, candidateId],
     queryFn: () =>
       get<GeoJSON>(`/groups/${groupId}/hex/candidate-support`, {
-        island_id: islandId!,
         candidate_id: candidateId!,
       }),
-    enabled: !!islandId && !!candidateId,
+    enabled: !!candidateId,
     placeholderData: keepPreviousData,
   });
 }
 
-export function useHexPartySupport(islandId: string | undefined) {
+export function useHexPartySupport() {
   const groupId = getGroupId();
   return useQuery<GeoJSON>({
-    queryKey: ["hexPartySupport", islandId],
-    queryFn: () =>
-      get<GeoJSON>(`/groups/${groupId}/hex/party-support`, {
-        island_id: islandId!,
-      }),
-    enabled: !!islandId,
+    queryKey: ["hexPartySupport", groupId],
+    queryFn: () => get<GeoJSON>(`/groups/${groupId}/hex/party-support`),
     placeholderData: keepPreviousData,
   });
 }

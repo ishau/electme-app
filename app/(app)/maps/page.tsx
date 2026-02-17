@@ -1,14 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useQueryState, parseAsString } from "nuqs";
-import { useMapIslands } from "@/lib/hooks/use-map-islands";
-import { IslandSelector } from "@/components/maps/island-selector";
 import { Page } from "@/components/shared/page";
-import { EmptyState } from "@/components/shared/empty-state";
-import { PageSkeleton } from "@/components/shared/loading-skeleton";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { MapPin, Hexagon, BarChart3, Vote, User } from "lucide-react";
+import { Hexagon, BarChart3, Vote, User } from "lucide-react";
 
 const MAP_PAGES = [
   {
@@ -38,41 +33,14 @@ const MAP_PAGES = [
 ];
 
 export default function MapsPage() {
-  const { atolls, islandsByAtoll, isLoading } = useMapIslands();
-  const [island, setIsland] = useQueryState("island", parseAsString.withDefault(""));
-
-  if (isLoading) {
-    return <Page title="Maps" description="Loading..."><PageSkeleton /></Page>;
-  }
-
-  if (atolls.length === 0) {
-    return (
-      <Page title="Maps" description="Hex analytics and voter distribution maps">
-        <EmptyState
-          icon={MapPin}
-          title="No islands assigned"
-          description="This group has no constituencies with islands assigned."
-        />
-      </Page>
-    );
-  }
-
   return (
     <Page title="Maps" description="Hex analytics and voter distribution maps">
-      <IslandSelector
-        atolls={atolls}
-        islandsByAtoll={islandsByAtoll}
-        value={island}
-        onChange={setIsland}
-      />
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {MAP_PAGES.map((page) => {
           const Icon = page.icon;
-          const href = island ? `${page.href}?island=${island}` : page.href;
           return (
-            <Link key={page.href} href={href}>
-              <Card className={`transition-colors hover:border-foreground/20 ${!island ? "opacity-50 pointer-events-none" : ""}`}>
+            <Link key={page.href} href={page.href}>
+              <Card className="transition-colors hover:border-foreground/20">
                 <CardHeader className="flex flex-row items-center gap-3 pb-2">
                   <Icon className="h-5 w-5 text-muted-foreground" />
                   <CardTitle className="text-base">{page.title}</CardTitle>

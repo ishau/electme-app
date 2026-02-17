@@ -1,13 +1,10 @@
 "use client";
 
 import { useState, useCallback, useMemo } from "react";
-import { useQueryState, parseAsString } from "nuqs";
 import { useHexCandidateSupport } from "@/lib/hooks/use-hex";
-import { useMapIslands } from "@/lib/hooks/use-map-islands";
-import { IslandSelector } from "@/components/maps/island-selector";
+import { useGroup } from "@/lib/hooks/use-group";
 import { HexMap } from "@/components/maps/hex-map";
 import { Page } from "@/components/shared/page";
-import { PageSkeleton } from "@/components/shared/loading-skeleton";
 import { Badge } from "@/components/ui/badge";
 import {
   Select,
@@ -35,18 +32,15 @@ const SUPPORT_LEVEL_LABELS: Record<string, string> = {
 };
 
 export default function CandidateSupportPage() {
-  const { atolls, islandsByAtoll, group, isLoading: islandsLoading } = useMapIslands();
-  const [island, setIsland] = useQueryState("island", parseAsString.withDefault(""));
+  const { data: group } = useGroup();
   const [selectedCandidate, setSelectedCandidate] = useState("");
 
   const candidates = group?.Candidates ?? [];
 
   const { data: candidateSupportGeo, isLoading } = useHexCandidateSupport(
-    island || undefined,
     selectedCandidate || undefined
   );
 
-  // Pre-process: add top_level for fill coloring
   const processedGeo = useMemo(() => {
     if (!candidateSupportGeo?.features?.length) return null;
 
@@ -105,15 +99,9 @@ export default function CandidateSupportPage() {
     return `<div style="font-size:13px"><div style="font-weight:600;margin-bottom:6px">${props.total_in_hex} voters</div>${rows}</div>`;
   }, []);
 
-  if (islandsLoading) {
-    return <Page title="Candidate Support" description="Loading..."><PageSkeleton /></Page>;
-  }
-
   return (
     <Page title="Candidate Support" description="Support levels for a specific candidate across hex cells">
       <div className="flex items-end gap-4 flex-wrap">
-        <IslandSelector atolls={atolls} islandsByAtoll={islandsByAtoll} value={island} onChange={setIsland} />
-
         <div>
           <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Candidate</label>
           <Select value={selectedCandidate} onValueChange={setSelectedCandidate}>
@@ -130,12 +118,12 @@ export default function CandidateSupportPage() {
           </Select>
         </div>
 
-        {isLoading && island && selectedCandidate && (
+        {isLoading && selectedCandidate && (
           <Badge variant="secondary" className="mb-1 animate-pulse">Loading...</Badge>
         )}
       </div>
 
-      {island && selectedCandidate && (
+      {selectedCandidate && (
         <div className="relative mt-4">
           <HexMap
             geojson={processedGeo ?? null}

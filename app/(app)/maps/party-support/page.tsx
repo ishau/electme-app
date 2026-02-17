@@ -1,14 +1,10 @@
 "use client";
 
 import { useState, useCallback, useMemo } from "react";
-import { useQueryState, parseAsString } from "nuqs";
 import { useHexPartySupport } from "@/lib/hooks/use-hex";
-import { useMapIslands } from "@/lib/hooks/use-map-islands";
 import { useParties } from "@/lib/hooks/use-parties";
-import { IslandSelector } from "@/components/maps/island-selector";
 import { HexMap } from "@/components/maps/hex-map";
 import { Page } from "@/components/shared/page";
-import { PageSkeleton } from "@/components/shared/loading-skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -37,7 +33,6 @@ const SUPPORT_LEVEL_LABELS: Record<string, string> = {
   hard_opposition: "Hard Opposition",
 };
 
-// Weights for scoring each party's support quality
 const LEVEL_WEIGHTS: Record<string, number> = {
   strong_supporter: 2,
   leaning: 1,
@@ -67,12 +62,10 @@ function parseLevels(raw: unknown): HexCandidateSupportLevel[] {
 }
 
 export default function PartySupportPage() {
-  const { atolls, islandsByAtoll, isLoading: islandsLoading } = useMapIslands();
   const { data: parties } = useParties();
-  const [island, setIsland] = useQueryState("island", parseAsString.withDefault(""));
   const [selectedParty, setSelectedParty] = useState("");
 
-  const { data: partySupportGeo, isLoading } = useHexPartySupport(island || undefined);
+  const { data: partySupportGeo, isLoading } = useHexPartySupport();
 
   // ── Party selected: filter to that party, color by top support level ──
   const partyFilteredGeo = useMemo(() => {
@@ -142,7 +135,6 @@ export default function PartySupportPage() {
     const features = partySupportGeo.features.map((f: { type: string; geometry: unknown; properties: Record<string, unknown> }) => {
       const allParties = parseParties(f.properties.parties);
 
-      // Score each party and find the winner
       let winnerColor = "#6B7280";
       let winnerCode = "";
       let bestScore = -Infinity;
@@ -179,7 +171,6 @@ export default function PartySupportPage() {
     const allParties: HexPartySupportEntry[] =
       typeof props._parties === "string" ? JSON.parse(props._parties as string) : [];
 
-    // Show each party with its score and level breakdown
     const sections = [...allParties]
       .sort((a, b) => partyScore(b.levels) - partyScore(a.levels))
       .map((p) => {
@@ -231,15 +222,9 @@ export default function PartySupportPage() {
   const fillExpr = isPartyMode ? partyFillExpr : aggregateFillExpr;
   const popupBuilder = isPartyMode ? partyPopupBuilder : aggregatePopupBuilder;
 
-  if (islandsLoading) {
-    return <Page title="Party Support" description="Loading..."><PageSkeleton /></Page>;
-  }
-
   return (
     <Page title="Party Support" description="Support levels across hex cells, overall or per party">
       <div className="flex items-end gap-4 flex-wrap">
-        <IslandSelector atolls={atolls} islandsByAtoll={islandsByAtoll} value={island} onChange={setIsland} />
-
         <div>
           <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Party</label>
           <div className="flex items-center gap-1.5 mt-1.5">
@@ -266,48 +251,45 @@ export default function PartySupportPage() {
           </div>
         </div>
 
-        {isLoading && island && <Badge variant="secondary" className="mb-1 animate-pulse">Loading...</Badge>}
+        {isLoading && <Badge variant="secondary" className="mb-1 animate-pulse">Loading...</Badge>}
       </div>
 
-      {island && (
-        <div className="relative mt-4">
-          <HexMap
-            geojson={geojson ?? null}
-            fillColorExpr={fillExpr}
-            buildPopupHtml={popupBuilder}
-            className="h-[600px] w-full rounded-md"
-          />
+      <div className="relative mt-4">
+        <HexMap
+          geojson={geojson ?? null}
+          fillColorExpr={fillExpr}
+          buildPopupHtml={popupBuilder}
+          className="h-[600px] w-full rounded-md"
+        />
 
-          {/* Legend */}
-          <div className="absolute bottom-4 right-4 bg-background/90 backdrop-blur-sm border rounded-lg p-3 shadow-md">
-            {isPartyMode ? (
-              <>
-                <p className="text-xs font-semibold mb-2">Support Level</p>
-                <div className="space-y-1">
-                  {Object.entries(SUPPORT_LEVEL_LABELS).map(([level, label]) => (
-                    <div key={level} className="flex items-center gap-2">
-                      <div className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: SUPPORT_LEVEL_COLORS[level] }} />
-                      <span className="text-xs">{label}</span>
-                    </div>
-                  ))}
-                </div>
-              </>
-            ) : (
-              <>
-                <p className="text-xs font-semibold mb-2">Top Party (by support score)</p>
-                <div className="space-y-1">
-                  {aggregateLegend.map(({ code, color }) => (
-                    <div key={code} className="flex items-center gap-2">
-                      <div className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: color }} />
-                      <span className="text-xs">{code}</span>
-                    </div>
-                  ))}
-                </div>
-              </>
-            )}
-          </div>
+        <div className="absolute bottom-4 right-4 bg-background/90 backdrop-blur-sm border rounded-lg p-3 shadow-md">
+          {isPartyMode ? (
+            <>
+              <p className="text-xs font-semibold mb-2">Support Level</p>
+              <div className="space-y-1">
+                {Object.entries(SUPPORT_LEVEL_LABELS).map(([level, label]) => (
+                  <div key={level} className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: SUPPORT_LEVEL_COLORS[level] }} />
+                    <span className="text-xs">{label}</span>
+                  </div>
+                ))}
+              </div>
+            </>
+          ) : (
+            <>
+              <p className="text-xs font-semibold mb-2">Top Party (by support score)</p>
+              <div className="space-y-1">
+                {aggregateLegend.map(({ code, color }) => (
+                  <div key={code} className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: color }} />
+                    <span className="text-xs">{code}</span>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
         </div>
-      )}
+      </div>
     </Page>
   );
 }
