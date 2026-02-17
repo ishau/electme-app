@@ -1,4 +1,4 @@
-import { get, post, put, del, getGroupId } from "@/lib/api";
+import { post, put, del } from "@/lib/api";
 import type {
   ConstituentProfile,
   Nickname,
@@ -28,15 +28,13 @@ export async function updateProfile(constituentId: string, data: {
   };
   notes?: string;
 }) {
-  const groupId = getGroupId();
-  return put<ConstituentProfile>(`/groups/${groupId}/constituents/${constituentId}/profile`, data);
+  return put<ConstituentProfile>(`/group/constituents/${constituentId}/profile`, data);
 }
 
 export async function updateNicknames(constituentId: string, data: {
   nicknames: { name: string; is_primary: boolean }[];
 }) {
-  const groupId = getGroupId();
-  return put<Nickname[]>(`/groups/${groupId}/constituents/${constituentId}/nicknames`, data);
+  return put<Nickname[]>(`/group/constituents/${constituentId}/nicknames`, data);
 }
 
 export async function createAffiliation(constituentId: string, data: {
@@ -45,8 +43,7 @@ export async function createAffiliation(constituentId: string, data: {
   source?: string;
   notes?: string;
 }) {
-  const groupId = getGroupId();
-  return post<PartyAffiliation>(`/groups/${groupId}/constituents/${constituentId}/affiliations`, data);
+  return post<PartyAffiliation>(`/group/constituents/${constituentId}/affiliations`, data);
 }
 
 export async function updateAffiliation(constituentId: string, affiliationId: string, data: {
@@ -55,13 +52,11 @@ export async function updateAffiliation(constituentId: string, affiliationId: st
   source?: string;
   notes?: string;
 }) {
-  const groupId = getGroupId();
-  return put<PartyAffiliation>(`/groups/${groupId}/constituents/${constituentId}/affiliations/${affiliationId}`, data);
+  return put<PartyAffiliation>(`/group/constituents/${constituentId}/affiliations/${affiliationId}`, data);
 }
 
 export async function deleteAffiliation(constituentId: string, affiliationId: string) {
-  const groupId = getGroupId();
-  return del(`/groups/${groupId}/constituents/${constituentId}/affiliations/${affiliationId}`);
+  return del(`/group/constituents/${constituentId}/affiliations/${affiliationId}`);
 }
 
 export async function updateWorkplace(constituentId: string, data: {
@@ -71,22 +66,19 @@ export async function updateWorkplace(constituentId: string, data: {
   island_id?: string;
   notes?: string;
 }) {
-  const groupId = getGroupId();
-  return put<WorkplaceAssignment[]>(`/groups/${groupId}/constituents/${constituentId}/workplace`, data);
+  return put<WorkplaceAssignment[]>(`/group/constituents/${constituentId}/workplace`, data);
 }
 
 export async function updateTags(constituentId: string, data: {
   tags: { key: string; value: string; added_by: string; notes?: string }[];
 }) {
-  const groupId = getGroupId();
-  return put<Tag[]>(`/groups/${groupId}/constituents/${constituentId}/tags`, data);
+  return put<Tag[]>(`/group/constituents/${constituentId}/tags`, data);
 }
 
 export async function updateTraits(constituentId: string, data: {
   traits: { category: string; value: string; notes?: string }[];
 }) {
-  const groupId = getGroupId();
-  return put<PersonalTrait[]>(`/groups/${groupId}/constituents/${constituentId}/traits`, data);
+  return put<PersonalTrait[]>(`/group/constituents/${constituentId}/traits`, data);
 }
 
 export async function createRelationship(constituentId: string, data: {
@@ -96,8 +88,7 @@ export async function createRelationship(constituentId: string, data: {
   influence_score: number;
   notes?: string;
 }) {
-  const groupId = getGroupId();
-  return post<{ status: string }>(`/groups/${groupId}/constituents/${constituentId}/relationships`, data);
+  return post<{ status: string }>(`/group/constituents/${constituentId}/relationships`, data);
 }
 
 // ── Campaign ──
@@ -109,8 +100,7 @@ export async function logSupport(constituentId: string, data: {
   assessed_by: string;
   notes?: string;
 }) {
-  const groupId = getGroupId();
-  return post<SupportAssessment>(`/groups/${groupId}/constituents/${constituentId}/support`, data);
+  return post<SupportAssessment>(`/group/constituents/${constituentId}/support`, data);
 }
 
 export async function logOutreach(constituentId: string, data: {
@@ -120,8 +110,7 @@ export async function logOutreach(constituentId: string, data: {
   follow_up_date?: string;
   notes?: string;
 }) {
-  const groupId = getGroupId();
-  return post<OutreachLog>(`/groups/${groupId}/constituents/${constituentId}/outreach`, data);
+  return post<OutreachLog>(`/group/constituents/${constituentId}/outreach`, data);
 }
 
 export interface BatchResult {
@@ -138,8 +127,7 @@ export async function bulkLogSupport(data: {
   assessed_by: string;
   notes?: string;
 }) {
-  const groupId = getGroupId();
-  return post<BatchResult>(`/groups/${groupId}/support/batch`, data);
+  return post<BatchResult>(`/group/support/batch`, data);
 }
 
 export async function bulkLogOutreach(data: {
@@ -150,8 +138,7 @@ export async function bulkLogOutreach(data: {
   follow_up_date?: string;
   notes?: string;
 }) {
-  const groupId = getGroupId();
-  return post<BatchResult>(`/groups/${groupId}/outreach/batch`, data);
+  return post<BatchResult>(`/group/outreach/batch`, data);
 }
 
 // ── Geography ──
@@ -200,9 +187,10 @@ export async function addTeamMember(data: {
   };
   is_active?: boolean;
   notes?: string;
+  username?: string;
+  password?: string;
 }) {
-  const groupId = getGroupId();
-  return post<Group>(`/groups/${groupId}/team-members`, data);
+  return post<Group>(`/group/team-members`, data);
 }
 
 export async function updateTeamMember(memberId: string, data: {
@@ -216,14 +204,14 @@ export async function updateTeamMember(memberId: string, data: {
   };
   is_active?: boolean;
   notes?: string;
+  username?: string;
+  password?: string;
 }) {
-  const groupId = getGroupId();
-  return put<Group>(`/groups/${groupId}/team-members/${memberId}`, data);
+  return put<Group>(`/group/team-members/${memberId}`, data);
 }
 
 export async function deleteTeamMember(memberId: string) {
-  const groupId = getGroupId();
-  return del(`/groups/${groupId}/team-members/${memberId}`);
+  return del(`/group/team-members/${memberId}`);
 }
 
 // ── Voting ──
@@ -235,8 +223,7 @@ export async function createRegistration(data: {
   is_reregistered: boolean;
   rereg_source: string;
 }) {
-  const groupId = getGroupId();
-  return post<VoterRegistration>(`/groups/${groupId}/registrations`, data);
+  return post<VoterRegistration>(`/group/registrations`, data);
 }
 
 export async function updateTransport(registrationId: string, data: {
@@ -244,8 +231,7 @@ export async function updateTransport(registrationId: string, data: {
   mode?: string;
   notes?: string;
 }) {
-  const groupId = getGroupId();
-  return put<void>(`/groups/${groupId}/registrations/${registrationId}/transport`, data);
+  return put<void>(`/group/registrations/${registrationId}/transport`, data);
 }
 
 export async function recordVote(data: {
@@ -255,11 +241,9 @@ export async function recordVote(data: {
   recorded_by: string;
   notes?: string;
 }) {
-  const groupId = getGroupId();
-  return post<VotingRecord>(`/groups/${groupId}/votes`, data);
+  return post<VotingRecord>(`/group/votes`, data);
 }
 
 export async function recordExitPoll(voteId: string, candidateId: string) {
-  const groupId = getGroupId();
-  return put<void>(`/groups/${groupId}/votes/${voteId}/exit-poll`, { candidate_id: candidateId });
+  return put<void>(`/group/votes/${voteId}/exit-poll`, { candidate_id: candidateId });
 }

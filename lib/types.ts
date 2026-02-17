@@ -86,6 +86,7 @@ export interface TeamMember {
   ContactInfo: ContactInfo;
   IsActive: boolean;
   Notes: string;
+  Username: string | null;
 }
 
 export interface CandidateView {

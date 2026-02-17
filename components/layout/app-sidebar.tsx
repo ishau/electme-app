@@ -13,6 +13,7 @@ import {
   FolderOpen,
   ChevronRight,
   MapPin,
+  LogOut,
 } from "lucide-react";
 import {
   Sidebar,
@@ -27,6 +28,10 @@ import {
   SidebarFooter,
   SidebarSeparator,
 } from "@/components/ui/sidebar";
+import { Button } from "@/components/ui/button";
+import { logout } from "@/lib/auth";
+import { useAuth } from "@/lib/hooks/use-auth";
+
 const navItems = [
   { label: "Dashboard", href: "/", icon: LayoutDashboard, exact: true },
   { label: "Voters", href: "/constituents", icon: Users },
@@ -44,6 +49,7 @@ const settingsNavItems = [
 
 export function AppSidebar({ groupName, partyCode }: { groupName: string; partyCode?: string }) {
   const pathname = usePathname();
+  const { user } = useAuth();
 
   return (
     <Sidebar>
@@ -110,8 +116,15 @@ export function AppSidebar({ groupName, partyCode }: { groupName: string; partyC
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="p-4">
-        <p className="text-xs text-muted-foreground">ElectMe v0.1</p>
+      <SidebarFooter className="p-4 space-y-2">
+        <div className="flex items-center justify-between">
+          <p className="text-xs text-muted-foreground truncate">
+            {user?.username}
+          </p>
+          <Button variant="ghost" size="sm" onClick={logout} className="h-7 px-2">
+            <LogOut className="h-3.5 w-3.5" />
+          </Button>
+        </div>
       </SidebarFooter>
     </Sidebar>
   );

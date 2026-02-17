@@ -1,5 +1,5 @@
 import { useQuery, keepPreviousData } from "@tanstack/react-query";
-import { get, getGroupId } from "@/lib/api";
+import { get } from "@/lib/api";
 import type {
   Constituent,
   EnrichedConstituent,
@@ -11,27 +11,24 @@ import type {
 } from "@/lib/types";
 
 export function useConstituents(params: Record<string, string>) {
-  const groupId = getGroupId();
   return useQuery({
-    queryKey: ["constituents", groupId, params],
+    queryKey: ["constituents", params],
     queryFn: () =>
-      get<PaginatedResponse<Constituent>>(`/groups/${groupId}/constituents`, params),
+      get<PaginatedResponse<Constituent>>(`/group/constituents`, params),
     placeholderData: keepPreviousData,
   });
 }
 
 export function useEnrichedConstituent(constituentId: string) {
-  const groupId = getGroupId();
   return useQuery({
-    queryKey: ["constituent", groupId, constituentId],
+    queryKey: ["constituent", constituentId],
     queryFn: () =>
-      get<EnrichedConstituent>(`/groups/${groupId}/constituents/${constituentId}`),
+      get<EnrichedConstituent>(`/group/constituents/${constituentId}`),
     enabled: !!constituentId,
   });
 }
 
 export function useBaseConstituent(constituentId: string) {
-  const groupId = getGroupId();
   return useQuery({
     queryKey: ["baseConstituent", constituentId],
     queryFn: () => get<Constituent>(`/constituents/${constituentId}`),
@@ -40,51 +37,46 @@ export function useBaseConstituent(constituentId: string) {
 }
 
 export function useSupportHistory(constituentId: string) {
-  const groupId = getGroupId();
   return useQuery({
-    queryKey: ["supportHistory", groupId, constituentId],
+    queryKey: ["supportHistory", constituentId],
     queryFn: () =>
-      get<SupportAssessment[]>(`/groups/${groupId}/constituents/${constituentId}/support`),
+      get<SupportAssessment[]>(`/group/constituents/${constituentId}/support`),
     enabled: !!constituentId,
   });
 }
 
 export function useOutreachHistory(constituentId: string) {
-  const groupId = getGroupId();
   return useQuery({
-    queryKey: ["outreachHistory", groupId, constituentId],
+    queryKey: ["outreachHistory", constituentId],
     queryFn: () =>
-      get<OutreachLog[]>(`/groups/${groupId}/constituents/${constituentId}/outreach`),
+      get<OutreachLog[]>(`/group/constituents/${constituentId}/outreach`),
     enabled: !!constituentId,
   });
 }
 
 export function useRelationships(constituentId: string) {
-  const groupId = getGroupId();
   return useQuery({
-    queryKey: ["relationships", groupId, constituentId],
+    queryKey: ["relationships", constituentId],
     queryFn: () =>
-      get<RelationshipView[]>(`/groups/${groupId}/constituents/${constituentId}/relationships`),
+      get<RelationshipView[]>(`/group/constituents/${constituentId}/relationships`),
     enabled: !!constituentId,
   });
 }
 
 export function useSearchConstituents(query: string) {
-  const groupId = getGroupId();
   return useQuery({
-    queryKey: ["searchConstituents", groupId, query],
+    queryKey: ["searchConstituents", query],
     queryFn: () =>
-      get<ConstituentSearchResult[]>(`/groups/${groupId}/constituents/search`, { q: query }),
+      get<ConstituentSearchResult[]>(`/group/constituents/search`, { q: query }),
     enabled: query.length >= 2,
   });
 }
 
 export function useNeighbors(address: string | undefined, islandId: string | undefined) {
-  const groupId = getGroupId();
   return useQuery({
-    queryKey: ["neighbors", groupId, address, islandId],
+    queryKey: ["neighbors", address, islandId],
     queryFn: () =>
-      get<PaginatedResponse<Constituent>>(`/groups/${groupId}/constituents`, {
+      get<PaginatedResponse<Constituent>>(`/group/constituents`, {
         address: address!,
         island_id: islandId!,
         exact_address: "true",
@@ -95,16 +87,15 @@ export function useNeighbors(address: string | undefined, islandId: string | und
 }
 
 export function useLatestSupport(constituentIds: string[]) {
-  const groupId = getGroupId();
   return useQuery({
-    queryKey: ["latestSupport", groupId, constituentIds],
+    queryKey: ["latestSupport", constituentIds],
     queryFn: async () => {
       const result: Record<string, SupportAssessment> = {};
       await Promise.all(
         constituentIds.map(async (cid) => {
           try {
             const history = await get<SupportAssessment[]>(
-              `/groups/${groupId}/constituents/${cid}/support`
+              `/group/constituents/${cid}/support`
             );
             if (history && history.length > 0) {
               result[cid] = history[0];

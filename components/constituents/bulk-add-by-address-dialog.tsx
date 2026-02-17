@@ -25,7 +25,7 @@ import { Badge } from "@/components/ui/badge";
 import { Rating } from "@/components/ui/rating";
 import { SupportLevelBadge } from "@/components/campaign/support-level-badge";
 import { bulkLogSupport, bulkLogOutreach } from "@/lib/mutations";
-import { get, getGroupId } from "@/lib/api";
+import { get } from "@/lib/api";
 import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
 import type { PaginatedResponse, Constituent, CandidateView, Party } from "@/lib/types";
@@ -164,14 +164,13 @@ export function AddressSupportDialog({
       return aType - bType;
     });
 
-  const groupId = getGroupId();
   const params: Record<string, string> = { address, island_id: islandId };
   if (constituencyId) params.constituency_id = constituencyId;
 
   const { data: votersResult, isLoading: loading } = useQuery({
-    queryKey: ["addressVoters", groupId, address, islandId, constituencyId],
+    queryKey: ["addressVoters", address, islandId, constituencyId],
     queryFn: () =>
-      get<PaginatedResponse<Constituent>>(`/groups/${groupId}/constituents`, params),
+      get<PaginatedResponse<Constituent>>(`/group/constituents`, params),
     enabled: open && !!address && !!islandId,
   });
 

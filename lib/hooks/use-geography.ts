@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { get } from "@/lib/api";
+import { useAuth } from "@/lib/hooks/use-auth";
 import type { Atoll, Island, AddressLocation, AddressWithCount, HeatMapPoint } from "@/lib/types";
 
 export function useAtolls() {
@@ -33,7 +34,9 @@ export function useUniqueAddresses(islandId: string) {
   });
 }
 
-export function useAddressesWithCounts(islandId: string, groupId: string) {
+export function useAddressesWithCounts(islandId: string) {
+  const { user } = useAuth();
+  const groupId = user?.group_id ?? "";
   return useQuery({
     queryKey: ["addressesWithCounts", islandId, groupId],
     queryFn: () => get<AddressWithCount[]>(`/islands/${islandId}/addresses`, { group_id: groupId }),
@@ -41,7 +44,9 @@ export function useAddressesWithCounts(islandId: string, groupId: string) {
   });
 }
 
-export function useHeatMapData(islandId: string, groupId: string) {
+export function useHeatMapData(islandId: string) {
+  const { user } = useAuth();
+  const groupId = user?.group_id ?? "";
   return useQuery({
     queryKey: ["heatMapData", islandId, groupId],
     queryFn: () => get<HeatMapPoint[]>(`/islands/${islandId}/heat-map`, { group_id: groupId }),

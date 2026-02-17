@@ -1,34 +1,31 @@
 import { useQuery, keepPreviousData } from "@tanstack/react-query";
-import { get, getGroupId } from "@/lib/api";
+import { get } from "@/lib/api";
 
 // GeoJSON FeatureCollection type (generic)
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type GeoJSON = any;
 
 export function useHexDominant() {
-  const groupId = getGroupId();
   return useQuery<GeoJSON>({
-    queryKey: ["hexDominant", groupId],
-    queryFn: () => get<GeoJSON>(`/groups/${groupId}/hex/dominant`),
+    queryKey: ["hexDominant"],
+    queryFn: () => get<GeoJSON>(`/group/hex/dominant`),
     placeholderData: keepPreviousData,
   });
 }
 
 export function useHexLeaning() {
-  const groupId = getGroupId();
   return useQuery<GeoJSON>({
-    queryKey: ["hexLeaning", groupId],
-    queryFn: () => get<GeoJSON>(`/groups/${groupId}/hex/leaning`),
+    queryKey: ["hexLeaning"],
+    queryFn: () => get<GeoJSON>(`/group/hex/leaning`),
     placeholderData: keepPreviousData,
   });
 }
 
 export function useHexCandidateSupport(candidateId: string | undefined) {
-  const groupId = getGroupId();
   return useQuery<GeoJSON>({
-    queryKey: ["hexCandidateSupport", groupId, candidateId],
+    queryKey: ["hexCandidateSupport", candidateId],
     queryFn: () =>
-      get<GeoJSON>(`/groups/${groupId}/hex/candidate-support`, {
+      get<GeoJSON>(`/group/hex/candidate-support`, {
         candidate_id: candidateId!,
       }),
     enabled: !!candidateId,
@@ -37,10 +34,9 @@ export function useHexCandidateSupport(candidateId: string | undefined) {
 }
 
 export function useHexPartySupport() {
-  const groupId = getGroupId();
   return useQuery<GeoJSON>({
-    queryKey: ["hexPartySupport", groupId],
-    queryFn: () => get<GeoJSON>(`/groups/${groupId}/hex/party-support`),
+    queryKey: ["hexPartySupport"],
+    queryFn: () => get<GeoJSON>(`/group/hex/party-support`),
     placeholderData: keepPreviousData,
   });
 }

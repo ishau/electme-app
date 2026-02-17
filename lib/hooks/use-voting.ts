@@ -1,56 +1,51 @@
 import { useQuery, keepPreviousData } from "@tanstack/react-query";
-import { get, getGroupId } from "@/lib/api";
+import { get } from "@/lib/api";
 import type { TurnoutStats, VoterRegistration, Constituent } from "@/lib/types";
 
 export function useTurnout(constituencyId: string) {
-  const groupId = getGroupId();
   return useQuery({
-    queryKey: ["turnout", groupId, constituencyId],
+    queryKey: ["turnout", constituencyId],
     queryFn: () =>
-      get<TurnoutStats>(`/groups/${groupId}/turnout`, { constituency_id: constituencyId }),
+      get<TurnoutStats>(`/group/turnout`, { constituency_id: constituencyId }),
     enabled: !!constituencyId,
     placeholderData: keepPreviousData,
   });
 }
 
 export function useNonVoters(constituencyId: string) {
-  const groupId = getGroupId();
   return useQuery({
-    queryKey: ["nonVoters", groupId, constituencyId],
+    queryKey: ["nonVoters", constituencyId],
     queryFn: () =>
-      get<string[]>(`/groups/${groupId}/non-voters`, { constituency_id: constituencyId }),
+      get<string[]>(`/group/non-voters`, { constituency_id: constituencyId }),
     enabled: !!constituencyId,
     placeholderData: keepPreviousData,
   });
 }
 
 export function useVotersForConstituency(constituencyId: string) {
-  const groupId = getGroupId();
   return useQuery({
-    queryKey: ["votersForConstituency", groupId, constituencyId],
+    queryKey: ["votersForConstituency", constituencyId],
     queryFn: () =>
-      get<Constituent[]>(`/groups/${groupId}/constituents`, { constituency_id: constituencyId }).catch(() => []),
+      get<Constituent[]>(`/group/constituents`, { constituency_id: constituencyId }).catch(() => []),
     enabled: !!constituencyId,
     placeholderData: keepPreviousData,
   });
 }
 
 export function useRegistrations(constituencyId: string) {
-  const groupId = getGroupId();
   return useQuery({
-    queryKey: ["registrations", groupId, constituencyId],
+    queryKey: ["registrations", constituencyId],
     queryFn: () =>
-      get<VoterRegistration[]>(`/groups/${groupId}/registrations`, { constituency_id: constituencyId }),
+      get<VoterRegistration[]>(`/group/registrations`, { constituency_id: constituencyId }),
     enabled: !!constituencyId,
     placeholderData: keepPreviousData,
   });
 }
 
 export function useTransportNeeded() {
-  const groupId = getGroupId();
   return useQuery({
-    queryKey: ["transportNeeded", groupId],
+    queryKey: ["transportNeeded"],
     queryFn: () =>
-      get<VoterRegistration[]>(`/groups/${groupId}/registrations/transport-needed`),
+      get<VoterRegistration[]>(`/group/registrations/transport-needed`),
   });
 }
