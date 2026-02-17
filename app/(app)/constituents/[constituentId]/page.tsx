@@ -39,8 +39,11 @@ export default function ConstituentDetailPage() {
 
   if (!constituent) return <Page title="Loading..." description=""><PageSkeleton /></Page>;
 
-  const activeAffiliation = constituent.Affiliations?.find((a) => !a.Period.EndDate);
-  const affiliationParty = activeAffiliation ? parties?.find((p) => p.ID === activeAffiliation.PartyID) : null;
+  const sortedAffiliations = [...(constituent.Affiliations ?? [])].sort(
+    (a, b) => new Date(b.KnownDate ?? 0).getTime() - new Date(a.KnownDate ?? 0).getTime()
+  );
+  const latestAffiliation = sortedAffiliations[0];
+  const affiliationParty = latestAffiliation ? parties?.find((p) => p.ID === latestAffiliation.PartyID) : null;
 
   return (
     <Page
@@ -61,6 +64,8 @@ export default function ConstituentDetailPage() {
               islandName: address?.IslandName,
               nicknames: constituent.Nicknames,
             }}
+            affiliations={sortedAffiliations}
+            parties={parties ?? []}
           />
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

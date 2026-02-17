@@ -140,9 +140,8 @@ export interface PartyAffiliation {
   GroupID: string;
   ConstituentID: string;
   PartyID: string;
-  Period: Period;
+  KnownDate: string | null;
   Source: string;
-  FromPartyID: string | null;
   Notes: string;
 }
 
@@ -409,3 +408,56 @@ export type WorkplaceSector =
   | "unemployed"
   | "retired"
   | "student";
+
+// Hex Analytics (GeoJSON)
+export interface HexDominantProperties {
+  hex: string;
+  party_id: string;
+  party_code: string;
+  party_color: string;
+  voter_count: number;
+  total_in_hex: number;
+  pct: number;
+}
+
+export interface HexLeaningParty {
+  party_id: string;
+  party_code: string;
+  party_color: string;
+  voter_count: number;
+  pct: number;
+}
+
+export interface HexLeaningProperties {
+  hex: string;
+  total_in_hex: number;
+  parties: HexLeaningParty[];
+}
+
+export interface HexCandidateSupportLevel {
+  level: string;
+  voter_count: number;
+  pct: number;
+}
+
+export interface HexCandidateSupportProperties {
+  hex: string;
+  total_in_hex: number;
+  levels: HexCandidateSupportLevel[];
+}
+
+export interface HexPartySupportEntry {
+  party_id: string;
+  party_code: string;
+  party_color: string;
+  levels: HexCandidateSupportLevel[];
+}
+
+export interface HexPartySupportProperties {
+  hex: string;
+  total_in_hex: number;
+  parties: HexPartySupportEntry[];
+}
+
+// Affiliation source values
+export type AffiliationSource = "self_declared" | "observed" | "voter_list" | "unknown";

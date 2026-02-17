@@ -39,11 +39,29 @@ export async function updateNicknames(constituentId: string, data: {
   return put<Nickname[]>(`/groups/${groupId}/constituents/${constituentId}/nicknames`, data);
 }
 
-export async function updateAffiliation(constituentId: string, data: {
+export async function createAffiliation(constituentId: string, data: {
   party_id: string;
+  known_date?: string;
+  source?: string;
+  notes?: string;
 }) {
   const groupId = getGroupId();
-  return put<PartyAffiliation[]>(`/groups/${groupId}/constituents/${constituentId}/affiliation`, data);
+  return post<PartyAffiliation>(`/groups/${groupId}/constituents/${constituentId}/affiliations`, data);
+}
+
+export async function updateAffiliation(constituentId: string, affiliationId: string, data: {
+  party_id: string;
+  known_date?: string;
+  source?: string;
+  notes?: string;
+}) {
+  const groupId = getGroupId();
+  return put<PartyAffiliation>(`/groups/${groupId}/constituents/${constituentId}/affiliations/${affiliationId}`, data);
+}
+
+export async function deleteAffiliation(constituentId: string, affiliationId: string) {
+  const groupId = getGroupId();
+  return del(`/groups/${groupId}/constituents/${constituentId}/affiliations/${affiliationId}`);
 }
 
 export async function updateWorkplace(constituentId: string, data: {
