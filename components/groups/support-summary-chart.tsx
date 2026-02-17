@@ -1,5 +1,14 @@
 "use client";
 
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  Cell,
+} from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { SupportSummary } from "@/lib/types";
 
@@ -8,44 +17,57 @@ interface SupportSummaryChartProps {
 }
 
 const levels = [
-  { key: "StrongSupporter" as const, label: "Strong Supporter", color: "bg-green-500" },
-  { key: "Leaning" as const, label: "Leaning", color: "bg-yellow-400" },
-  { key: "Undecided" as const, label: "Undecided", color: "bg-gray-400" },
-  { key: "SoftOpposition" as const, label: "Soft Opposition", color: "bg-orange-400" },
-  { key: "HardOpposition" as const, label: "Hard Opposition", color: "bg-red-500" },
-  { key: "NotAssessed" as const, label: "Not Assessed", color: "bg-gray-200" },
+  { key: "StrongSupporter" as const, label: "Strong Supporter", color: "#22c55e" },
+  { key: "Leaning" as const, label: "Leaning", color: "#facc15" },
+  { key: "Undecided" as const, label: "Undecided", color: "#9ca3af" },
+  { key: "SoftOpposition" as const, label: "Soft Opposition", color: "#fb923c" },
+  { key: "HardOpposition" as const, label: "Hard Opposition", color: "#ef4444" },
+  { key: "NotAssessed" as const, label: "Not Assessed", color: "#e5e7eb" },
 ];
 
 export function SupportSummaryChart({ summary }: SupportSummaryChartProps) {
   const total = summary.TotalAssessed + summary.NotAssessed;
   if (total === 0) return null;
 
+  const data = levels.map(({ key, label, color }) => ({
+    name: label,
+    count: summary[key],
+    pct: ((summary[key] / total) * 100).toFixed(1),
+    color,
+  }));
+
   return (
     <Card>
       <CardHeader>
         <CardTitle className="text-base">Support Breakdown</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-3">
-        {levels.map(({ key, label, color }) => {
-          const count = summary[key];
-          const percent = total > 0 ? (count / total) * 100 : 0;
-          return (
-            <div key={key}>
-              <div className="flex justify-between text-sm mb-1">
-                <span>{label}</span>
-                <span className="text-muted-foreground">
-                  {count} ({percent.toFixed(1)}%)
-                </span>
-              </div>
-              <div className="h-2 bg-muted rounded-full overflow-hidden">
-                <div
-                  className={`h-full rounded-full ${color}`}
-                  style={{ width: `${percent}%` }}
-                />
-              </div>
-            </div>
-          );
-        })}
+      <CardContent>
+        <ResponsiveContainer width="100%" height={220}>
+          <BarChart data={data} layout="vertical" margin={{ left: 0, right: 12, top: 0, bottom: 0 }}>
+            <XAxis type="number" hide />
+            <YAxis
+              type="category"
+              dataKey="name"
+              width={110}
+              tick={{ fontSize: 12 }}
+              axisLine={false}
+              tickLine={false}
+            />
+            <Tooltip
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              formatter={(value: any, _name: any, props: any) => [
+                `${value} (${props?.payload?.pct ?? ""}%)`,
+                "Count",
+              ]}
+              contentStyle={{ fontSize: 12 }}
+            />
+            <Bar dataKey="count" radius={[0, 4, 4, 0]} barSize={14}>
+              {data.map((entry, i) => (
+                <Cell key={i} fill={entry.color} />
+              ))}
+            </Bar>
+          </BarChart>
+        </ResponsiveContainer>
       </CardContent>
     </Card>
   );

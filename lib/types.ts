@@ -301,6 +301,40 @@ export interface TurnoutStats {
   VotedByHour: Record<number, number>;
 }
 
+// Analytics
+export interface SupportTrendPoint {
+  Week: string;
+  StrongSupporter: number;
+  Leaning: number;
+  Undecided: number;
+  SoftOpposition: number;
+  HardOpposition: number;
+}
+
+export interface ConstituencySupportBreakdown {
+  ConstituencyID: string;
+  ConstituencyName: string;
+  StrongSupporter: number;
+  Leaning: number;
+  Undecided: number;
+  SoftOpposition: number;
+  HardOpposition: number;
+}
+
+export interface OutreachDayCount {
+  Date: string;
+  Count: number;
+}
+
+export interface TeamMemberActivity {
+  ContactedBy: string;
+  TotalContacts: number;
+  UniqueContacted: number;
+  Positive: number;
+  Neutral: number;
+  Negative: number;
+}
+
 // Ballot Box
 export interface BallotBox {
   ID: string;
@@ -398,6 +432,18 @@ export interface HeatMapPoint {
   Weight: number;
 }
 
+// House
+export interface House {
+  ID: string;
+  HouseName: string;
+  IslandID: string;
+  IslandName: string;
+  Lat: number | null;
+  Lng: number | null;
+  HasOverride: boolean;
+  ResidentCount: number;
+}
+
 // Workplace sectors
 export type WorkplaceSector =
   | "government"
@@ -460,5 +506,81 @@ export interface HexPartySupportProperties {
   parties: HexPartySupportEntry[];
 }
 
+// Demographics
+export interface SexBreakdown {
+  Male: number;
+  Female: number;
+}
+
+export interface AgeGroupCount {
+  AgeGroup: string;
+  Count: number;
+}
+
+export interface IslandCount {
+  IslandID: string;
+  IslandName: string;
+  Count: number;
+}
+
+export interface ConstituencyCount {
+  ConstituencyID: string;
+  ConstituencyName: string;
+  Count: number;
+}
+
+export interface Demographics {
+  TotalVoters: number;
+  BySex: SexBreakdown;
+  ByAgeGroup: AgeGroupCount[];
+  ByIsland: IslandCount[];
+  ByConstituency: ConstituencyCount[];
+}
+
 // Affiliation source values
 export type AffiliationSource = "self_declared" | "observed" | "voter_list" | "unknown";
+
+// Transport Request
+export type TransportRequestStatus =
+  | "pending"
+  | "arranged"
+  | "in_progress"
+  | "completed"
+  | "cancelled";
+
+export interface TransportRequest {
+  ID: string;
+  GroupID: string;
+  ConstituentID: string;
+  ConstituencyID: string;
+  FullName: string;
+  MaskedNationalID: string;
+  IslandName: string;
+  VotingIslandName: string;
+  InterIslandNeeded: boolean;
+  InterIslandMode: string;
+  InterIslandStatus: string;
+  InterIslandNotes: string;
+  VotingDayNeeded: boolean;
+  VotingDayDirection: string;
+  VotingDayStatus: string;
+  VotingDayNotes: string;
+  ServiceProvided: boolean | null;
+  DeniedReason: string;
+  AssignedTo: string;
+  Notes: string;
+  CreatedAt: string;
+  UpdatedAt: string;
+}
+
+export interface TransportStats {
+  Total: number;
+  InterIslandNeeded: number;
+  VotingDayNeeded: number;
+  Pending: number;
+  Arranged: number;
+  Completed: number;
+  Cancelled: number;
+  ServiceProvided: number;
+  ServiceDenied: number;
+}
