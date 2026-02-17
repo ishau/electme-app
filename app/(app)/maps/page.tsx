@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { Page } from "@/components/shared/page";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Hexagon, BarChart3, Vote, User } from "lucide-react";
+import { Hexagon, Vote, User } from "lucide-react";
 
 const MAP_PAGES = [
   {
@@ -11,12 +11,6 @@ const MAP_PAGES = [
     description: "See which party dominates each hex cell based on voter affiliation.",
     href: "/maps/dominant",
     icon: Hexagon,
-  },
-  {
-    title: "Party Leaning",
-    description: "Multi-party breakdown per hex showing voter distribution across all parties.",
-    href: "/maps/leaning",
-    icon: BarChart3,
   },
   {
     title: "Party Support",
