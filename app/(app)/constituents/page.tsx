@@ -17,8 +17,7 @@ const PAGE_SIZE = 50;
 export default function ConstituentsPage() {
   const [filters] = useQueryStates(
     {
-      name: parseAsString.withDefault(""),
-      address: parseAsString.withDefault(""),
+      q: parseAsString.withDefault(""),
       sex: parseAsString.withDefault(""),
       page: parseAsString.withDefault(""),
       constituency_id: parseAsString.withDefault(""),
@@ -45,9 +44,8 @@ export default function ConstituentsPage() {
     limit: String(PAGE_SIZE),
   };
   if (constituencyId) apiParams.constituency_id = constituencyId;
-  if (filters.name) apiParams.name = filters.name;
+  if (filters.q) apiParams.q = filters.q;
   if (filters.sex) apiParams.sex = filters.sex;
-  if (filters.address) apiParams.address = filters.address;
 
   const { data: result, isLoading: constituentsLoading } = useConstituents(apiParams);
 
@@ -79,7 +77,7 @@ export default function ConstituentsPage() {
         <EmptyState
           icon={Users}
           title="No voters found"
-          description={filters.name ? "Try a different search term." : "No voters in this constituency yet."}
+          description={filters.q ? "Try a different search term." : "No voters in this constituency yet."}
         />
       ) : (
         <ConstituentTable
