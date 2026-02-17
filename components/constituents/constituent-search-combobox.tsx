@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useEffect, useTransition } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Search, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { get, getGroupId } from "@/lib/api";
+import { useSearchConstituents } from "@/lib/hooks/use-constituents";
 import type { ConstituentSearchResult } from "@/lib/types";
 
 interface ConstituentSearchComboboxProps {
@@ -20,33 +20,28 @@ export function ConstituentSearchCombobox({
   placeholder = "Search by name, address, phone...",
 }: ConstituentSearchComboboxProps) {
   const [query, setQuery] = useState("");
-  const [results, setResults] = useState<ConstituentSearchResult[]>([]);
+  const [debouncedQuery, setDebouncedQuery] = useState("");
   const [open, setOpen] = useState(false);
-  const [isPending, startTransition] = useTransition();
   const [selectedName, setSelectedName] = useState("");
 
+  // Debounce the query by 300ms
   useEffect(() => {
-    if (query.length < 2) {
-      setResults([]);
-      return;
-    }
-
-    const timeout = setTimeout(() => {
-      startTransition(async () => {
-        const groupId = getGroupId();
-        const data = (await get<ConstituentSearchResult[]>(`/groups/${groupId}/constituents/search`, { q: query })) ?? [];
-        setResults(excludeId ? data.filter((r) => r.ID !== excludeId) : data);
-      });
-    }, 300);
-
+    const timeout = setTimeout(() => setDebouncedQuery(query), 300);
     return () => clearTimeout(timeout);
-  }, [query, excludeId]);
+  }, [query]);
+
+  const { data, isFetching } = useSearchConstituents(debouncedQuery);
+
+  const results = useMemo(() => {
+    if (!data) return [];
+    return excludeId ? data.filter((r) => r.ID !== excludeId) : data;
+  }, [data, excludeId]);
 
   const handleSelect = (result: ConstituentSearchResult) => {
     onSelect(result.ID, result.FullName);
     setSelectedName(result.FullName);
     setQuery("");
-    setResults([]);
+    setDebouncedQuery("");
     setOpen(false);
   };
 
@@ -54,6 +49,7 @@ export function ConstituentSearchCombobox({
     onSelect("", "");
     setSelectedName("");
     setQuery("");
+    setDebouncedQuery("");
   };
 
   return (
@@ -82,7 +78,7 @@ export function ConstituentSearchCombobox({
             placeholder={placeholder}
             className="pl-9"
           />
-          {isPending && (
+          {isFetching && (
             <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-muted-foreground" />
           )}
         </div>
@@ -115,7 +111,7 @@ export function ConstituentSearchCombobox({
         </div>
       )}
 
-      {open && query.length >= 2 && !isPending && results.length === 0 && (
+      {open && debouncedQuery.length >= 2 && !isFetching && results.length === 0 && (
         <div className="absolute z-50 mt-1 w-full rounded-md border bg-popover shadow-md">
           <p className="px-3 py-2 text-sm text-muted-foreground">No results found.</p>
         </div>

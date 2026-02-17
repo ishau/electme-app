@@ -3,6 +3,7 @@
 import { useGroup } from "@/lib/hooks/use-group";
 import { useConstituencies } from "@/lib/hooks/use-constituencies";
 import { useConstituents } from "@/lib/hooks/use-constituents";
+import { useParties } from "@/lib/hooks/use-parties";
 import { ConstituencySwitcher } from "@/components/constituents/constituency-switcher";
 import { ConstituentSearch } from "@/components/constituents/constituent-search";
 import { ConstituentTable } from "@/components/constituents/constituent-table";
@@ -27,6 +28,7 @@ export default function ConstituentsPage() {
 
   const { data: group, isLoading: groupLoading } = useGroup();
   const { data: allConstituencies } = useConstituencies();
+  const { data: parties } = useParties();
 
   const groupConstituencyIds = group?.Constituencies ?? [];
   const groupConstituencies = (allConstituencies ?? []).filter((c) =>
@@ -86,6 +88,7 @@ export default function ConstituentsPage() {
           offset={offset}
           constituencyId={constituencyId}
           candidates={group?.Candidates ?? []}
+          parties={parties ?? []}
         />
       )}
     </Page>

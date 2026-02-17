@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { SupportLevelBadge } from "@/components/campaign/support-level-badge";
 import { AddressSupportDialog } from "@/components/constituents/bulk-add-by-address-dialog";
 import { Users } from "lucide-react";
-import type { Constituent, SupportAssessment, CandidateView } from "@/lib/types";
+import type { Constituent, SupportAssessment, CandidateView, Party } from "@/lib/types";
 
 interface HouseholdCardProps {
   currentConstituentId: string;
@@ -19,6 +19,7 @@ interface HouseholdCardProps {
   islandName?: string;
   constituencyId?: string;
   candidates?: CandidateView[];
+  parties?: Party[];
 }
 
 export function HouseholdCard({
@@ -30,6 +31,7 @@ export function HouseholdCard({
   islandName,
   constituencyId,
   candidates,
+  parties,
 }: HouseholdCardProps) {
   const [dialogOpen, setDialogOpen] = useState(false);
   const others = neighbors.filter((n) => n.ID !== currentConstituentId);
@@ -100,6 +102,7 @@ export function HouseholdCard({
           islandName={islandName ?? ""}
           constituencyId={constituencyId}
           candidates={candidates ?? []}
+          parties={parties ?? []}
         />
       )}
     </>
