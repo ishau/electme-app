@@ -5,6 +5,7 @@
 - Go backend API — all response fields are PascalCase (e.g., `CandidateType`, `IsOwnCandidate`)
 - TanStack Query for data fetching (`useQuery`) and cache invalidation after mutations (`queryClient.invalidateQueries`)
 - UI: shadcn/ui components in `/components/ui`
+- Charts: Recharts (`recharts`) for bar charts, pie charts, etc. CSS heatmaps for calendar grids.
 - nuqs for URL search param state in filter components (`useQueryStates`, `parseAsString`)
 - Auth: HttpOnly cookie session, Next.js API routes for login/logout, catch-all proxy for Go backend
 
@@ -14,6 +15,8 @@
 - `/lib/api.ts` — API client (`get`, `post`, `put`, `del`) — calls `/api/backend/*` proxy (same-origin)
 - `/lib/hooks/use-auth.ts` — `useAuth()` hook for current user info (calls `/api/auth/me`)
 - `/lib/hooks/` — TanStack Query hooks for all data fetching (useGroup, useConstituents, useCandidateVoters, etc.)
+- `/lib/hooks/use-demographics.ts` — demographics data hook
+- `/lib/hooks/use-analytics.ts` — analytics hooks (support trend, outreach by day, team activity, support by constituency)
 - `/lib/mutations.ts` — all mutation functions
 - `/app/api/auth/` — login (POST), logout (POST), me (GET) — server-side, manages HttpOnly cookie
 - `/app/api/backend/[...path]/route.ts` — catch-all proxy: reads cookie, forwards to Go with Authorization header
@@ -31,6 +34,8 @@
 - `keepPreviousData` on filter-dependent hooks to prevent "No results" flash during refetch
 - Layout split: `app/(app)/layout.tsx` (server component with `<Suspense>` + `<NuqsAdapter>`) wraps `AuthGuard` > `AppLayoutContent` (client component)
 - Loading skeletons: use `PageSkeleton`/`TableSkeleton` from `components/shared/loading-skeleton.tsx` gated on `isLoading`
+- **Tab layouts**: Dashboard (`/dashboard/*`) and Maps (`/maps/*`) use tab subpages with `layout.tsx` containing tab links. Pattern: parent `page.tsx` does `redirect()` to default tab.
+- **Dashboard tabs**: Overview, Demographics, Campaign, Outreach, Election Day — each loads only its own data
 
 ## Environment Variables
 - `BACKEND_URL` — Go backend URL (server-only, default: `http://localhost:8080/api/v1`)
@@ -56,3 +61,5 @@
 - Multi-constituency types: `["president", "mayor", "wdc_president"]` are global — always normalize with `type.toLowerCase().replace(/\s+/g, "_")` before comparing
 - Voter add/import and party management are backend-only — no frontend CRUD for these
 - 401 from API proxy redirects to /login — no manual error handling needed for auth failures
+- Recharts `Tooltip` formatter: use `(value: any)` with `// eslint-disable-next-line @typescript-eslint/no-explicit-any` — Recharts `ValueType` is a union type that doesn't accept plain `number`
+- Recharts `Pie` label: `percent` prop is possibly undefined — always use `(percent ?? 0)`
