@@ -9,42 +9,26 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
-import { Search, MapPin } from "lucide-react";
+import { Search } from "lucide-react";
 
 export function ConstituentSearch() {
   const [filters, setFilters] = useQueryStates(
     {
-      name: parseAsString.withDefault(""),
-      address: parseAsString.withDefault(""),
+      q: parseAsString.withDefault(""),
       sex: parseAsString.withDefault(""),
       page: parseAsString,
     },
     { shallow: false }
   );
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setFilters({ ...filters, page: null });
-  };
-
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3">
+    <div className="flex flex-col sm:flex-row gap-3">
       <div className="relative flex-1">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
-          placeholder="Search by name..."
-          value={filters.name}
-          onChange={(e) => setFilters({ name: e.target.value || null, page: null })}
-          className="pl-9"
-        />
-      </div>
-      <div className="relative flex-1">
-        <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input
-          placeholder="Filter by address..."
-          value={filters.address}
-          onChange={(e) => setFilters({ address: e.target.value || null, page: null })}
+          placeholder="Search by name, address..."
+          value={filters.q}
+          onChange={(e) => setFilters({ q: e.target.value || null, page: null })}
           className="pl-9"
         />
       </div>
@@ -63,9 +47,6 @@ export function ConstituentSearch() {
           <SelectItem value="F">Female</SelectItem>
         </SelectContent>
       </Select>
-      <Button type="submit" size="icon" variant="secondary">
-        <Search className="h-4 w-4" />
-      </Button>
-    </form>
+    </div>
   );
 }

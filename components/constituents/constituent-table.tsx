@@ -16,7 +16,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { AddressSupportDialog } from "@/components/constituents/bulk-add-by-address-dialog";
-import type { Constituent, CandidateView } from "@/lib/types";
+import type { Constituent, CandidateView, Party } from "@/lib/types";
 
 interface BulkAddState {
   address: string;
@@ -30,6 +30,7 @@ interface ConstituentTableProps {
   offset: number;
   constituencyId: string;
   candidates: CandidateView[];
+  parties: Party[];
 }
 
 export function ConstituentTable({
@@ -38,18 +39,10 @@ export function ConstituentTable({
   offset,
   constituencyId,
   candidates,
+  parties,
 }: ConstituentTableProps) {
   const searchParams = useSearchParams();
   const [bulkAdd, setBulkAdd] = useState<BulkAddState | null>(null);
-
-  const GLOBAL_TYPES = ["president", "mayor", "wdc_president"];
-  const normalizeType = (t: string) => t.toLowerCase().replace(/\s+/g, "_");
-
-  const eligibleCandidates = candidates.filter(
-    (c) =>
-      GLOBAL_TYPES.includes(normalizeType(c.CandidateType)) ||
-      (c.Constituencies ?? []).includes(constituencyId)
-  );
 
   const currentPage = Math.floor(offset / limit) + 1;
   const hasNextPage = constituents.length === limit;
@@ -164,7 +157,8 @@ export function ConstituentTable({
           islandId={bulkAdd.islandId}
           islandName={bulkAdd.islandName}
           constituencyId={constituencyId}
-          candidates={eligibleCandidates}
+          candidates={candidates}
+          parties={parties}
         />
       )}
     </div>

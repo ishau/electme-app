@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import { useState, useTransition } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
@@ -26,28 +26,68 @@ import { Rating } from "@/components/ui/rating";
 import { SupportLevelBadge } from "@/components/campaign/support-level-badge";
 import { bulkLogSupport, bulkLogOutreach } from "@/lib/mutations";
 import { get, getGroupId } from "@/lib/api";
-import { useQueryClient } from "@tanstack/react-query";
-import type { PaginatedResponse } from "@/lib/types";
-import type { Constituent, CandidateView } from "@/lib/types";
+import { useQueryClient, useQuery } from "@tanstack/react-query";
+import { cn } from "@/lib/utils";
+import type { PaginatedResponse, Constituent, CandidateView, Party } from "@/lib/types";
 import { Check, Loader2 } from "lucide-react";
 
-interface AddressSupportDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  address: string;
-  islandId: string;
-  islandName: string;
-  constituencyId: string;
-  candidates: CandidateView[];
-}
+const GLOBAL_TYPES = ["president", "mayor", "wdc_president"];
+const normalizeType = (t: string) => t.toLowerCase().replace(/\s+/g, "_");
+
+const TYPE_ORDER: Record<string, number> = {
+  mayor: 0,
+  president: 1,
+  wdc_president: 2,
+  council_member: 3,
+  wdc_member: 4,
+};
+
+const TYPE_BADGE: Record<string, { label: string; className: string }> = {
+  mayor: { label: "Mayor", className: "text-blue-600 border-blue-300 bg-blue-50 dark:text-blue-400 dark:border-blue-800 dark:bg-blue-950" },
+  president: { label: "Pres", className: "text-blue-600 border-blue-300 bg-blue-50 dark:text-blue-400 dark:border-blue-800 dark:bg-blue-950" },
+  wdc_president: { label: "WDC-P", className: "text-purple-600 border-purple-300 bg-purple-50 dark:text-purple-400 dark:border-purple-800 dark:bg-purple-950" },
+  council_member: { label: "CM", className: "text-slate-600 border-slate-300 bg-slate-50 dark:text-slate-400 dark:border-slate-700 dark:bg-slate-900" },
+  wdc_member: { label: "WDC-M", className: "text-rose-600 border-rose-300 bg-rose-50 dark:text-rose-400 dark:border-rose-800 dark:bg-rose-950" },
+};
 
 const supportLevels = [
-  { value: "strong_supporter", label: "Strong Supporter" },
-  { value: "leaning", label: "Leaning" },
-  { value: "undecided", label: "Undecided" },
-  { value: "soft_opposition", label: "Soft Opposition" },
-  { value: "hard_opposition", label: "Hard Opposition" },
+  { value: "strong_supporter", label: "SS", full: "Strong Supporter" },
+  { value: "leaning", label: "L", full: "Leaning" },
+  { value: "undecided", label: "U", full: "Undecided" },
+  { value: "soft_opposition", label: "SO", full: "Soft Opposition" },
+  { value: "hard_opposition", label: "HO", full: "Hard Opposition" },
 ];
+
+const dotColors: Record<string, { idle: string; active: string }> = {
+  strong_supporter: {
+    idle: "border-green-300 bg-green-50 dark:border-green-700 dark:bg-green-950",
+    active: "bg-green-500 ring-2 ring-green-300 ring-offset-1 dark:ring-green-700 dark:ring-offset-background",
+  },
+  leaning: {
+    idle: "border-yellow-300 bg-yellow-50 dark:border-yellow-700 dark:bg-yellow-950",
+    active: "bg-yellow-400 ring-2 ring-yellow-300 ring-offset-1 dark:ring-yellow-600 dark:ring-offset-background",
+  },
+  undecided: {
+    idle: "border-gray-300 bg-gray-50 dark:border-gray-600 dark:bg-gray-800",
+    active: "bg-gray-400 ring-2 ring-gray-300 ring-offset-1 dark:ring-gray-500 dark:ring-offset-background",
+  },
+  soft_opposition: {
+    idle: "border-orange-300 bg-orange-50 dark:border-orange-700 dark:bg-orange-950",
+    active: "bg-orange-400 ring-2 ring-orange-300 ring-offset-1 dark:ring-orange-600 dark:ring-offset-background",
+  },
+  hard_opposition: {
+    idle: "border-red-300 bg-red-50 dark:border-red-700 dark:bg-red-950",
+    active: "bg-red-500 ring-2 ring-red-300 ring-offset-1 dark:ring-red-700 dark:ring-offset-background",
+  },
+};
+
+const legendDotColors: Record<string, string> = {
+  strong_supporter: "bg-green-500",
+  leaning: "bg-yellow-400",
+  undecided: "bg-gray-400",
+  soft_opposition: "bg-orange-400",
+  hard_opposition: "bg-red-500",
+};
 
 const outcomes = [
   { value: "positive", label: "Positive" },
@@ -57,6 +97,46 @@ const outcomes = [
   { value: "refused", label: "Refused" },
 ];
 
+function SupportDots({
+  value,
+  onChange,
+}: {
+  value: string | undefined;
+  onChange: (level: string) => void;
+}) {
+  return (
+    <div className="flex gap-1.5">
+      {supportLevels.map((sl) => {
+        const isActive = value === sl.value;
+        const colors = dotColors[sl.value];
+        return (
+          <button
+            key={sl.value}
+            type="button"
+            title={sl.full}
+            onClick={() => onChange(sl.value)}
+            className={cn(
+              "w-6 h-6 rounded-full border-2 transition-all hover:scale-110",
+              isActive ? colors.active : colors.idle
+            )}
+          />
+        );
+      })}
+    </div>
+  );
+}
+
+interface AddressSupportDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  address: string;
+  islandId: string;
+  islandName: string;
+  constituencyId: string;
+  candidates: CandidateView[];
+  parties: Party[];
+}
+
 export function AddressSupportDialog({
   open,
   onOpenChange,
@@ -64,16 +144,50 @@ export function AddressSupportDialog({
   islandId,
   islandName,
   constituencyId,
-  candidates,
+  candidates: allCandidates,
+  parties,
 }: AddressSupportDialogProps) {
   const queryClient = useQueryClient();
-  const [voters, setVoters] = useState<Constituent[]>([]);
-  const [loading, setLoading] = useState(false);
+  const partyMap = Object.fromEntries(parties.map((p) => [p.ID, p]));
+  const candidates = allCandidates
+    .filter(
+      (c) =>
+        GLOBAL_TYPES.includes(normalizeType(c.CandidateType)) ||
+        (c.Constituencies ?? []).includes(constituencyId)
+    )
+    .sort((a, b) => {
+      const aOwn = a.IsOwnCandidate ? 0 : 1;
+      const bOwn = b.IsOwnCandidate ? 0 : 1;
+      if (aOwn !== bOwn) return aOwn - bOwn;
+      const aType = TYPE_ORDER[normalizeType(a.CandidateType)] ?? 99;
+      const bType = TYPE_ORDER[normalizeType(b.CandidateType)] ?? 99;
+      return aType - bType;
+    });
+
+  const groupId = getGroupId();
+  const params: Record<string, string> = { address, island_id: islandId };
+  if (constituencyId) params.constituency_id = constituencyId;
+
+  const { data: votersResult, isLoading: loading } = useQuery({
+    queryKey: ["addressVoters", groupId, address, islandId, constituencyId],
+    queryFn: () =>
+      get<PaginatedResponse<Constituent>>(`/groups/${groupId}/constituents`, params),
+    enabled: open && !!address && !!islandId,
+  });
+
+  const voters = votersResult?.data ?? [];
+
   const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [initialized, setInitialized] = useState(false);
+
+  // Auto-select all voters when data first loads
+  if (voters.length > 0 && !initialized) {
+    setSelected(new Set(voters.map((v) => v.ID)));
+    setInitialized(true);
+  }
 
   // Support fields
-  const [level, setLevel] = useState("");
-  const [selectedCandidates, setSelectedCandidates] = useState<Set<string>>(new Set());
+  const [candidateLevels, setCandidateLevels] = useState<Record<string, string>>({});
   const [confidence, setConfidence] = useState(3);
   const [assessedBy, setAssessedBy] = useState("");
   const [notes, setNotes] = useState("");
@@ -84,28 +198,12 @@ export function AddressSupportDialog({
   const [isPending, startTransition] = useTransition();
   const [done, setDone] = useState(false);
 
-  // Fetch voters when dialog opens
-  useEffect(() => {
-    if (open && address && islandId) {
-      setLoading(true);
-      setDone(false);
-      const groupId = getGroupId();
-      const params: Record<string, string> = { address, island_id: islandId };
-      if (constituencyId) params.constituency_id = constituencyId;
-      get<PaginatedResponse<Constituent>>(`/groups/${groupId}/constituents`, params).then((result) => {
-        const v = result?.data ?? [];
-        setVoters(v);
-        setSelected(new Set(v.map((voter) => voter.ID)));
-        setLoading(false);
-      });
-    }
-  }, [open, address, islandId, constituencyId]);
+  const assessedCount = Object.keys(candidateLevels).length;
 
   function reset() {
-    setVoters([]);
     setSelected(new Set());
-    setLevel("");
-    setSelectedCandidates(new Set());
+    setInitialized(false);
+    setCandidateLevels({});
     setConfidence(3);
     setAssessedBy("");
     setNotes("");
@@ -130,32 +228,58 @@ export function AddressSupportDialog({
     }
   }
 
-  function toggleCandidate(id: string) {
-    setSelectedCandidates((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
+  function toggleLevel(candidateId: string, level: string) {
+    setCandidateLevels((prev) => {
+      const next = { ...prev };
+      if (next[candidateId] === level) {
+        delete next[candidateId];
+      } else {
+        next[candidateId] = level;
+      }
+      return next;
+    });
+  }
+
+  function setAll(level: string) {
+    setCandidateLevels((prev) => {
+      const allSame = candidates.every((c) => prev[c.ID] === level);
+      if (allSame) {
+        return {};
+      }
+      const next: Record<string, string> = {};
+      for (const c of candidates) {
+        next[c.ID] = level;
+      }
       return next;
     });
   }
 
   function handleSubmit() {
-    if (selected.size === 0 || !level || !assessedBy) return;
+    if (selected.size === 0 || assessedCount === 0 || !assessedBy) return;
 
     const ids = Array.from(selected);
 
     startTransition(async () => {
       try {
-        // Log support for all selected voters (× selected candidates)
-        const candidateIds = Array.from(selectedCandidates);
-        const supportResult = await bulkLogSupport({
-          constituent_ids: ids,
-          level,
-          confidence,
-          assessed_by: assessedBy,
-          candidate_ids: candidateIds.length > 0 ? candidateIds : undefined,
-          notes: notes || undefined,
-        });
+        // Group candidates by level to minimize API calls
+        const levelToCandidates: Record<string, string[]> = {};
+        for (const [candidateId, level] of Object.entries(candidateLevels)) {
+          if (!levelToCandidates[level]) levelToCandidates[level] = [];
+          levelToCandidates[level].push(candidateId);
+        }
+
+        const results = await Promise.all(
+          Object.entries(levelToCandidates).map(([level, candidateIds]) =>
+            bulkLogSupport({
+              constituent_ids: ids,
+              level,
+              confidence,
+              assessed_by: assessedBy,
+              candidate_ids: candidateIds,
+              notes: notes || undefined,
+            })
+          )
+        );
 
         // If outreach outcome is set, also log door-to-door outreach
         if (outcome) {
@@ -171,8 +295,10 @@ export function AddressSupportDialog({
         queryClient.invalidateQueries({ queryKey: ["supportSummary"] });
         queryClient.invalidateQueries({ queryKey: ["outreachStats"] });
         queryClient.invalidateQueries({ queryKey: ["latestSupport"] });
-        const msg = `${supportResult.Succeeded} voter${supportResult.Succeeded === 1 ? "" : "s"} assessed`;
-        toast.success(msg);
+        queryClient.invalidateQueries({ queryKey: ["candidateSummaries"] });
+        queryClient.invalidateQueries({ queryKey: ["candidateSupport"] });
+        const total = results.reduce((sum, r) => sum + r.Succeeded, 0);
+        toast.success(`${total} assessment${total === 1 ? "" : "s"} logged`);
         setDone(true);
       } catch (err) {
         toast.error(err instanceof Error ? err.message : "Failed");
@@ -207,7 +333,7 @@ export function AddressSupportDialog({
               <Check className="h-8 w-8 mx-auto text-green-500 mb-2" />
               <p className="font-medium">Assessment logged for {selected.size} voter{selected.size === 1 ? "" : "s"}</p>
               <p className="text-sm text-muted-foreground mt-1">
-                <SupportLevelBadge level={level} />
+                {assessedCount} candidate{assessedCount === 1 ? "" : "s"} assessed
                 {outcome && (
                   <Badge variant="outline" className="ml-2">{outcome}</Badge>
                 )}
@@ -221,102 +347,119 @@ export function AddressSupportDialog({
           </>
         ) : (
           <>
-            {/* Voter list with selection */}
-            <div className="space-y-1">
-              <div className="flex items-center justify-between mb-2">
+            {/* Voter chips */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
                 <Label className="text-sm font-medium">
                   {voters.length} voter{voters.length === 1 ? "" : "s"} at this address
+                  {voters.length > 0 && selected.size < voters.length && (
+                    <span className="text-muted-foreground font-normal ml-1">
+                      ({selected.size} selected)
+                    </span>
+                  )}
                 </Label>
-                <Button type="button" variant="ghost" size="sm" onClick={toggleAll}>
-                  {selected.size === voters.length ? "Deselect all" : "Select all"}
-                </Button>
+                {voters.length > 1 && (
+                  <Button type="button" variant="ghost" size="sm" onClick={toggleAll}>
+                    {selected.size === voters.length ? "Deselect all" : "Select all"}
+                  </Button>
+                )}
               </div>
               {voters.length === 0 ? (
                 <p className="text-sm text-muted-foreground py-4 text-center">
                   No voters found at this address.
                 </p>
               ) : (
-                <div className="space-y-1 max-h-40 overflow-y-auto">
-                  {voters.map((v) => (
-                    <button
-                      key={v.ID}
-                      type="button"
-                      onClick={() => toggleVoter(v.ID)}
-                      className={`w-full flex items-center justify-between p-2 rounded-md border text-left text-sm transition-colors ${
-                        selected.has(v.ID)
-                          ? "border-primary bg-primary/5"
-                          : "border-transparent bg-muted/30 opacity-50"
-                      }`}
-                    >
-                      <div>
-                        <span className="font-medium">{v.FullName}</span>
-                        <span className="text-muted-foreground ml-2">{v.FullNationalID ?? v.MaskedNationalID}</span>
-                      </div>
-                      <Badge variant="outline">{v.Sex}</Badge>
-                    </button>
-                  ))}
+                <div className="flex flex-wrap gap-1.5">
+                  {voters.map((v) => {
+                    const isSelected = selected.has(v.ID);
+                    return (
+                      <button
+                        key={v.ID}
+                        type="button"
+                        onClick={() => toggleVoter(v.ID)}
+                        className={cn(
+                          "inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium transition-colors",
+                          isSelected
+                            ? "border-primary bg-primary/10 text-foreground"
+                            : "border-muted bg-muted/30 text-muted-foreground line-through"
+                        )}
+                      >
+                        {v.FullName}
+                        <span className={cn("text-xs", isSelected ? "text-muted-foreground" : "text-muted-foreground/60")}>
+                          {v.Sex === "F" ? "F" : "M"}{v.Age != null ? ` ${v.Age}` : ""}
+                        </span>
+                      </button>
+                    );
+                  })}
                 </div>
               )}
             </div>
 
             {voters.length > 0 && (
               <>
-                {/* Support assessment fields */}
+                {/* Support assessment — per-candidate dots */}
                 <div className="space-y-3 pt-2 border-t">
-                  <Label className="text-sm font-medium">Support Assessment</Label>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-1">
-                      <Label className="text-xs">Support Level</Label>
-                      <Select value={level} onValueChange={setLevel}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select level" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {supportLevels.map((l) => (
-                            <SelectItem key={l.value} value={l.value}>
-                              {l.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <Rating value={confidence} onChange={setConfidence} max={5} label="Confidence" />
-                  </div>
+                  <Label className="text-sm font-medium">
+                    Support Assessment{assessedCount > 0 && ` (${assessedCount})`}
+                  </Label>
 
                   {candidates.length > 0 && (
                     <div className="space-y-1">
-                      <Label className="text-xs">Candidates {selectedCandidates.size > 0 && `(${selectedCandidates.size})`}</Label>
-                      <div className="flex flex-wrap gap-1.5">
-                        {candidates.map((c) => (
-                          <button
-                            key={c.ID}
-                            type="button"
-                            onClick={() => toggleCandidate(c.ID)}
-                            className={`inline-flex items-center rounded-md border px-2.5 py-1 text-xs font-medium transition-colors ${
-                              selectedCandidates.has(c.ID)
-                                ? "border-primary bg-primary text-primary-foreground"
-                                : "border-input bg-background hover:bg-accent"
-                            }`}
-                          >
-                            #{c.Number} {c.Name}
-                          </button>
+                      <div className="rounded-md border">
+                        {/* Set all row */}
+                        <div className="flex items-center justify-between px-3 py-2 bg-muted/30">
+                          <span className="text-xs font-medium text-muted-foreground">Set all</span>
+                          <SupportDots value={undefined} onChange={setAll} />
+                        </div>
+                        {/* Candidate rows */}
+                        <div className="max-h-56 overflow-y-auto divide-y">
+                          {candidates.map((c) => {
+                            const party = c.PartyID ? partyMap[c.PartyID] : null;
+                            const typeBadge = TYPE_BADGE[normalizeType(c.CandidateType)];
+                            return (
+                              <div
+                                key={c.ID}
+                                className="flex items-center justify-between px-3 py-2"
+                              >
+                                <div className="flex items-center gap-1.5 min-w-0 mr-3">
+                                  <span
+                                    className="shrink-0 inline-flex items-center rounded px-1 py-0.5 text-[10px] font-semibold text-white leading-none"
+                                    style={{ backgroundColor: party ? party.Color : "#9ca3af" }}
+                                  >
+                                    {party ? party.Code : "IDP"}
+                                  </span>
+                                  <span className="text-sm font-medium truncate">
+                                    #{c.Number} {c.Name}
+                                  </span>
+                                  {typeBadge && (
+                                    <span className={cn("shrink-0 inline-flex items-center rounded border px-1 py-0.5 text-[10px] font-medium leading-none", typeBadge.className)}>
+                                      {typeBadge.label}
+                                    </span>
+                                  )}
+                                </div>
+                                <SupportDots
+                                  value={candidateLevels[c.ID]}
+                                  onChange={(level) => toggleLevel(c.ID, level)}
+                                />
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                      {/* Legend */}
+                      <div className="flex gap-3 justify-end pt-0.5">
+                        {supportLevels.map((sl) => (
+                          <div key={sl.value} className="flex items-center gap-1">
+                            <span className={cn("w-2.5 h-2.5 rounded-full", legendDotColors[sl.value])} />
+                            <span className="text-[10px] text-muted-foreground">{sl.label}</span>
+                          </div>
                         ))}
                       </div>
-                      {selectedCandidates.size === 0 && (
-                        <p className="text-xs text-muted-foreground">Tap to select. None = general assessment.</p>
-                      )}
                     </div>
                   )}
 
                   <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-1">
-                      <Label className="text-xs">Assessed By</Label>
-                      <Input
-                        value={assessedBy}
-                        onChange={(e) => setAssessedBy(e.target.value)}
-                        placeholder="Your name"
-                      />
-                    </div>
+                    <Rating value={confidence} onChange={setConfidence} max={5} label="Confidence" />
                     <div className="space-y-1">
                       <Label className="text-xs">Visit Outcome</Label>
                       <Select value={outcome} onValueChange={setOutcome}>
@@ -334,14 +477,24 @@ export function AddressSupportDialog({
                     </div>
                   </div>
 
-                  <div className="space-y-1">
-                    <Label className="text-xs">Notes</Label>
-                    <Textarea
-                      value={notes}
-                      onChange={(e) => setNotes(e.target.value)}
-                      rows={2}
-                      placeholder="Optional notes for all selected voters"
-                    />
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1">
+                      <Label className="text-xs">Assessed By</Label>
+                      <Input
+                        value={assessedBy}
+                        onChange={(e) => setAssessedBy(e.target.value)}
+                        placeholder="Your name"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-xs">Notes</Label>
+                      <Textarea
+                        value={notes}
+                        onChange={(e) => setNotes(e.target.value)}
+                        rows={1}
+                        placeholder="Optional"
+                      />
+                    </div>
                   </div>
                 </div>
 
@@ -351,7 +504,7 @@ export function AddressSupportDialog({
                   </Button>
                   <Button
                     onClick={handleSubmit}
-                    disabled={isPending || selected.size === 0 || !level || !assessedBy}
+                    disabled={isPending || selected.size === 0 || assessedCount === 0 || !assessedBy}
                   >
                     {isPending
                       ? "Saving..."

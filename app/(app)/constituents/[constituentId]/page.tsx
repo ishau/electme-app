@@ -69,7 +69,7 @@ export default function ConstituentDetailPage() {
           />
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <SupportForm constituentId={constituentId} constituencyId={constituent?.ConstituencyID ?? ""} history={supportHistory ?? []} candidates={group?.Candidates ?? []} />
+            <SupportForm constituentId={constituentId} constituencyId={constituent?.ConstituencyID ?? ""} history={supportHistory ?? []} candidates={group?.Candidates ?? []} parties={parties ?? []} />
             <OutreachForm constituentId={constituentId} history={outreachHistory ?? []} />
           </div>
 
@@ -89,6 +89,7 @@ export default function ConstituentDetailPage() {
             islandName={address?.IslandName}
             constituencyId={constituent?.ConstituencyID}
             candidates={group?.Candidates ?? []}
+            parties={parties ?? []}
           />
         </div>
       </div>
