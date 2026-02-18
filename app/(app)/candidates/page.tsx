@@ -2,14 +2,13 @@
 
 import Link from "next/link";
 import { useGroup } from "@/lib/hooks/use-group";
-import { useCandidateSummaries } from "@/lib/hooks/use-candidates";
 import { useConstituencies } from "@/lib/hooks/use-constituencies";
 import { useParties } from "@/lib/hooks/use-parties";
 import { Page } from "@/components/shared/page";
 import { EmptyState } from "@/components/shared/empty-state";
 import { Card, CardContent } from "@/components/ui/card";
 import { UserCog } from "lucide-react";
-import { PageSkeleton } from "@/components/shared/loading-skeleton";
+import { CardGridSkeleton } from "@/components/shared/loading-skeleton";
 import type { CandidateView } from "@/lib/types";
 
 const MULTI_CONSTITUENCY_TYPES = ["president", "mayor", "wdc_president"];
@@ -44,13 +43,8 @@ const TYPE_LABEL: Record<string, string> = {
 
 export default function CandidatesPage() {
   const { data: group, isLoading: groupLoading } = useGroup();
-  const { data: summaries } = useCandidateSummaries();
   const { data: constituencies } = useConstituencies();
   const { data: parties } = useParties();
-
-  const summaryMap = Object.fromEntries(
-    (summaries ?? []).map((s) => [s.CandidateID, s])
-  );
 
   const constituencyMap = Object.fromEntries(
     (constituencies ?? []).map((c) => [c.ID, c])
@@ -119,7 +113,7 @@ export default function CandidatesPage() {
   );
 
   if (groupLoading) {
-    return <Page title="Candidates" description="Loading..."><PageSkeleton /></Page>;
+    return <Page title="Candidates" description="Loading..."><CardGridSkeleton /></Page>;
   }
 
   return (
@@ -137,7 +131,6 @@ export default function CandidatesPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {[...ownCandidates, ...opponents].map((c) => {
               const party = c.PartyID ? partyMap[c.PartyID] : null;
-              const assessed = summaryMap[c.ID]?.TotalAssessed;
               return (
                 <Link key={c.ID} href={`/candidates/${c.ID}`}>
                   <Card className="transition-colors cursor-pointer hover:bg-muted/50">
@@ -154,7 +147,6 @@ export default function CandidatesPage() {
                         </p>
                         <p className="text-xs text-muted-foreground truncate">
                           {party?.Name ?? "Independent"}
-                          {assessed != null && ` · ${assessed} assessed`}
                         </p>
                       </div>
                     </CardContent>

@@ -9,7 +9,7 @@ import { StatCard } from "@/components/shared/stat-card";
 import { Badge } from "@/components/ui/badge";
 import { CandidateVoterSearch } from "@/components/candidates/candidate-voter-search";
 import { CandidateVoterTable } from "@/components/candidates/candidate-voter-table";
-import { PageSkeleton } from "@/components/shared/loading-skeleton";
+import { DetailWithStatsSkeleton } from "@/components/shared/loading-skeleton";
 import { useQueryStates, parseAsString } from "nuqs";
 
 const normalizeType = (t: string) => t.toLowerCase().replace(/\s+/g, "_");
@@ -49,7 +49,7 @@ export default function CandidateDetailPage() {
   const party = candidate?.PartyID ? (parties ?? []).find((p) => p.ID === candidate.PartyID) : null;
   const typeLabel = candidate ? (TYPE_LABEL[normalizeType(candidate.CandidateType)] ?? candidate.CandidateType.replace(/_/g, " ")) : "";
 
-  if (!candidate) return <Page title="Loading..." description=""><PageSkeleton /></Page>;
+  if (!candidate) return <Page title="Loading..." description=""><DetailWithStatsSkeleton /></Page>;
 
   return (
     <Page

@@ -17,7 +17,7 @@ import {
   UserCog,
 } from "lucide-react";
 import { outreachMethodLabel, formatDate } from "@/lib/utils";
-import { PageSkeleton } from "@/components/shared/loading-skeleton";
+import { DashboardSkeleton } from "@/components/shared/loading-skeleton";
 
 export default function OverviewPage() {
   const { data: supportSummary, isLoading: summaryLoading } = useSupportSummary();
@@ -40,7 +40,7 @@ export default function OverviewPage() {
   const pendingFollowUps = followUps ?? [];
 
   if (summaryLoading) {
-    return <PageSkeleton />;
+    return <DashboardSkeleton statCount={4} />;
   }
 
   return (
@@ -110,7 +110,7 @@ export default function OverviewPage() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <Link href="/constituents">
           <Card className="hover:shadow-md transition-shadow cursor-pointer">
-            <CardContent className="p-4 flex items-center gap-3">
+            <CardContent className="flex items-center gap-3">
               <Users className="h-5 w-5 text-muted-foreground shrink-0" />
               <span className="text-sm font-medium">Voters</span>
             </CardContent>
@@ -118,7 +118,7 @@ export default function OverviewPage() {
         </Link>
         <Link href="/campaign">
           <Card className="hover:shadow-md transition-shadow cursor-pointer">
-            <CardContent className="p-4 flex items-center gap-3">
+            <CardContent className="flex items-center gap-3">
               <Target className="h-5 w-5 text-muted-foreground shrink-0" />
               <span className="text-sm font-medium">Campaign</span>
             </CardContent>
@@ -126,7 +126,7 @@ export default function OverviewPage() {
         </Link>
         <Link href="/voting">
           <Card className="hover:shadow-md transition-shadow cursor-pointer">
-            <CardContent className="p-4 flex items-center gap-3">
+            <CardContent className="flex items-center gap-3">
               <Vote className="h-5 w-5 text-muted-foreground shrink-0" />
               <span className="text-sm font-medium">Voting</span>
             </CardContent>
@@ -134,7 +134,7 @@ export default function OverviewPage() {
         </Link>
         <Link href="/team">
           <Card className="hover:shadow-md transition-shadow cursor-pointer">
-            <CardContent className="p-4 flex items-center gap-3">
+            <CardContent className="flex items-center gap-3">
               <UserCog className="h-5 w-5 text-muted-foreground shrink-0" />
               <span className="text-sm font-medium">Team</span>
             </CardContent>

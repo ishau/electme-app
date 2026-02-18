@@ -26,7 +26,7 @@ export function TurnoutCard({ stats }: { stats: TurnoutStats }) {
 
   return (
     <Card>
-      <CardContent className="p-6">
+      <CardContent>
         <div className="flex flex-col sm:flex-row items-center gap-8">
           {/* Ring */}
           <div className="relative w-36 h-36 shrink-0">

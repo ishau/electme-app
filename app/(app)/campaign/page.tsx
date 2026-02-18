@@ -9,14 +9,14 @@ import { StatCard } from "@/components/shared/stat-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Phone, Users, CalendarClock, ArrowRight } from "lucide-react";
-import { PageSkeleton } from "@/components/shared/loading-skeleton";
+import { StatsPageSkeleton } from "@/components/shared/loading-skeleton";
 
 export default function CampaignPage() {
   const { data: stats, isLoading } = useOutreachStats();
   const { data: followUps } = useFollowUps();
 
   if (isLoading) {
-    return <Page title="Campaign" description="Loading..."><PageSkeleton /></Page>;
+    return <Page title="Campaign" description="Loading..."><StatsPageSkeleton statCount={4} /></Page>;
   }
 
   return (

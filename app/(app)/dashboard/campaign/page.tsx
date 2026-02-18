@@ -16,7 +16,7 @@ import { useSupportTrend, useSupportByConstituency } from "@/lib/hooks/use-analy
 import { SupportSummaryChart } from "@/components/groups/support-summary-chart";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { PageSkeleton } from "@/components/shared/loading-skeleton";
+import { DashboardSkeleton } from "@/components/shared/loading-skeleton";
 
 const SUPPORT_LEVELS = [
   { key: "StrongSupporter" as const, color: "#22c55e", label: "Strong" },
@@ -39,7 +39,7 @@ export default function CampaignPage() {
   const candidateStats = candidateSupport ?? [];
 
   if (groupLoading) {
-    return <PageSkeleton />;
+    return <DashboardSkeleton statCount={0} />;
   }
 
   // Outreach funnel

@@ -18,7 +18,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StatCard } from "@/components/shared/stat-card";
 import { Phone, Users, CalendarDays } from "lucide-react";
 import { outreachMethodLabel, outreachOutcomeLabel } from "@/lib/utils";
-import { PageSkeleton } from "@/components/shared/loading-skeleton";
+import { DashboardSkeleton } from "@/components/shared/loading-skeleton";
 
 const WEEKDAY_LABELS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
@@ -45,7 +45,7 @@ export default function OutreachPage() {
   const { data: teamActivity } = useTeamActivity();
 
   if (isLoading) {
-    return <PageSkeleton />;
+    return <DashboardSkeleton statCount={3} />;
   }
 
   const dayData = byDay ?? [];

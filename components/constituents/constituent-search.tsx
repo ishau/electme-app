@@ -20,7 +20,6 @@ export function ConstituentSearch({ constituencies }: ConstituentSearchProps) {
   const [filters, setFilters] = useQueryStates(
     {
       q: parseAsString.withDefault(""),
-      sex: parseAsString.withDefault(""),
       constituency_id: parseAsString.withDefault(""),
       page: parseAsString,
     },
@@ -61,23 +60,6 @@ export function ConstituentSearch({ constituencies }: ConstituentSearchProps) {
           className="pl-9"
         />
       </div>
-      <Select
-        value={filters.sex || "all"}
-        onValueChange={(value) => {
-          const v = value ?? "";
-          setFilters({ sex: v === "all" ? null : v, page: null });
-        }}
-        items={{ all: "All Genders", M: "Male", F: "Female" }}
-      >
-        <SelectTrigger className="w-full sm:w-[140px]">
-          <SelectValue placeholder="Gender" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">All Genders</SelectItem>
-          <SelectItem value="M">Male</SelectItem>
-          <SelectItem value="F">Female</SelectItem>
-        </SelectContent>
-      </Select>
     </div>
   );
 }

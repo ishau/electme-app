@@ -7,7 +7,7 @@ import { RegistrationsView } from "@/components/voting/registrations-view";
 import { Page } from "@/components/shared/page";
 import { StatCard } from "@/components/shared/stat-card";
 import { EmptyState } from "@/components/shared/empty-state";
-import { PageSkeleton } from "@/components/shared/loading-skeleton";
+import { StatsPageSkeleton } from "@/components/shared/loading-skeleton";
 import { ClipboardList, Bus, CheckCircle, MapPin } from "lucide-react";
 import { useQueryState, parseAsString } from "nuqs";
 
@@ -24,7 +24,7 @@ export default function RegistrationsPage() {
   const { data: transportNeeded } = useTransportNeeded();
 
   if (groupLoading) {
-    return <Page title="Voter Registrations" description="Loading..."><PageSkeleton /></Page>;
+    return <Page title="Voter Registrations" description="Loading..."><StatsPageSkeleton statCount={3} /></Page>;
   }
 
   if (!constituencyId) {
