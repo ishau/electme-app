@@ -12,7 +12,7 @@ import {
 import { cn } from "@/lib/utils";
 
 const mobileNavItems = [
-  { label: "Dashboard", href: "/", icon: LayoutDashboard, exact: true },
+  { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { label: "Voters", href: "/constituents", icon: Users },
   { label: "Campaign", href: "/campaign", icon: Megaphone },
   { label: "Register", href: "/registrations", icon: ClipboardList },
@@ -26,9 +26,7 @@ export function MobileNav() {
     <nav className="fixed bottom-0 left-0 right-0 z-50 border-t bg-background md:hidden">
       <div className="flex items-center justify-around h-16">
         {mobileNavItems.map((item) => {
-          const isActive = item.exact
-            ? pathname === item.href
-            : pathname.startsWith(item.href);
+          const isActive = pathname.startsWith(item.href);
           return (
             <Link
               key={item.label}

@@ -13,6 +13,7 @@ import {
   FolderOpen,
   ChevronRight,
   MapPin,
+  Bus,
   LogOut,
 } from "lucide-react";
 import {
@@ -33,12 +34,13 @@ import { logout } from "@/lib/auth";
 import { useAuth } from "@/lib/hooks/use-auth";
 
 const navItems = [
-  { label: "Dashboard", href: "/", icon: LayoutDashboard, exact: true },
+  { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { label: "Voters", href: "/constituents", icon: Users },
   { label: "Candidates", href: "/candidates", icon: UserCog },
   { label: "Team", href: "/team", icon: UserCog },
   { label: "Campaign", href: "/campaign", icon: Megaphone },
   { label: "Registrations", href: "/registrations", icon: ClipboardList },
+  { label: "Transport", href: "/transport", icon: Bus },
   { label: "Maps", href: "/maps", icon: MapPin },
   { label: "Voting Day", href: "/voting", icon: Vote },
 ];
@@ -68,9 +70,7 @@ export function AppSidebar({ groupName, partyCode }: { groupName: string; partyC
           <SidebarGroupContent>
             <SidebarMenu>
               {navItems.map((item) => {
-                const isActive = item.exact
-                  ? pathname === item.href
-                  : pathname.startsWith(item.href);
+                const isActive = pathname.startsWith(item.href);
                 return (
                   <SidebarMenuItem key={item.label}>
                     <SidebarMenuButton asChild isActive={isActive}>
