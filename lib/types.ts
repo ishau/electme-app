@@ -54,12 +54,13 @@ export interface PermanentAddress {
 export interface Constituent {
   ID: string;
   MaskedNationalID: string;
-  FullNationalID: string | null;
+  FullNationalID?: string | null;
   FullName: string;
   Sex: string;
-  Age: number | null;
+  Age?: number | null;
   PermanentAddress: PermanentAddress;
   ConstituencyID: string;
+  LatestAffiliation?: PartyAffiliation | null;
 }
 
 export interface PaginatedResponse<T> {
@@ -182,6 +183,7 @@ export interface RelationshipView {
   Notes: string;
   Derived: boolean;
   Score: number;
+  LatestAffiliation?: PartyAffiliation | null;
 }
 
 export interface EnrichedConstituent {

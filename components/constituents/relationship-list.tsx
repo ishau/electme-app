@@ -25,11 +25,12 @@ import { Rating } from "@/components/ui/rating";
 import { createRelationship } from "@/lib/mutations";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import type { RelationshipView } from "@/lib/types";
+import type { RelationshipView, Party } from "@/lib/types";
 
 interface RelationshipListProps {
   constituentId: string;
   relationships: RelationshipView[];
+  parties: Party[];
 }
 
 const relationshipTypes = [
@@ -41,7 +42,7 @@ const relationshipTypes = [
   { value: "colleague", label: "Colleague" },
 ];
 
-export function RelationshipList({ constituentId, relationships }: RelationshipListProps) {
+export function RelationshipList({ constituentId, relationships, parties }: RelationshipListProps) {
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
   const [toId, setToId] = useState("");
@@ -95,12 +96,24 @@ export function RelationshipList({ constituentId, relationships }: RelationshipL
                       {rel.RelLabel.replace(/_/g, " ")}
                     </Badge>
                     <div className="min-w-0">
-                      <Link
-                        href={`/constituents/${rel.PersonID}`}
-                        className="text-sm font-medium hover:underline"
-                      >
-                        {rel.Name}
-                      </Link>
+                      <div className="flex items-center gap-1.5">
+                        {(() => {
+                          const party = rel.LatestAffiliation ? parties.find((p) => p.ID === rel.LatestAffiliation!.PartyID) : null;
+                          return party ? (
+                            <span
+                              className="w-2 h-2 rounded-full shrink-0"
+                              style={{ backgroundColor: party.Color }}
+                              title={party.Code}
+                            />
+                          ) : null;
+                        })()}
+                        <Link
+                          href={`/constituents/${rel.PersonID}`}
+                          className="text-sm font-medium hover:underline"
+                        >
+                          {rel.Name}
+                        </Link>
+                      </div>
                       {rel.Address?.Name && (
                         <p className="text-xs text-muted-foreground truncate">
                           {rel.Address.IslandName ? `${rel.Address.Name} / ${rel.Address.IslandName}` : rel.Address.Name}

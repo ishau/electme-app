@@ -35,9 +35,12 @@
 - `AuthGuard` in `app/(app)/layout.tsx` uses `useAuth()` hook to check session. Login page at `app/login/page.tsx`.
 - Reference data hooks (atolls, islands, parties, constituencies) use `staleTime: Infinity` — fetched once per session
 - `AssessedBy`/`ContactedBy` are server-set from JWT — campaign forms should NOT include these fields
+- `useLatestSupport` returns `Record<string, SupportAssessment[]>` (full history per person) — household card shows one colored bar per candidate (most recent assessment)
 - `keepPreviousData` on filter-dependent hooks to prevent "No results" flash during refetch
 - Layout split: `app/(app)/layout.tsx` (server component with `<Suspense>` + `<NuqsAdapter>`) wraps `AuthGuard` > `AppLayoutContent` (client component)
 - Loading skeletons: use `PageSkeleton`/`TableSkeleton` from `components/shared/loading-skeleton.tsx` gated on `isLoading`
+- `Page` component `description` accepts `ReactNode` — can render styled badges/tooltips inline in page headers
+- Compact party affiliation display: small colored dot (`w-2 h-2 rounded-full`) next to names, resolved from `LatestAffiliation.PartyID` against `parties` array
 - **Tab layouts**: Dashboard (`/dashboard/*`) and Maps (`/maps/*`) use tab subpages with `layout.tsx` containing tab links. Pattern: parent `page.tsx` does `redirect()` to default tab.
 - **Dashboard tabs**: Overview, Demographics, Campaign, Outreach, Election Day — each loads only its own data
 
@@ -51,6 +54,7 @@
 
 ## Gotchas
 - Go backend returns PascalCase keys in ALL responses including login (`Token`, `GroupID`, `ExpiresAt`) — API route handlers in `app/api/` must use PascalCase when reading backend responses (e.g., `data.Token` not `data.token`)
+- Go backend omits zero-value fields (empty strings, nil, 0) — use `?` optional markers on TypeScript interfaces, not just `| null`
 - `useSearchParams()`/nuqs requires a `<Suspense>` boundary — the layout handles this, don't make `layout.tsx` a client component
 - API enum/type values (e.g., `CandidateType`) use inconsistent casing — can be `"Mayor"`, `"WDC President"`, or `"council_member"`. Always normalize (lowercase + replace spaces with underscores) before comparing.
 - `/group/constituents` returns `PaginatedResponse<T>` (`{ data, total, limit, offset }`), not a plain array
@@ -62,6 +66,7 @@
 - Relationships use `RelationshipView` — API returns `PersonID`, `Name`, `Address`, `RelLabel`, `Derived`, `Score` (no N+1 queries needed)
 - Relationship input types: `parent_child`, `spouse`, `influencer`, `friend`, `colleague` — siblings/in-laws/grandparents are derived server-side
 - Enriched constituent (`/group/constituents/{cid}`) includes `PermanentAddress` — no separate base constituent fetch needed
+- List/search constituents and `RelationshipView` include `LatestAffiliation?: PartyAffiliation` (single pre-resolved object, not an array)
 - Multi-constituency types: `["president", "mayor", "wdc_president"]` are global — always normalize with `type.toLowerCase().replace(/\s+/g, "_")` before comparing
 - Voter add/import and party management are backend-only — no frontend CRUD for these
 - 401 from API proxy redirects to /login — no manual error handling needed for auth failures

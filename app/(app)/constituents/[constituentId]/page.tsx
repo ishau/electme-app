@@ -15,9 +15,15 @@ import { ProfileForm } from "@/components/constituents/profile-form";
 import { SupportForm } from "@/components/constituents/support-form";
 import { OutreachForm } from "@/components/constituents/outreach-form";
 import { RelationshipList } from "@/components/constituents/relationship-list";
+import { AffiliationCard } from "@/components/constituents/affiliation-card";
 import { HouseholdCard } from "@/components/constituents/household-card";
 import { Page } from "@/components/shared/page";
 import { PageSkeleton } from "@/components/shared/loading-skeleton";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export default function ConstituentDetailPage() {
   const { constituentId } = useParams<{ constituentId: string }>();
@@ -45,10 +51,45 @@ export default function ConstituentDetailPage() {
   const latestAffiliation = sortedAffiliations[0];
   const affiliationParty = latestAffiliation ? parties?.find((p) => p.ID === latestAffiliation.PartyID) : null;
 
+  const affiliationBadge = affiliationParty ? (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <span
+          className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold text-white cursor-default"
+          style={{ backgroundColor: affiliationParty.Color }}
+        >
+          <span
+            className="w-4 h-4 rounded-full bg-white/20 flex items-center justify-center text-[9px] font-bold"
+          >
+            {affiliationParty.Code?.[0]}
+          </span>
+          {affiliationParty.Code}
+        </span>
+      </TooltipTrigger>
+      <TooltipContent>
+        <p>{affiliationParty.Name}</p>
+        {latestAffiliation.KnownDate && (
+          <p className="text-xs text-muted-foreground">
+            Last known {new Date(latestAffiliation.KnownDate).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "2-digit" })}
+          </p>
+        )}
+      </TooltipContent>
+    </Tooltip>
+  ) : (
+    <span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-muted text-muted-foreground">
+      Independent
+    </span>
+  );
+
   return (
     <Page
       title={constituent.FullName}
-      description={`${constituent.FullNationalID ?? constituent.MaskedNationalID} | ${constituent.Sex === "M" ? "Male" : "Female"}${constituent.Age != null ? ` | ${constituent.Age} yrs` : ""}`}
+      description={
+        <span className="flex items-center gap-2 flex-wrap">
+          <span>{constituent.FullNationalID ?? constituent.MaskedNationalID} | {constituent.Sex === "M" ? "Male" : "Female"}{constituent.Age != null ? ` | ${constituent.Age} yrs` : ""}</span>
+          {affiliationBadge}
+        </span>
+      }
     >
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
@@ -59,13 +100,10 @@ export default function ConstituentDetailPage() {
               nationalId: constituent.FullNationalID ?? constituent.MaskedNationalID,
               sex: constituent.Sex,
               age: constituent.Age ?? undefined,
-              affiliationCode: affiliationParty?.Code ?? null,
               address: address?.Name,
               islandName: address?.IslandName,
               nicknames: constituent.Nicknames,
             }}
-            affiliations={sortedAffiliations}
-            parties={parties ?? []}
           />
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -76,6 +114,13 @@ export default function ConstituentDetailPage() {
           <RelationshipList
             constituentId={constituentId}
             relationships={relationships ?? []}
+            parties={parties ?? []}
+          />
+
+          <AffiliationCard
+            constituentId={constituentId}
+            affiliations={sortedAffiliations}
+            parties={parties ?? []}
           />
         </div>
 
