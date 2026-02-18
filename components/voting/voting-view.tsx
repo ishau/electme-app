@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { recordVote } from "@/lib/mutations";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -202,7 +203,7 @@ export function VotingView({
               {nonVoters.length === 0 ? (
                 <p className="text-sm text-muted-foreground">Everyone has voted!</p>
               ) : (
-                <div className="space-y-1.5 max-h-96 overflow-y-auto">
+                <ScrollArea className="max-h-96"><div className="space-y-1.5">
                   {nonVoters.map((id) => {
                     const voter = voterMap[id];
                     return (
@@ -230,7 +231,7 @@ export function VotingView({
                       </div>
                     );
                   })}
-                </div>
+                </div></ScrollArea>
               )}
             </CardContent>
           </Card>

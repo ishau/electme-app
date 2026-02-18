@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { SupportLevelBadge } from "@/components/campaign/support-level-badge";
 import { GenderBadge } from "@/components/shared/gender-badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { AddressSupportDialog } from "@/components/constituents/bulk-add-by-address-dialog";
 import { supportLevelColor, supportLevelLabel, formatDate } from "@/lib/utils";
 import { Users } from "lucide-react";
@@ -160,11 +161,11 @@ export function HouseholdCard({
       </Card>
 
       <Dialog open={!!preview} onOpenChange={(v) => { if (!v) setPreview(null); }}>
-        <DialogContent className="sm:max-w-2xl max-h-[85vh] overflow-y-auto">
+        <DialogContent className="sm:max-w-2xl max-h-[85vh]">
           <DialogHeader>
             <DialogTitle className="text-sm">{preview?.name} — Assessments</DialogTitle>
           </DialogHeader>
-          <div className="space-y-3">
+          <ScrollArea className="max-h-[70vh]"><div className="space-y-3">
             {(() => {
               if (!preview) return null;
               const byCand = new Map<string, SupportAssessment[]>();
@@ -232,7 +233,7 @@ export function HouseholdCard({
                 </div>
               ));
             })()}
-          </div>
+          </div></ScrollArea>
         </DialogContent>
       </Dialog>
 

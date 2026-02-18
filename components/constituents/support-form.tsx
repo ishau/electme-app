@@ -18,6 +18,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { formatDateTime, supportLevelColor, supportLevelLabel } from "@/lib/utils";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import type { SupportAssessment, CandidateView, Party } from "@/lib/types";
 
 const GLOBAL_TYPES = ["president", "mayor", "wdc_president"];
@@ -215,7 +216,7 @@ export function SupportForm({ constituentId, constituencyId, history, candidates
         </CardHeader>
         <CardContent>
           {history.length > 0 ? (
-            <div className="space-y-4 max-h-80 overflow-y-auto">
+            <ScrollArea className="max-h-80"><div className="space-y-4">
               {(() => {
                 const partyMap2 = Object.fromEntries(parties.map((p) => [p.ID, p]));
                 // Group by candidate
@@ -291,7 +292,7 @@ export function SupportForm({ constituentId, constituencyId, history, candidates
                   </div>
                 ));
               })()}
-            </div>
+            </div></ScrollArea>
           ) : (
             <p className="text-sm text-muted-foreground">No assessments yet.</p>
           )}
@@ -310,13 +311,13 @@ export function SupportForm({ constituentId, constituencyId, history, candidates
                   Candidates{assessedCount > 0 && ` (${assessedCount})`}
                 </Label>
                 <div className="rounded-md border">
-                  {/* Set all row */}
-                  <div className="flex items-center justify-between px-3 py-2 bg-muted/30">
-                    <span className="text-xs font-medium text-muted-foreground">Set all</span>
+                  {/* Set all row — sticky header */}
+                  <div className="sticky top-0 z-10 flex items-center justify-between px-3 py-2 bg-muted border-b">
+                    <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Set all</span>
                     <SupportDots value={undefined} onChange={setAll} />
                   </div>
                   {/* Candidate rows */}
-                  <div className="max-h-56 overflow-y-auto divide-y">
+                  <ScrollArea className="max-h-56"><div className="divide-y">
                     {candidates.map((c) => {
                       const party = c.PartyID ? partyMap[c.PartyID] : null;
                       const typeBadge = TYPE_BADGE[normalizeType(c.CandidateType)];
@@ -348,7 +349,7 @@ export function SupportForm({ constituentId, constituencyId, history, candidates
                         </div>
                       );
                     })}
-                  </div>
+                  </div></ScrollArea>
                 </div>
                 {/* Legend */}
                 <div className="flex gap-3 justify-end pt-0.5">

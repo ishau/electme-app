@@ -3,6 +3,7 @@
 import { useTransition } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { recordVote } from "@/lib/mutations";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -48,7 +49,7 @@ export function NonVotersList({ nonVoterIds, constituencyId }: NonVotersListProp
         {nonVoterIds.length === 0 ? (
           <p className="text-sm text-muted-foreground">Everyone has voted!</p>
         ) : (
-          <div className="space-y-2 max-h-80 overflow-y-auto">
+          <ScrollArea className="max-h-80"><div className="space-y-2">
             {nonVoterIds.map((id) => (
               <div
                 key={id}
@@ -65,7 +66,7 @@ export function NonVotersList({ nonVoterIds, constituencyId }: NonVotersListProp
                 </Button>
               </div>
             ))}
-          </div>
+          </div></ScrollArea>
         )}
       </CardContent>
     </Card>

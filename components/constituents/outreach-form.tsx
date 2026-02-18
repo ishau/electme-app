@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/dialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { logOutreach } from "@/lib/mutations";
 import { useQueryClient } from "@tanstack/react-query";
 import { formatDateTime, outreachMethodLabel, outreachOutcomeLabel } from "@/lib/utils";
@@ -99,7 +100,7 @@ export function OutreachForm({ constituentId, history }: OutreachFormProps) {
         </CardHeader>
         <CardContent>
           {history.length > 0 ? (
-            <div className="space-y-1.5 max-h-80 overflow-y-auto">
+            <ScrollArea className="max-h-80"><div className="space-y-1.5">
               {history.map((log) => (
                 <div key={log.ID} className="flex items-start gap-2.5 py-1.5 px-2 border rounded text-sm">
                   <span
@@ -130,7 +131,7 @@ export function OutreachForm({ constituentId, history }: OutreachFormProps) {
                   </div>
                 </div>
               ))}
-            </div>
+            </div></ScrollArea>
           ) : (
             <p className="text-sm text-muted-foreground">No outreach contacts yet.</p>
           )}

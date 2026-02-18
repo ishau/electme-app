@@ -27,6 +27,7 @@ import { bulkLogSupport, bulkLogOutreach } from "@/lib/mutations";
 import { get } from "@/lib/api";
 import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import type { PaginatedResponse, Constituent, CandidateView, Party } from "@/lib/types";
 import { Check, Loader2 } from "lucide-react";
 
@@ -308,7 +309,7 @@ export function AddressSupportDialog({
         if (!v) reset();
       }}
     >
-      <DialogContent className="sm:max-w-2xl max-h-[85vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-2xl max-h-[85vh]">
         <DialogHeader>
           <DialogTitle>Door-to-Door — {address}</DialogTitle>
           <DialogDescription>{islandName}</DialogDescription>
@@ -400,13 +401,13 @@ export function AddressSupportDialog({
                   {candidates.length > 0 && (
                     <div className="space-y-1">
                       <div className="rounded-md border">
-                        {/* Set all row */}
-                        <div className="flex items-center justify-between px-3 py-2 bg-muted/30">
-                          <span className="text-xs font-medium text-muted-foreground">Set all</span>
+                        {/* Set all row — sticky header */}
+                        <div className="sticky top-0 z-10 flex items-center justify-between px-3 py-2 bg-muted border-b">
+                          <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Set all</span>
                           <SupportDots value={undefined} onChange={setAll} />
                         </div>
                         {/* Candidate rows */}
-                        <div className="max-h-56 overflow-y-auto divide-y">
+                        <ScrollArea className="max-h-56"><div className="divide-y">
                           {candidates.map((c) => {
                             const party = c.PartyID ? partyMap[c.PartyID] : null;
                             const typeBadge = TYPE_BADGE[normalizeType(c.CandidateType)];
@@ -438,7 +439,7 @@ export function AddressSupportDialog({
                               </div>
                             );
                           })}
-                        </div>
+                        </div></ScrollArea>
                       </div>
                       {/* Legend */}
                       <div className="flex gap-3 justify-end pt-0.5">
