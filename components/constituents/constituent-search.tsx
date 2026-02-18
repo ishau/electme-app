@@ -10,12 +10,18 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Search } from "lucide-react";
+import type { Constituency } from "@/lib/types";
 
-export function ConstituentSearch() {
+interface ConstituentSearchProps {
+  constituencies: Constituency[];
+}
+
+export function ConstituentSearch({ constituencies }: ConstituentSearchProps) {
   const [filters, setFilters] = useQueryStates(
     {
       q: parseAsString.withDefault(""),
       sex: parseAsString.withDefault(""),
+      constituency_id: parseAsString.withDefault(""),
       page: parseAsString,
     },
     { shallow: false }
@@ -23,6 +29,24 @@ export function ConstituentSearch() {
 
   return (
     <div className="flex flex-col sm:flex-row gap-3">
+      <Select
+        value={filters.constituency_id || "all"}
+        onValueChange={(value) =>
+          setFilters({ constituency_id: value === "all" ? null : value, page: null })
+        }
+      >
+        <SelectTrigger className="w-full sm:w-[240px]">
+          <SelectValue placeholder="All constituencies" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all">All constituencies</SelectItem>
+          {constituencies.map((c) => (
+            <SelectItem key={c.ID} value={c.ID}>
+              {c.Code} — {c.Name}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
       <div className="relative flex-1">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input

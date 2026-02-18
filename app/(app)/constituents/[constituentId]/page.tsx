@@ -16,6 +16,8 @@ import { SupportForm } from "@/components/constituents/support-form";
 import { OutreachForm } from "@/components/constituents/outreach-form";
 import { RelationshipList } from "@/components/constituents/relationship-list";
 import { AffiliationCard } from "@/components/constituents/affiliation-card";
+import { TransportCard } from "@/components/constituents/transport-card";
+import { VotingCard } from "@/components/constituents/voting-card";
 import { HouseholdCard } from "@/components/constituents/household-card";
 import { Page } from "@/components/shared/page";
 import { GenderBadge } from "@/components/shared/gender-badge";
@@ -111,6 +113,11 @@ export default function ConstituentDetailPage() {
 
           <SupportForm constituentId={constituentId} constituencyId={constituent?.ConstituencyID ?? ""} history={supportHistory ?? []} candidates={group?.Candidates ?? []} parties={parties ?? []} />
           <OutreachForm constituentId={constituentId} history={outreachHistory ?? []} />
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <TransportCard constituentId={constituentId} constituencyId={constituent?.ConstituencyID ?? ""} />
+            <VotingCard constituentId={constituentId} constituencyId={constituent?.ConstituencyID ?? ""} fullName={constituent.FullName} />
+          </div>
 
           <RelationshipList
             constituentId={constituentId}

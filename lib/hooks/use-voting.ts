@@ -1,6 +1,6 @@
 import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import { get } from "@/lib/api";
-import type { TurnoutStats, VoterRegistration, Constituent } from "@/lib/types";
+import type { TurnoutStats, VoterRegistration, Constituent, PaginatedResponse } from "@/lib/types";
 
 export function useTurnout(constituencyId: string) {
   return useQuery({
@@ -26,7 +26,9 @@ export function useVotersForConstituency(constituencyId: string) {
   return useQuery({
     queryKey: ["votersForConstituency", constituencyId],
     queryFn: () =>
-      get<Constituent[]>(`/group/constituents`, { constituency_id: constituencyId }).catch(() => []),
+      get<PaginatedResponse<Constituent>>(`/group/constituents`, { constituency_id: constituencyId })
+        .then((res) => res.data)
+        .catch(() => []),
     enabled: !!constituencyId,
     placeholderData: keepPreviousData,
   });

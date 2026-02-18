@@ -6,8 +6,8 @@ import { HexMap } from "@/components/maps/hex-map";
 import { Badge } from "@/components/ui/badge";
 import type { HexLeaningParty } from "@/lib/types";
 
-export default function DominantPartyPage() {
-  const { data: geojson, isLoading: dominantLoading } = useHexDominant();
+export default function PartyLeaningPage() {
+  const { data: dominantGeo, isLoading: dominantLoading } = useHexDominant();
   const { data: leaningGeo, isLoading: leaningLoading } = useHexLeaning();
 
   const isLoading = dominantLoading || leaningLoading;
@@ -31,12 +31,7 @@ export default function DominantPartyPage() {
     const hex = props.hex as string;
     const detail = leaningDetailMap[hex];
     if (!detail) {
-      return `
-        <div style="font-size:13px">
-          <div style="font-weight:600;margin-bottom:4px">${props.party_code}</div>
-          <div>${props.voter_count} / ${props.total_in_hex} voters (${props.pct}%)</div>
-        </div>
-      `;
+      return `<div style="font-size:13px">${props.party_code}: ${props.voter_count}/${props.total_in_hex} (${props.pct}%)</div>`;
     }
     const rows = [...detail.parties]
       .sort((a, b) => b.voter_count - a.voter_count)
@@ -48,7 +43,7 @@ export default function DominantPartyPage() {
             <div style="flex:1;background:#e5e7eb;border-radius:2px;height:8px;overflow:hidden">
               <div style="width:${p.pct}%;background:${p.party_color};height:100%"></div>
             </div>
-            <span style="min-width:50px;text-align:right">${p.voter_count} (${p.pct}%)</span>
+            <span style="min-width:36px;text-align:right">${p.pct}%</span>
           </div>
         `
       )
@@ -57,15 +52,15 @@ export default function DominantPartyPage() {
   }, [leaningDetailMap]);
 
   const partyLegend = useMemo(() => {
-    if (!geojson?.features) return [];
+    if (!dominantGeo?.features) return [];
     const seen = new Map<string, string>();
-    for (const f of geojson.features) {
+    for (const f of dominantGeo.features) {
       const code = f.properties.party_code;
       const color = f.properties.party_color;
       if (code && color && !seen.has(code)) seen.set(code, color);
     }
     return Array.from(seen.entries()).map(([code, color]) => ({ code, color }));
-  }, [geojson]);
+  }, [dominantGeo]);
 
   return (
     <div className="space-y-4">
@@ -73,7 +68,7 @@ export default function DominantPartyPage() {
 
       <div className="relative">
         <HexMap
-          geojson={geojson ?? null}
+          geojson={dominantGeo ?? null}
           fillColorExpr={fillColorExpr}
           buildPopupHtml={buildPopupHtml}
           className="h-[600px] w-full rounded-md"

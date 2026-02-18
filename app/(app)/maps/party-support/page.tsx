@@ -4,7 +4,6 @@ import { useState, useCallback, useMemo } from "react";
 import { useHexPartySupport } from "@/lib/hooks/use-hex";
 import { useParties } from "@/lib/hooks/use-parties";
 import { HexMap } from "@/components/maps/hex-map";
-import { Page } from "@/components/shared/page";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -223,7 +222,7 @@ export default function PartySupportPage() {
   const popupBuilder = isPartyMode ? partyPopupBuilder : aggregatePopupBuilder;
 
   return (
-    <Page title="Party Support" description="Support levels across hex cells, overall or per party">
+    <div className="space-y-4">
       <div className="flex items-end gap-4 flex-wrap">
         <div>
           <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Party</label>
@@ -290,6 +289,6 @@ export default function PartySupportPage() {
           )}
         </div>
       </div>
-    </Page>
+    </div>
   );
 }

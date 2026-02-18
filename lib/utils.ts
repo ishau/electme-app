@@ -163,6 +163,63 @@ export function transportStatusColor(status: string): string {
   }
 }
 
+export function transportRequestStatusLabel(status: string): string {
+  switch (status) {
+    case "pending":
+      return "Pending";
+    case "arranged":
+      return "Arranged";
+    case "in_progress":
+      return "In Progress";
+    case "completed":
+      return "Completed";
+    case "cancelled":
+      return "Cancelled";
+    default:
+      return status;
+  }
+}
+
+export function transportRequestStatusColor(status: string): string {
+  switch (status) {
+    case "pending":
+      return "bg-yellow-100 text-yellow-700";
+    case "arranged":
+      return "bg-blue-100 text-blue-700";
+    case "in_progress":
+      return "bg-indigo-100 text-indigo-700";
+    case "completed":
+      return "bg-green-100 text-green-700";
+    case "cancelled":
+      return "bg-gray-100 text-gray-700";
+    default:
+      return "bg-gray-100 text-gray-700";
+  }
+}
+
+export function votingDayDirectionLabel(direction: string): string {
+  switch (direction) {
+    case "to_center":
+      return "To Center";
+    case "from_center":
+      return "From Center";
+    case "both":
+      return "Both Ways";
+    default:
+      return "—";
+  }
+}
+
+export function serviceOutcomeLabel(provided: boolean | null): string {
+  if (provided === null) return "Pending";
+  return provided ? "Provided" : "Denied";
+}
+
+export function serviceOutcomeColor(provided: boolean | null): string {
+  if (provided === null) return "bg-gray-100 text-gray-700";
+  return provided ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700";
+}
+
 export function sectorLabel(sector: string): string {
   switch (sector) {
     case "government":

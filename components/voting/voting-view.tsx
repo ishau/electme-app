@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useTransition, useState, useMemo } from "react";
+import { useTransition, useMemo } from "react";
 import {
   Select,
   SelectContent,
@@ -11,10 +11,7 @@ import {
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TurnoutCard } from "@/components/voting/turnout-card";
-import { VoterCombobox } from "@/components/voting/voter-combobox";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { recordVote } from "@/lib/mutations";
@@ -43,17 +40,8 @@ export function VotingView({
   const queryClient = useQueryClient();
   const [isPending, startTransition] = useTransition();
 
-  const [constituentId, setConstituentId] = useState("");
-  const [recordedBy, setRecordedBy] = useState("");
-  const [notes, setNotes] = useState("");
-
   const voterMap = useMemo(
     () => Object.fromEntries(voters.map((v) => [v.ID, v])),
-    [voters]
-  );
-
-  const voterOptions = useMemo(
-    () => voters.map((v) => ({ id: v.ID, name: v.FullName, nationalId: v.FullNationalID ?? v.MaskedNationalID })),
     [voters]
   );
 
@@ -64,38 +52,22 @@ export function VotingView({
     router.push(`/voting${qs ? `?${qs}` : ""}`);
   };
 
-  const handleRecordVote = (cId: string) => {
+  const handleQuickRecord = (cId: string) => {
     startTransition(async () => {
       try {
         await recordVote({
           constituent_id: cId,
           constituency_id: currentConstituencyId,
-          recorded_by: recordedBy || "Quick Record",
-          notes: notes || undefined,
+          recorded_by: "Quick Record",
         });
         queryClient.invalidateQueries({ queryKey: ["turnout"] });
         queryClient.invalidateQueries({ queryKey: ["nonVoters"] });
         const voter = voterMap[cId];
         toast.success(voter ? `Vote recorded for ${voter.FullName}` : "Vote recorded");
-        setConstituentId("");
-        setNotes("");
       } catch (err) {
         toast.error(`Failed: ${err instanceof Error ? err.message : "Unknown error"}`);
       }
     });
-  };
-
-  const handleSubmitVote = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!currentConstituencyId) {
-      toast.error("Please select a constituency first");
-      return;
-    }
-    if (!constituentId) {
-      toast.error("Please select a voter");
-      return;
-    }
-    handleRecordVote(constituentId);
   };
 
   return (
@@ -156,44 +128,6 @@ export function VotingView({
         <div className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">Record Vote</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleSubmitVote} className="space-y-3">
-                <div className="space-y-1">
-                  <Label>Voter</Label>
-                  <VoterCombobox
-                    voters={voterOptions}
-                    value={constituentId}
-                    onSelect={setConstituentId}
-                  />
-                </div>
-                <div className="space-y-1">
-                  <Label>Recorded By</Label>
-                  <Input
-                    value={recordedBy}
-                    onChange={(e) => setRecordedBy(e.target.value)}
-                    placeholder="Polling agent name"
-                    required
-                  />
-                </div>
-                <div className="space-y-1">
-                  <Label>Notes</Label>
-                  <Input
-                    value={notes}
-                    onChange={(e) => setNotes(e.target.value)}
-                    placeholder="Optional notes"
-                  />
-                </div>
-                <Button type="submit" className="w-full" disabled={isPending}>
-                  {isPending ? "Recording..." : "Record Vote"}
-                </Button>
-              </form>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
               <CardTitle className="text-base">
                 Non-Voters
                 <Badge variant="secondary" className="ml-2">{nonVoters.length}</Badge>
@@ -223,7 +157,7 @@ export function VotingView({
                           variant="outline"
                           size="sm"
                           className="shrink-0 ml-2"
-                          onClick={() => handleRecordVote(id)}
+                          onClick={() => handleQuickRecord(id)}
                           disabled={isPending}
                         >
                           Mark Voted

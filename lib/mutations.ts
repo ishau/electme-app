@@ -11,6 +11,7 @@ import type {
   Group,
   VoterRegistration,
   VotingRecord,
+  TransportRequest,
 } from "@/lib/types";
 
 // ── Enrichment ──
@@ -200,4 +201,45 @@ export async function recordVote(data: {
 
 export async function recordExitPoll(voteId: string, candidateId: string) {
   return put<void>(`/group/votes/${voteId}/exit-poll`, { candidate_id: candidateId });
+}
+
+
+// ── Transport ──
+
+export async function createTransportRequest(data: {
+  constituent_id: string;
+  constituency_id: string;
+  inter_island_needed: boolean;
+  inter_island_mode?: string;
+  voting_day_needed: boolean;
+  voting_day_direction?: string;
+  notes?: string;
+}) {
+  return post<TransportRequest>(`/group/transport`, data);
+}
+
+export async function updateTransportRequest(id: string, data: {
+  inter_island_needed?: boolean;
+  inter_island_mode?: string;
+  inter_island_status?: string;
+  inter_island_notes?: string;
+  voting_day_needed?: boolean;
+  voting_day_direction?: string;
+  voting_day_status?: string;
+  voting_day_notes?: string;
+  assigned_to?: string;
+  notes?: string;
+}) {
+  return put<TransportRequest>(`/group/transport/${id}`, data);
+}
+
+export async function markTransportService(id: string, data: {
+  provided: boolean;
+  denied_reason?: string;
+}) {
+  return put<void>(`/group/transport/${id}/service`, data);
+}
+
+export async function deleteTransportRequest(id: string) {
+  return del(`/group/transport/${id}`);
 }
