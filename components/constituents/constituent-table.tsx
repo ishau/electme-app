@@ -75,12 +75,24 @@ export function ConstituentTable({
             {constituents.map((c) => (
               <TableRow key={c.ID}>
                 <TableCell>
-                  <Link
-                    href={`/constituents/${c.ID}`}
-                    className="font-medium hover:underline"
-                  >
-                    {c.FullName}
-                  </Link>
+                  <div className="flex items-center gap-1.5">
+                    {(() => {
+                      const party = c.LatestAffiliation ? parties.find((p) => p.ID === c.LatestAffiliation!.PartyID) : null;
+                      return party ? (
+                        <span
+                          className="w-2.5 h-2.5 rounded-full shrink-0"
+                          style={{ backgroundColor: party.Color }}
+                          title={party.Code}
+                        />
+                      ) : null;
+                    })()}
+                    <Link
+                      href={`/constituents/${c.ID}`}
+                      className="font-medium hover:underline"
+                    >
+                      {c.FullName}
+                    </Link>
+                  </div>
                 </TableCell>
                 <TableCell className="hidden sm:table-cell text-muted-foreground">
                   {c.FullNationalID ?? c.MaskedNationalID}

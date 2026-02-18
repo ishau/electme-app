@@ -82,7 +82,7 @@ export function useLatestSupport(constituentIds: string[]) {
   return useQuery({
     queryKey: ["latestSupport", constituentIds],
     queryFn: async () => {
-      const result: Record<string, SupportAssessment> = {};
+      const result: Record<string, SupportAssessment[]> = {};
       await Promise.all(
         constituentIds.map(async (cid) => {
           try {
@@ -90,7 +90,7 @@ export function useLatestSupport(constituentIds: string[]) {
               `/group/constituents/${cid}/support`
             );
             if (history && history.length > 0) {
-              result[cid] = history[0];
+              result[cid] = history;
             }
           } catch {
             // skip
