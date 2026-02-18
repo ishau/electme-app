@@ -8,7 +8,6 @@ import { StatCard } from "@/components/shared/stat-card";
 import { Badge } from "@/components/ui/badge";
 import { CandidateVoterSearch } from "@/components/candidates/candidate-voter-search";
 import { CandidateVoterTable } from "@/components/candidates/candidate-voter-table";
-import { AssessVoterDialog } from "@/components/candidates/assess-voter-dialog";
 import { PageSkeleton } from "@/components/shared/loading-skeleton";
 import { useQueryStates, parseAsString } from "nuqs";
 
@@ -45,7 +44,6 @@ export default function CandidateDetailPage() {
         <div className="flex items-center gap-2">
           {candidate.IsOwnCandidate && <Badge variant="default">Own</Badge>}
           {!candidate.IsOwnCandidate && <Badge variant="secondary">Competing</Badge>}
-          <AssessVoterDialog candidateId={candidateId} />
         </div>
       }
     >

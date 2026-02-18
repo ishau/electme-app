@@ -22,13 +22,8 @@ export function TeamView({ members }: TeamViewProps) {
   const handleEdit = (data: {
     name: string;
     role: string;
-    contact_info?: {
-      phone_numbers?: string[];
-      email?: string;
-      notes?: string;
-    };
     is_active?: boolean;
-    notes?: string;
+    password?: string;
   }) => {
     if (!editingMember) return;
     startTransition(async () => {

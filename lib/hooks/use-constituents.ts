@@ -28,14 +28,6 @@ export function useEnrichedConstituent(constituentId: string) {
   });
 }
 
-export function useBaseConstituent(constituentId: string) {
-  return useQuery({
-    queryKey: ["baseConstituent", constituentId],
-    queryFn: () => get<Constituent>(`/constituents/${constituentId}`),
-    enabled: !!constituentId,
-  });
-}
-
 export function useSupportHistory(constituentId: string) {
   return useQuery({
     queryKey: ["supportHistory", constituentId],

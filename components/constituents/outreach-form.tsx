@@ -51,7 +51,7 @@ export function OutreachForm({ constituentId, history }: OutreachFormProps) {
   const [open, setOpen] = useState(false);
   const [method, setMethod] = useState("");
   const [outcome, setOutcome] = useState("");
-  const [contactedBy, setContactedBy] = useState("");
+  const [followUpDate, setFollowUpDate] = useState("");
   const [notes, setNotes] = useState("");
   const [isPending, startTransition] = useTransition();
 
@@ -62,7 +62,7 @@ export function OutreachForm({ constituentId, history }: OutreachFormProps) {
         await logOutreach(constituentId, {
           method,
           outcome,
-          contacted_by: contactedBy,
+          follow_up_date: followUpDate || undefined,
           notes: notes || undefined,
         });
         queryClient.invalidateQueries({ queryKey: ["outreachHistory"] });
@@ -72,7 +72,7 @@ export function OutreachForm({ constituentId, history }: OutreachFormProps) {
         setOpen(false);
         setMethod("");
         setOutcome("");
-        setContactedBy("");
+        setFollowUpDate("");
         setNotes("");
       } catch (err) {
         toast.error(`Failed: ${err instanceof Error ? err.message : "Unknown error"}`);
@@ -160,11 +160,11 @@ export function OutreachForm({ constituentId, history }: OutreachFormProps) {
               </div>
             </div>
             <div className="space-y-1">
-              <Label>Contacted By</Label>
+              <Label>Follow-up Date</Label>
               <Input
-                value={contactedBy}
-                onChange={(e) => setContactedBy(e.target.value)}
-                required
+                type="date"
+                value={followUpDate}
+                onChange={(e) => setFollowUpDate(e.target.value)}
               />
             </div>
             <div className="space-y-1">

@@ -79,13 +79,9 @@ export interface ContactInfo {
 export interface TeamMember {
   ID: string;
   GroupID: string;
-  ConstituentID: string | null;
   Name: string;
   Role: string;
-  AssignedArea: string | null;
-  ContactInfo: ContactInfo;
   IsActive: boolean;
-  Notes: string;
   Username: string | null;
 }
 
@@ -391,56 +387,18 @@ export type TransportStatus =
   | "arranged"
   | "confirmed";
 
-// Voter Import
-export interface VoterImportEntry {
-  masked_national_id: string;
-  full_national_id?: string;
-  full_name: string;
-  sex: string;
-  dob?: string;
-  island_id: string;
-  address: string;
-  constituency_id: string;
-}
-
-export interface ImportResult {
-  Created: number;
-  Updated: number;
-  Skipped: number;
-  Errors: { Entry: VoterImportEntry; Reason: string }[];
-}
-
-// Address Locations
-export interface AddressLocation {
-  ID: string;
-  IslandID: string;
-  AddressName: string;
-  Latitude: number;
-  Longitude: number;
-}
-
-export interface AddressWithCount {
-  AddressName: string;
-  Latitude: number | null;
-  Longitude: number | null;
-  Count: number;
-}
-
-export interface HeatMapPoint {
-  Latitude: number;
-  Longitude: number;
-  Weight: number;
-}
-
 // House
 export interface House {
   ID: string;
   HouseName: string;
   IslandID: string;
   IslandName: string;
+  IslandLat: number | null;
+  IslandLng: number | null;
   Lat: number | null;
   Lng: number | null;
-  HasOverride: boolean;
+  H3Cell: string | null;
+  IsPlotted: boolean;
   ResidentCount: number;
 }
 
