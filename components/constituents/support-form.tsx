@@ -2,7 +2,6 @@
 
 import { useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -136,7 +135,6 @@ export function SupportForm({ constituentId, constituencyId, history, candidates
   const [open, setOpen] = useState(false);
   const [candidateLevels, setCandidateLevels] = useState<Record<string, string>>({});
   const [confidence, setConfidence] = useState(3);
-  const [assessedBy, setAssessedBy] = useState("");
   const [notes, setNotes] = useState("");
   const [isPending, startTransition] = useTransition();
 
@@ -186,7 +184,6 @@ export function SupportForm({ constituentId, constituencyId, history, candidates
             logSupport(constituentId, {
               level,
               confidence,
-              assessed_by: assessedBy,
               notes: notes || undefined,
               candidate_id: candidateId,
             })
@@ -200,7 +197,6 @@ export function SupportForm({ constituentId, constituencyId, history, candidates
         setOpen(false);
         setCandidateLevels({});
         setConfidence(3);
-        setAssessedBy("");
         setNotes("");
       } catch (err) {
         toast.error(`Failed: ${err instanceof Error ? err.message : "Unknown error"}`);
@@ -313,14 +309,6 @@ export function SupportForm({ constituentId, constituencyId, history, candidates
               </div>
             )}
             <Rating value={confidence} onChange={setConfidence} max={5} label="Confidence" />
-            <div className="space-y-1">
-              <Label>Assessed By</Label>
-              <Input
-                value={assessedBy}
-                onChange={(e) => setAssessedBy(e.target.value)}
-                required
-              />
-            </div>
             <div className="space-y-1">
               <Label>Notes</Label>
               <Textarea

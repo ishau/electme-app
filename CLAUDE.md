@@ -31,6 +31,8 @@
 - **Security**: HttpOnly cookie (XSS-immune), SameSite=Lax (CSRF protection), Secure in production.
 - Group-scoped API routes use `/group/...` (singular, group from JWT). Unprotected routes (geography, parties, base constituents) use original paths.
 - `AuthGuard` in `app/(app)/layout.tsx` uses `useAuth()` hook to check session. Login page at `app/login/page.tsx`.
+- Reference data hooks (atolls, islands, parties, constituencies) use `staleTime: Infinity` — fetched once per session
+- `AssessedBy`/`ContactedBy` are server-set from JWT — campaign forms should NOT include these fields
 - `keepPreviousData` on filter-dependent hooks to prevent "No results" flash during refetch
 - Layout split: `app/(app)/layout.tsx` (server component with `<Suspense>` + `<NuqsAdapter>`) wraps `AuthGuard` > `AppLayoutContent` (client component)
 - Loading skeletons: use `PageSkeleton`/`TableSkeleton` from `components/shared/loading-skeleton.tsx` gated on `isLoading`

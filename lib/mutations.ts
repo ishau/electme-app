@@ -93,7 +93,6 @@ export async function logSupport(constituentId: string, data: {
   candidate_id?: string;
   level: string;
   confidence: number;
-  assessed_by: string;
   notes?: string;
 }) {
   return post<SupportAssessment>(`/group/constituents/${constituentId}/support`, data);
@@ -102,7 +101,6 @@ export async function logSupport(constituentId: string, data: {
 export async function logOutreach(constituentId: string, data: {
   method: string;
   outcome: string;
-  contacted_by: string;
   follow_up_date?: string;
   notes?: string;
 }) {
@@ -120,7 +118,6 @@ export async function bulkLogSupport(data: {
   candidate_ids?: string[];
   level: string;
   confidence: number;
-  assessed_by: string;
   notes?: string;
 }) {
   return post<BatchResult>(`/group/support/batch`, data);
@@ -130,7 +127,6 @@ export async function bulkLogOutreach(data: {
   constituent_ids: string[];
   method: string;
   outcome: string;
-  contacted_by: string;
   follow_up_date?: string;
   notes?: string;
 }) {

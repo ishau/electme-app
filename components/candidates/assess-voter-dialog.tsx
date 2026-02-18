@@ -43,7 +43,6 @@ export function AssessVoterDialog({ candidateId }: AssessVoterDialogProps) {
   const [constituentId, setConstituentId] = useState("");
   const [level, setLevel] = useState("");
   const [confidence, setConfidence] = useState(3);
-  const [assessedBy, setAssessedBy] = useState("");
   const [notes, setNotes] = useState("");
   const [isPending, startTransition] = useTransition();
 
@@ -51,13 +50,12 @@ export function AssessVoterDialog({ candidateId }: AssessVoterDialogProps) {
     setConstituentId("");
     setLevel("");
     setConfidence(3);
-    setAssessedBy("");
     setNotes("");
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!constituentId.trim() || !level || !assessedBy.trim()) return;
+    if (!constituentId.trim() || !level) return;
 
     startTransition(async () => {
       try {
@@ -65,7 +63,6 @@ export function AssessVoterDialog({ candidateId }: AssessVoterDialogProps) {
           candidate_id: candidateId,
           level,
           confidence,
-          assessed_by: assessedBy.trim(),
           notes: notes || undefined,
         });
         queryClient.invalidateQueries({ queryKey: ["candidateSummaries"] });
@@ -117,14 +114,6 @@ export function AssessVoterDialog({ candidateId }: AssessVoterDialogProps) {
             </Select>
           </div>
           <Rating value={confidence} onChange={setConfidence} max={5} label="Confidence" />
-          <div className="space-y-1">
-            <Label>Assessed By</Label>
-            <Input
-              value={assessedBy}
-              onChange={(e) => setAssessedBy(e.target.value)}
-              required
-            />
-          </div>
           <div className="space-y-1">
             <Label>Notes</Label>
             <Textarea

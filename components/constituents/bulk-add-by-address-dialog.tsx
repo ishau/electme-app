@@ -11,7 +11,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -188,7 +187,6 @@ export function AddressSupportDialog({
   // Support fields
   const [candidateLevels, setCandidateLevels] = useState<Record<string, string>>({});
   const [confidence, setConfidence] = useState(3);
-  const [assessedBy, setAssessedBy] = useState("");
   const [notes, setNotes] = useState("");
 
   // Outreach fields
@@ -204,7 +202,6 @@ export function AddressSupportDialog({
     setInitialized(false);
     setCandidateLevels({});
     setConfidence(3);
-    setAssessedBy("");
     setNotes("");
     setOutcome("");
     setDone(false);
@@ -254,7 +251,7 @@ export function AddressSupportDialog({
   }
 
   function handleSubmit() {
-    if (selected.size === 0 || assessedCount === 0 || !assessedBy) return;
+    if (selected.size === 0 || assessedCount === 0) return;
 
     const ids = Array.from(selected);
 
@@ -273,7 +270,6 @@ export function AddressSupportDialog({
               constituent_ids: ids,
               level,
               confidence,
-              assessed_by: assessedBy,
               candidate_ids: candidateIds,
               notes: notes || undefined,
             })
@@ -286,7 +282,6 @@ export function AddressSupportDialog({
             constituent_ids: ids,
             method: "door_to_door",
             outcome,
-            contacted_by: assessedBy,
             notes: notes || undefined,
           });
         }
@@ -476,24 +471,14 @@ export function AddressSupportDialog({
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-1">
-                      <Label className="text-xs">Assessed By</Label>
-                      <Input
-                        value={assessedBy}
-                        onChange={(e) => setAssessedBy(e.target.value)}
-                        placeholder="Your name"
-                      />
-                    </div>
-                    <div className="space-y-1">
-                      <Label className="text-xs">Notes</Label>
-                      <Textarea
-                        value={notes}
-                        onChange={(e) => setNotes(e.target.value)}
-                        rows={1}
-                        placeholder="Optional"
-                      />
-                    </div>
+                  <div className="space-y-1">
+                    <Label className="text-xs">Notes</Label>
+                    <Textarea
+                      value={notes}
+                      onChange={(e) => setNotes(e.target.value)}
+                      rows={1}
+                      placeholder="Optional"
+                    />
                   </div>
                 </div>
 
@@ -503,7 +488,7 @@ export function AddressSupportDialog({
                   </Button>
                   <Button
                     onClick={handleSubmit}
-                    disabled={isPending || selected.size === 0 || assessedCount === 0 || !assessedBy}
+                    disabled={isPending || selected.size === 0 || assessedCount === 0}
                   >
                     {isPending
                       ? "Saving..."

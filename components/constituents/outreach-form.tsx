@@ -51,7 +51,6 @@ export function OutreachForm({ constituentId, history }: OutreachFormProps) {
   const [open, setOpen] = useState(false);
   const [method, setMethod] = useState("");
   const [outcome, setOutcome] = useState("");
-  const [contactedBy, setContactedBy] = useState("");
   const [followUpDate, setFollowUpDate] = useState("");
   const [notes, setNotes] = useState("");
   const [isPending, startTransition] = useTransition();
@@ -63,7 +62,6 @@ export function OutreachForm({ constituentId, history }: OutreachFormProps) {
         await logOutreach(constituentId, {
           method,
           outcome,
-          contacted_by: contactedBy,
           follow_up_date: followUpDate || undefined,
           notes: notes || undefined,
         });
@@ -74,7 +72,6 @@ export function OutreachForm({ constituentId, history }: OutreachFormProps) {
         setOpen(false);
         setMethod("");
         setOutcome("");
-        setContactedBy("");
         setFollowUpDate("");
         setNotes("");
       } catch (err) {
@@ -161,14 +158,6 @@ export function OutreachForm({ constituentId, history }: OutreachFormProps) {
                   </SelectContent>
                 </Select>
               </div>
-            </div>
-            <div className="space-y-1">
-              <Label>Contacted By</Label>
-              <Input
-                value={contactedBy}
-                onChange={(e) => setContactedBy(e.target.value)}
-                required
-              />
             </div>
             <div className="space-y-1">
               <Label>Follow-up Date</Label>
