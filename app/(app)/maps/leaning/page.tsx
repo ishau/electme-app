@@ -3,7 +3,6 @@
 import { useCallback, useMemo } from "react";
 import { useHexDominant, useHexLeaning } from "@/lib/hooks/use-hex";
 import { HexMap } from "@/components/maps/hex-map";
-import { Page } from "@/components/shared/page";
 import { Badge } from "@/components/ui/badge";
 import type { HexLeaningParty } from "@/lib/types";
 
@@ -64,7 +63,7 @@ export default function PartyLeaningPage() {
   }, [dominantGeo]);
 
   return (
-    <Page title="Party Leaning" description="Multi-party voter distribution per hex cell">
+    <div className="space-y-4">
       {isLoading && <Badge variant="secondary" className="animate-pulse w-fit">Loading...</Badge>}
 
       <div className="relative">
@@ -88,6 +87,6 @@ export default function PartyLeaningPage() {
           </div>
         )}
       </div>
-    </Page>
+    </div>
   );
 }

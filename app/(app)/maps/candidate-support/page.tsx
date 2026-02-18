@@ -4,7 +4,6 @@ import { useState, useCallback, useMemo } from "react";
 import { useHexCandidateSupport } from "@/lib/hooks/use-hex";
 import { useGroup } from "@/lib/hooks/use-group";
 import { HexMap } from "@/components/maps/hex-map";
-import { Page } from "@/components/shared/page";
 import { Badge } from "@/components/ui/badge";
 import {
   Select,
@@ -100,7 +99,7 @@ export default function CandidateSupportPage() {
   }, []);
 
   return (
-    <Page title="Candidate Support" description="Support levels for a specific candidate across hex cells">
+    <div className="space-y-4">
       <div className="flex items-end gap-4 flex-wrap">
         <div>
           <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Candidate</label>
@@ -144,6 +143,6 @@ export default function CandidateSupportPage() {
           </div>
         </div>
       )}
-    </Page>
+    </div>
   );
 }

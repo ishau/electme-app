@@ -4,7 +4,6 @@ import { useGroup } from "@/lib/hooks/use-group";
 import { useConstituencies } from "@/lib/hooks/use-constituencies";
 import { useConstituents } from "@/lib/hooks/use-constituents";
 import { useParties } from "@/lib/hooks/use-parties";
-import { ConstituencySwitcher } from "@/components/constituents/constituency-switcher";
 import { ConstituentSearch } from "@/components/constituents/constituent-search";
 import { ConstituentTable } from "@/components/constituents/constituent-table";
 import { Page } from "@/components/shared/page";
@@ -66,12 +65,7 @@ export default function ConstituentsPage() {
       title="Voters"
       description={activeConstituency ? `${activeConstituency.Code} — ${activeConstituency.Name}` : "All constituencies"}
     >
-      <ConstituencySwitcher
-        constituencies={groupConstituencies}
-        currentConstituencyId={constituencyId}
-      />
-
-      <ConstituentSearch />
+      <ConstituentSearch constituencies={groupConstituencies} />
 
       {constituentsLoading ? (
         <TableSkeleton rows={10} />
