@@ -82,7 +82,7 @@ export function AssessVoterDialog({ candidateId }: AssessVoterDialogProps) {
         <ClipboardPlus className="h-4 w-4 mr-2" />
         Assess Voter
       </DialogTrigger>
-      <DialogContent className="max-w-md">
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Assess Voter</DialogTitle>
         </DialogHeader>

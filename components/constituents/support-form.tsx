@@ -28,7 +28,9 @@ const TYPE_ORDER: Record<string, number> = {
   mayor: 0,
   president: 1,
   wdc_president: 2,
-  council_member: 3,
+  member: 3,
+  "member_(reserved_for_female)": 3,
+  "reserved_seat_for_female": 3,
   wdc_member: 4,
 };
 
@@ -36,7 +38,9 @@ const TYPE_BADGE: Record<string, { label: string; className: string }> = {
   mayor: { label: "Mayor", className: "text-blue-600 border-blue-300 bg-blue-50 dark:text-blue-400 dark:border-blue-800 dark:bg-blue-950" },
   president: { label: "Pres", className: "text-blue-600 border-blue-300 bg-blue-50 dark:text-blue-400 dark:border-blue-800 dark:bg-blue-950" },
   wdc_president: { label: "WDC-P", className: "text-purple-600 border-purple-300 bg-purple-50 dark:text-purple-400 dark:border-purple-800 dark:bg-purple-950" },
-  council_member: { label: "CM", className: "text-slate-600 border-slate-300 bg-slate-50 dark:text-slate-400 dark:border-slate-700 dark:bg-slate-900" },
+  member: { label: "CM", className: "text-slate-600 border-slate-300 bg-slate-50 dark:text-slate-400 dark:border-slate-700 dark:bg-slate-900" },
+  "member_(reserved_for_female)": { label: "CM-F", className: "text-pink-600 border-pink-300 bg-pink-50 dark:text-pink-400 dark:border-pink-800 dark:bg-pink-950" },
+  "reserved_seat_for_female": { label: "CM-F", className: "text-pink-600 border-pink-300 bg-pink-50 dark:text-pink-400 dark:border-pink-800 dark:bg-pink-950" },
   wdc_member: { label: "WDC-M", className: "text-rose-600 border-rose-300 bg-rose-50 dark:text-rose-400 dark:border-rose-800 dark:bg-rose-950" },
 };
 
@@ -216,7 +220,7 @@ export function SupportForm({ constituentId, constituencyId, history, candidates
         </CardHeader>
         <CardContent>
           {history.length > 0 ? (
-            <ScrollArea className="max-h-80"><div className="space-y-4">
+            <div className="max-h-80 overflow-y-auto space-y-4">
               {(() => {
                 const partyMap2 = Object.fromEntries(parties.map((p) => [p.ID, p]));
                 // Group by candidate
@@ -292,7 +296,7 @@ export function SupportForm({ constituentId, constituencyId, history, candidates
                   </div>
                 ));
               })()}
-            </div></ScrollArea>
+            </div>
           ) : (
             <p className="text-sm text-muted-foreground">No assessments yet.</p>
           )}
@@ -300,7 +304,7 @@ export function SupportForm({ constituentId, constituencyId, history, candidates
       </Card>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="sm:max-w-md max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Log Support Assessment</DialogTitle>
           </DialogHeader>
@@ -312,21 +316,21 @@ export function SupportForm({ constituentId, constituencyId, history, candidates
                 </Label>
                 <div className="rounded-md border">
                   {/* Set all row — sticky header */}
-                  <div className="sticky top-0 z-10 flex items-center justify-between px-3 py-2 bg-muted border-b">
+                  <div className="sticky top-0 z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between px-3 py-2 bg-muted border-b gap-1">
                     <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Set all</span>
                     <SupportDots value={undefined} onChange={setAll} />
                   </div>
                   {/* Candidate rows */}
-                  <ScrollArea className="max-h-56"><div className="divide-y">
+                  <ScrollArea className="h-56"><div className="divide-y">
                     {candidates.map((c) => {
                       const party = c.PartyID ? partyMap[c.PartyID] : null;
                       const typeBadge = TYPE_BADGE[normalizeType(c.CandidateType)];
                       return (
                         <div
                           key={c.ID}
-                          className="flex items-center justify-between px-3 py-2"
+                          className="flex flex-col sm:flex-row sm:items-center sm:justify-between px-3 py-2 gap-1"
                         >
-                          <div className="flex items-center gap-1.5 min-w-0 mr-3">
+                          <div className="flex items-center gap-1.5 min-w-0">
                             <span
                               className="shrink-0 inline-flex items-center rounded px-1 py-0.5 text-[10px] font-semibold text-white leading-none"
                               style={{ backgroundColor: party ? party.Color : "#9ca3af" }}

@@ -87,9 +87,9 @@ export function RelationshipList({ constituentId, relationships, parties }: Rela
           </Button>
         </CardHeader>
         <CardContent>
-          {relationships.length > 0 ? (
+          {relationships.filter((r) => !r.Derived).length > 0 ? (
             <div className="space-y-2">
-              {relationships.map((rel, i) => (
+              {relationships.filter((r) => !r.Derived).map((rel, i) => (
                 <div key={rel.ID || `derived-${i}`} className="flex items-center justify-between p-2 border rounded">
                   <div className="flex items-center gap-2 min-w-0">
                     <Badge variant={rel.Derived ? "secondary" : "outline"} className="capitalize shrink-0">
@@ -121,16 +121,11 @@ export function RelationshipList({ constituentId, relationships, parties }: Rela
                       )}
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 shrink-0">
-                    {rel.Derived && (
-                      <span className="text-xs text-muted-foreground italic">derived</span>
-                    )}
-                    {rel.Score > 0 && (
-                      <span className="text-xs text-muted-foreground">
-                        {rel.Score}/10
-                      </span>
-                    )}
-                  </div>
+                  {rel.Score > 0 && (
+                    <span className="text-xs text-muted-foreground shrink-0">
+                      {rel.Score}/10
+                    </span>
+                  )}
                 </div>
               ))}
             </div>
@@ -141,7 +136,7 @@ export function RelationshipList({ constituentId, relationships, parties }: Rela
       </Card>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Add Relationship</DialogTitle>
           </DialogHeader>

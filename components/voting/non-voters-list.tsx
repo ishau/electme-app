@@ -3,9 +3,9 @@
 import { useTransition } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { recordVote } from "@/lib/mutations";
 import { useQueryClient } from "@tanstack/react-query";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
 
 interface NonVotersListProps {
@@ -49,24 +49,26 @@ export function NonVotersList({ nonVoterIds, constituencyId }: NonVotersListProp
         {nonVoterIds.length === 0 ? (
           <p className="text-sm text-muted-foreground">Everyone has voted!</p>
         ) : (
-          <ScrollArea className="max-h-80"><div className="space-y-2">
-            {nonVoterIds.map((id) => (
-              <div
-                key={id}
-                className="flex items-center justify-between p-2 border rounded"
-              >
-                <span className="font-mono text-xs">{id.slice(0, 12)}...</span>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleQuickRecord(id)}
-                  disabled={isPending}
+          <ScrollArea className="h-80">
+            <div className="space-y-2">
+              {nonVoterIds.map((id) => (
+                <div
+                  key={id}
+                  className="flex items-center justify-between p-2 border rounded"
                 >
-                  Mark Voted
-                </Button>
-              </div>
-            ))}
-          </div></ScrollArea>
+                  <span className="font-mono text-xs">{id.slice(0, 12)}...</span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleQuickRecord(id)}
+                    disabled={isPending}
+                  >
+                    Mark Voted
+                  </Button>
+                </div>
+              ))}
+            </div>
+          </ScrollArea>
         )}
       </CardContent>
     </Card>

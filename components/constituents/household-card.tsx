@@ -13,7 +13,6 @@ import {
 } from "@/components/ui/dialog";
 import { SupportLevelBadge } from "@/components/campaign/support-level-badge";
 import { GenderBadge } from "@/components/shared/gender-badge";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { AddressSupportDialog } from "@/components/constituents/bulk-add-by-address-dialog";
 import { supportLevelColor, supportLevelLabel, formatDate } from "@/lib/utils";
 import { Users } from "lucide-react";
@@ -25,7 +24,9 @@ const TYPE_ORDER: Record<string, number> = {
   mayor: 0,
   president: 1,
   wdc_president: 2,
-  council_member: 3,
+  member: 3,
+  "member_(reserved_for_female)": 3,
+  "reserved_seat_for_female": 3,
   wdc_member: 4,
 };
 
@@ -33,7 +34,9 @@ const TYPE_LABEL: Record<string, string> = {
   mayor: "Mayor",
   president: "President",
   wdc_president: "WDC President",
-  council_member: "Council Member",
+  member: "Council Member",
+  "member_(reserved_for_female)": "Council Member (Women's Seat)",
+  "reserved_seat_for_female": "Council Member (Women's Seat)",
   wdc_member: "WDC Member",
 };
 
@@ -92,17 +95,16 @@ export function HouseholdCard({
           )}
         </CardHeader>
         <CardContent>
-          <div className="space-y-2">
+          <div className="divide-y">
             {others.map((n) => {
               const assessments = latestSupport[n.ID];
-              const partyColor = n.LatestAffiliation
-                ? (parties ?? []).find((p) => p.ID === n.LatestAffiliation!.PartyID)?.Color
+              const affiliatedParty = n.LatestAffiliation
+                ? (parties ?? []).find((p) => p.ID === n.LatestAffiliation!.PartyID)
                 : undefined;
               return (
                 <div
                   key={n.ID}
-                  className="flex items-center justify-between p-2 border rounded border-l-4"
-                  style={partyColor ? { borderLeftColor: partyColor } : undefined}
+                  className="flex items-center justify-between py-2"
                 >
                   <div>
                     <Link
@@ -111,8 +113,16 @@ export function HouseholdCard({
                     >
                       {n.FullName}
                     </Link>
-                    <div className="flex items-center gap-2 mt-0.5">
+                    <div className="flex items-center gap-1.5 mt-0.5">
                       <GenderBadge sex={n.Sex} />
+                      {affiliatedParty && (
+                        <span
+                          className="inline-flex items-center rounded px-1 py-0.5 text-[10px] font-semibold text-white leading-none"
+                          style={{ backgroundColor: affiliatedParty.Color }}
+                        >
+                          {affiliatedParty.Code}
+                        </span>
+                      )}
                       {n.Age != null && (
                         <span className="text-xs text-muted-foreground">{n.Age} yrs</span>
                       )}
@@ -161,11 +171,11 @@ export function HouseholdCard({
       </Card>
 
       <Dialog open={!!preview} onOpenChange={(v) => { if (!v) setPreview(null); }}>
-        <DialogContent className="sm:max-w-2xl max-h-[85vh]">
+        <DialogContent className="sm:max-w-2xl max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-sm">{preview?.name} — Assessments</DialogTitle>
           </DialogHeader>
-          <ScrollArea className="max-h-[70vh]"><div className="space-y-3">
+          <div className="max-h-[70vh] overflow-y-auto space-y-3">
             {(() => {
               if (!preview) return null;
               const byCand = new Map<string, SupportAssessment[]>();
@@ -233,7 +243,7 @@ export function HouseholdCard({
                 </div>
               ));
             })()}
-          </div></ScrollArea>
+          </div>
         </DialogContent>
       </Dialog>
 
