@@ -3,7 +3,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Pencil, Trash2, Phone, Mail } from "lucide-react";
+import { Pencil, Trash2 } from "lucide-react";
 import { teamRoleLabel } from "@/lib/utils";
 import type { TeamMember } from "@/lib/types";
 
@@ -26,6 +26,9 @@ export function TeamMemberCard({ member, onEdit, onDelete }: TeamMemberCardProps
             <Badge variant="secondary" className="mt-1">
               {teamRoleLabel(member.Role)}
             </Badge>
+            {member.Username && (
+              <p className="mt-1 text-xs text-muted-foreground">@{member.Username}</p>
+            )}
           </div>
           <div className="flex gap-1">
             <Button variant="ghost" size="icon" onClick={() => onEdit(member)}>
@@ -40,25 +43,6 @@ export function TeamMemberCard({ member, onEdit, onDelete }: TeamMemberCardProps
             </Button>
           </div>
         </div>
-        {(member.ContactInfo?.PhoneNumbers?.length > 0 || member.ContactInfo?.Email) && (
-          <div className="mt-2 space-y-1 text-sm text-muted-foreground">
-            {member.ContactInfo.PhoneNumbers?.map((num) => (
-              <div key={num} className="flex items-center gap-1">
-                <Phone className="h-3 w-3" />
-                {num}
-              </div>
-            ))}
-            {member.ContactInfo.Email && (
-              <div className="flex items-center gap-1">
-                <Mail className="h-3 w-3" />
-                {member.ContactInfo.Email}
-              </div>
-            )}
-          </div>
-        )}
-        {member.Notes && (
-          <p className="mt-2 text-xs text-muted-foreground">{member.Notes}</p>
-        )}
       </CardContent>
     </Card>
   );

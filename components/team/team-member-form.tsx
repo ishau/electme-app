@@ -10,7 +10,6 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -39,13 +38,9 @@ interface TeamMemberFormProps {
   onSubmit: (data: {
     name: string;
     role: string;
-    contact_info?: {
-      phone_numbers?: string[];
-      email?: string;
-      notes?: string;
-    };
     is_active?: boolean;
-    notes?: string;
+    username?: string;
+    password?: string;
   }) => void;
   isPending: boolean;
 }
@@ -59,20 +54,16 @@ export function TeamMemberForm({
 }: TeamMemberFormProps) {
   const [name, setName] = useState(member?.Name ?? "");
   const [role, setRole] = useState<string>(member?.Role ?? "volunteer");
-  const [phone, setPhone] = useState(member?.ContactInfo?.PhoneNumbers?.join(", ") ?? "");
-  const [email, setEmail] = useState(member?.ContactInfo?.Email ?? "");
-  const [notes, setNotes] = useState(member?.Notes ?? "");
+  const [username, setUsername] = useState(member?.Username ?? "");
+  const [password, setPassword] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSubmit({
       name,
       role,
-      contact_info: {
-        phone_numbers: phone ? phone.split(",").map((s) => s.trim()) : [],
-        email: email || undefined,
-      },
-      notes: notes || undefined,
+      username: username || undefined,
+      password: password || undefined,
     });
   };
 
@@ -103,16 +94,12 @@ export function TeamMemberForm({
             </Select>
           </div>
           <div className="space-y-2">
-            <Label>Phone Numbers (comma separated)</Label>
-            <Input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+960..." />
+            <Label>Username</Label>
+            <Input value={username} onChange={(e) => setUsername(e.target.value)} placeholder="For login access" />
           </div>
           <div className="space-y-2">
-            <Label>Email</Label>
-            <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
-          </div>
-          <div className="space-y-2">
-            <Label>Notes</Label>
-            <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={2} />
+            <Label>{member ? "New Password" : "Password"}</Label>
+            <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder={member ? "Leave blank to keep current" : "Set password"} />
           </div>
           <div className="flex justify-end gap-2">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>

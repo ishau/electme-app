@@ -5,6 +5,7 @@ import type { Party } from "@/lib/types";
 export function useParties() {
   return useQuery({
     queryKey: ["parties"],
-    queryFn: () => get<Party[]>("/parties"),
+    queryFn: () => get<Party[]>("/group/parties"),
+    staleTime: Infinity,
   });
 }

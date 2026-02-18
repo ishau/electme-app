@@ -8,10 +8,6 @@ import type {
   PersonalTrait,
   SupportAssessment,
   OutreachLog,
-  Atoll,
-  Island,
-  Constituency,
-  AddressLocation,
   Group,
   VoterRegistration,
   VotingRecord,
@@ -141,52 +137,12 @@ export async function bulkLogOutreach(data: {
   return post<BatchResult>(`/group/outreach/batch`, data);
 }
 
-// ── Geography ──
-
-export async function createAtoll(data: { code: string; name: string }) {
-  return post<Atoll>("/atolls", data);
-}
-
-export async function createIsland(data: { atoll_id: string; code: string; name: string }) {
-  return post<Island>("/islands", data);
-}
-
-export async function createConstituency(data: {
-  code: string;
-  name: string;
-  atoll_id: string;
-  islands: string[];
-}) {
-  return post<Constituency>("/constituencies", data);
-}
-
-export async function saveAddressLocation(data: {
-  island_id: string;
-  address_name: string;
-  latitude: number;
-  longitude: number;
-}) {
-  return put<AddressLocation>("/address-locations", data);
-}
-
-export async function deleteAddressLocation(id: string) {
-  return del(`/address-locations/${id}`);
-}
-
 // ── Groups / Team ──
 
 export async function addTeamMember(data: {
   name: string;
   role: string;
-  constituent_id?: string;
-  assigned_area?: string;
-  contact_info?: {
-    phone_numbers?: string[];
-    email?: string;
-    notes?: string;
-  };
   is_active?: boolean;
-  notes?: string;
   username?: string;
   password?: string;
 }) {
@@ -196,14 +152,7 @@ export async function addTeamMember(data: {
 export async function updateTeamMember(memberId: string, data: {
   name?: string;
   role?: string;
-  assigned_area?: string;
-  contact_info?: {
-    phone_numbers?: string[];
-    email?: string;
-    notes?: string;
-  };
   is_active?: boolean;
-  notes?: string;
   username?: string;
   password?: string;
 }) {
