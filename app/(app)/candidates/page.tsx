@@ -9,6 +9,7 @@ import { EmptyState } from "@/components/shared/empty-state";
 import { Card, CardContent } from "@/components/ui/card";
 import { UserCog } from "lucide-react";
 import { CardGridSkeleton } from "@/components/shared/loading-skeleton";
+import { candidateDisplayName } from "@/lib/utils";
 import type { CandidateView } from "@/lib/types";
 
 const MULTI_CONSTITUENCY_TYPES = ["president", "mayor", "wdc_president"];
@@ -143,7 +144,7 @@ export default function CandidatesPage() {
                       </span>
                       <div className="min-w-0 flex-1">
                         <p className="text-sm font-medium truncate">
-                          #{c.Number} {c.Name}
+                          {candidateDisplayName(c)}
                         </p>
                         <p className="text-xs text-muted-foreground truncate">
                           {party?.Name ?? "Independent"}

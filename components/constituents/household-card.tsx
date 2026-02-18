@@ -14,7 +14,7 @@ import {
 import { SupportLevelBadge } from "@/components/campaign/support-level-badge";
 import { GenderBadge } from "@/components/shared/gender-badge";
 import { AddressSupportDialog } from "@/components/constituents/bulk-add-by-address-dialog";
-import { supportLevelColor, supportLevelLabel, formatDate } from "@/lib/utils";
+import { supportLevelColor, supportLevelLabel, formatDate, candidateDisplayName } from "@/lib/utils";
 import { Users } from "lucide-react";
 import type { Constituent, SupportAssessment, CandidateView, Party } from "@/lib/types";
 
@@ -217,7 +217,7 @@ export function HouseholdCard({
                               title={candParty?.Code ?? "IND"}
                             />
                             <span className="font-medium truncate">
-                              {cand ? `#${cand.Number} ${cand.Name}` : "General"}
+                              {cand ? candidateDisplayName(cand) : "General"}
                             </span>
                             <span className="text-xs text-muted-foreground whitespace-nowrap ml-auto">
                               {formatDate(latest.AssessedAt)}

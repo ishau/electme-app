@@ -155,7 +155,7 @@ export function VoteDialog({
                             #{c.Number}
                           </span>
                         )}
-                        <span className="text-sm truncate">{c.Name}</span>
+                        <span className="text-sm truncate">{c.Name}{c.Nickname ? ` (${c.Nickname})` : ""}</span>
                         {c.IsOwnCandidate && (
                           <span className="text-xs text-primary font-medium shrink-0">Ours</span>
                         )}

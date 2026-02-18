@@ -60,9 +60,15 @@ export async function updateWorkplace(constituentId: string, data: {
   position: string;
   sector: string;
   island_id?: string;
+  start_date?: string;
+  is_active?: boolean;
   notes?: string;
 }) {
   return put<WorkplaceAssignment[]>(`/group/constituents/${constituentId}/workplace`, data);
+}
+
+export async function updateCandidateNickname(candidateId: string, data: { nickname: string }) {
+  return put<void>(`/group/candidates/${candidateId}/nickname`, data);
 }
 
 export async function updateTags(constituentId: string, data: {

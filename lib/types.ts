@@ -72,9 +72,9 @@ export interface PaginatedResponse<T> {
 
 // Group
 export interface ContactInfo {
-  PhoneNumbers: string[];
-  Email: string;
-  Notes: string;
+  phone_numbers?: string[];
+  email?: string;
+  notes?: string;
 }
 
 export interface TeamMember {
@@ -92,6 +92,7 @@ export interface CandidateView {
   ConstituentID: string | null;
   PartyID: string | null;
   Name: string;
+  Nickname?: string;
   CandidateType: string;
   Number: number;
   Constituencies: string[];
@@ -115,9 +116,9 @@ export interface Group {
 export interface ConstituentProfile {
   GroupID: string;
   ConstituentID: string;
-  FullNationalID: string | null;
-  ContactInfo: ContactInfo;
-  Notes: string;
+  FullNationalID?: string | null;
+  ContactInfo?: ContactInfo;
+  Notes?: string;
 }
 
 export interface Nickname {
@@ -129,8 +130,8 @@ export interface Nickname {
 }
 
 export interface Period {
-  StartDate: string;
-  EndDate: string | null;
+  Start: string;
+  End: string | null;
 }
 
 export interface PartyAffiliation {
@@ -198,6 +199,7 @@ export interface EnrichedConstituent {
   Profile: ConstituentProfile | null;
   Nicknames: Nickname[];
   Affiliations: PartyAffiliation[];
+  Workplaces?: WorkplaceAssignment[];
 }
 
 // Campaign
@@ -412,14 +414,11 @@ export interface House {
 // Workplace sectors
 export type WorkplaceSector =
   | "government"
-  | "soe"
-  | "private"
-  | "self_employed"
-  | "resort"
-  | "ngo"
-  | "unemployed"
-  | "retired"
-  | "student";
+  | "fenaka"
+  | "stelco"
+  | "road_corporation"
+  | "airport"
+  | "other";
 
 // Hex Analytics (GeoJSON)
 export interface HexLeaningParty {

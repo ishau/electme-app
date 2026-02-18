@@ -15,7 +15,7 @@ import { Rating } from "@/components/ui/rating";
 import { SupportLevelBadge } from "@/components/campaign/support-level-badge";
 import { logSupport } from "@/lib/mutations";
 import { useQueryClient } from "@tanstack/react-query";
-import { formatDateTime, supportLevelColor, supportLevelLabel } from "@/lib/utils";
+import { formatDateTime, supportLevelColor, supportLevelLabel, candidateDisplayName } from "@/lib/utils";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -264,7 +264,7 @@ export function SupportForm({ constituentId, constituencyId, history, candidates
                                 title={candParty?.Code ?? "IND"}
                               />
                               <span className="font-medium truncate">
-                                {cand ? `#${cand.Number} ${cand.Name}` : "General"}
+                                {cand ? candidateDisplayName(cand) : "General"}
                               </span>
                               <span className="text-xs text-muted-foreground whitespace-nowrap ml-auto">
                                 {formatDateTime(latest.AssessedAt)}
@@ -338,7 +338,7 @@ export function SupportForm({ constituentId, constituencyId, history, candidates
                               {party ? party.Code : "IDP"}
                             </span>
                             <span className="text-sm font-medium truncate">
-                              #{c.Number} {c.Name}
+                              {candidateDisplayName(c)}
                             </span>
                             {typeBadge && (
                               <span className={cn("shrink-0 inline-flex items-center rounded border px-1 py-0.5 text-[10px] font-medium leading-none", typeBadge.className)}>

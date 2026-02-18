@@ -95,8 +95,10 @@ export default function ConstituentDetailPage() {
           <ProfileForm
             constituentId={constituentId}
             profile={constituent.Profile}
+            workplaces={constituent.Workplaces ?? []}
             basicInfo={{
               nationalId: constituent.FullNationalID ?? constituent.MaskedNationalID,
+              fullNationalId: constituent.FullNationalID ?? undefined,
               sex: constituent.Sex,
               age: constituent.Age ?? undefined,
               address: address?.Name,
