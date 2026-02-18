@@ -417,16 +417,6 @@ export type WorkplaceSector =
   | "student";
 
 // Hex Analytics (GeoJSON)
-export interface HexDominantProperties {
-  hex: string;
-  party_id: string;
-  party_code: string;
-  party_color: string;
-  voter_count: number;
-  total_in_hex: number;
-  pct: number;
-}
-
 export interface HexLeaningParty {
   party_id: string;
   party_code: string;

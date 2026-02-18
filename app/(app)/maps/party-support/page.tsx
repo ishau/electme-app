@@ -60,6 +60,24 @@ function parseLevels(raw: unknown): HexCandidateSupportLevel[] {
   return (raw as HexCandidateSupportLevel[]) ?? [];
 }
 
+function buildLevelRows(levels: HexCandidateSupportLevel[]): string {
+  return [...levels]
+    .sort((a, b) => b.voter_count - a.voter_count)
+    .map(
+      (l) => `
+        <div style="display:flex;align-items:center;gap:8px;padding:3px 6px;border-radius:4px">
+          <div style="width:10px;height:10px;border-radius:50%;background:${SUPPORT_LEVEL_COLORS[l.level] ?? "#6B7280"};flex-shrink:0"></div>
+          <span style="min-width:90px">${SUPPORT_LEVEL_LABELS[l.level] ?? l.level}</span>
+          <div style="flex:1;background:#e5e7eb;border-radius:3px;height:7px;overflow:hidden;min-width:50px">
+            <div style="width:${l.pct}%;background:${SUPPORT_LEVEL_COLORS[l.level] ?? "#6B7280"};height:100%;border-radius:3px"></div>
+          </div>
+          <span style="min-width:64px;text-align:right;font-variant-numeric:tabular-nums;color:#555">${l.voter_count} <span style="color:#999">(${l.pct}%)</span></span>
+        </div>
+      `
+    )
+    .join("");
+}
+
 export default function PartySupportPage() {
   const { data: parties } = useParties();
   const [selectedParty, setSelectedParty] = useState("");
@@ -104,27 +122,23 @@ export default function PartySupportPage() {
 
   const partyPopupBuilder = useCallback((props: Record<string, unknown>) => {
     const levels = parseLevels(props._levels);
+    const total = props.total_in_hex;
 
     if (!levels.length) {
-      return `<div style="font-size:13px">${props.total_in_hex} voters<br/><span style="color:#888">No assessment data for this party</span></div>`;
+      return `
+        <div style="font-size:13px;min-width:260px;font-family:system-ui,-apple-system,sans-serif">
+          <div style="font-weight:600;padding-bottom:6px;margin-bottom:6px;border-bottom:1px solid #e5e7eb">${total} voters</div>
+          <div style="color:#888;padding:4px 0">No assessment data for this party</div>
+        </div>
+      `;
     }
 
-    const rows = [...levels]
-      .sort((a, b) => b.voter_count - a.voter_count)
-      .map(
-        (l) => `
-          <div style="display:flex;align-items:center;gap:6px;margin:3px 0">
-            <div style="width:10px;height:10px;border-radius:50%;background:${SUPPORT_LEVEL_COLORS[l.level] ?? "#6B7280"};flex-shrink:0"></div>
-            <span style="min-width:80px">${SUPPORT_LEVEL_LABELS[l.level] ?? l.level}</span>
-            <div style="flex:1;background:#e5e7eb;border-radius:2px;height:8px;overflow:hidden">
-              <div style="width:${l.pct}%;background:${SUPPORT_LEVEL_COLORS[l.level] ?? "#6B7280"};height:100%"></div>
-            </div>
-            <span style="min-width:36px;text-align:right">${l.pct}%</span>
-          </div>
-        `
-      )
-      .join("");
-    return `<div style="font-size:13px"><div style="font-weight:600;margin-bottom:6px">${props.total_in_hex} voters</div>${rows}</div>`;
+    return `
+      <div style="font-size:13px;min-width:260px;font-family:system-ui,-apple-system,sans-serif">
+        <div style="font-weight:600;padding-bottom:6px;margin-bottom:6px;border-bottom:1px solid #e5e7eb">${total} voters</div>
+        <div style="display:flex;flex-direction:column;gap:2px">${buildLevelRows(levels)}</div>
+      </div>
+    `;
   }, []);
 
   // ── No party selected: color hex by the party with highest weighted score ──
@@ -135,7 +149,6 @@ export default function PartySupportPage() {
       const allParties = parseParties(f.properties.parties);
 
       let winnerColor = "#6B7280";
-      let winnerCode = "";
       let bestScore = -Infinity;
 
       for (const p of allParties) {
@@ -143,7 +156,6 @@ export default function PartySupportPage() {
         if (s > bestScore) {
           bestScore = s;
           winnerColor = p.party_color;
-          winnerCode = p.party_code;
         }
       }
 
@@ -154,8 +166,6 @@ export default function PartySupportPage() {
           hex: f.properties.hex,
           total_in_hex: f.properties.total_in_hex,
           _winner_color: winnerColor,
-          _winner_code: winnerCode,
-          _winner_score: bestScore === -Infinity ? "0" : bestScore.toFixed(2),
           _parties: JSON.stringify(allParties),
         },
       };
@@ -170,28 +180,32 @@ export default function PartySupportPage() {
     const allParties: HexPartySupportEntry[] =
       typeof props._parties === "string" ? JSON.parse(props._parties as string) : [];
 
-    const sections = [...allParties]
-      .sort((a, b) => partyScore(b.levels) - partyScore(a.levels))
+    const sorted = [...allParties].sort((a, b) => partyScore(b.levels) - partyScore(a.levels));
+    const topPartyId = sorted[0]?.party_id;
+
+    const sections = sorted
       .map((p) => {
         const score = partyScore(p.levels);
+        const totalVoters = p.levels.reduce((s, l) => s + l.voter_count, 0);
         const levelRows = [...p.levels]
           .sort((a, b) => b.voter_count - a.voter_count)
           .map(
             (l) => `
-              <div style="display:flex;align-items:center;gap:4px;margin:2px 0 2px 16px;font-size:11px">
+              <div style="display:flex;align-items:center;gap:6px;margin-left:18px;font-size:12px;padding:1px 0">
                 <div style="width:8px;height:8px;border-radius:50%;background:${SUPPORT_LEVEL_COLORS[l.level] ?? "#6B7280"};flex-shrink:0"></div>
-                <span style="min-width:64px">${SUPPORT_LEVEL_LABELS[l.level] ?? l.level}</span>
-                <span>${l.voter_count} (${l.pct}%)</span>
+                <span style="min-width:80px;color:#555">${SUPPORT_LEVEL_LABELS[l.level] ?? l.level}</span>
+                <span style="font-variant-numeric:tabular-nums;color:#777">${l.voter_count} (${l.pct}%)</span>
               </div>
             `
           )
           .join("");
+
         return `
-          <div style="margin:6px 0">
-            <div style="display:flex;align-items:center;gap:6px;font-weight:600">
+          <div style="padding:6px;border-radius:6px;${p.party_id === topPartyId ? "background:rgba(0,0,0,0.04);" : ""}">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:2px">
               <div style="width:10px;height:10px;border-radius:50%;background:${p.party_color};flex-shrink:0"></div>
-              ${p.party_code}
-              <span style="font-weight:400;color:#888;font-size:11px">score: ${score.toFixed(1)}</span>
+              <span style="font-weight:600">${p.party_code}</span>
+              <span style="font-size:11px;color:#888;margin-left:auto;font-variant-numeric:tabular-nums">${totalVoters} assessed &middot; score ${score.toFixed(1)}</span>
             </div>
             ${levelRows}
           </div>
@@ -199,7 +213,12 @@ export default function PartySupportPage() {
       })
       .join("");
 
-    return `<div style="font-size:13px"><div style="font-weight:600;margin-bottom:4px">${props.total_in_hex} voters</div>${sections}</div>`;
+    return `
+      <div style="font-size:13px;min-width:280px;font-family:system-ui,-apple-system,sans-serif">
+        <div style="font-weight:600;padding-bottom:6px;margin-bottom:4px;border-bottom:1px solid #e5e7eb">${props.total_in_hex} voters</div>
+        <div style="display:flex;flex-direction:column;gap:2px">${sections}</div>
+      </div>
+    `;
   }, []);
 
   // Extract party legend from aggregate data

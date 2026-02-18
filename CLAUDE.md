@@ -26,6 +26,8 @@
 - `/components/providers.tsx` — QueryClientProvider + TooltipProvider
 - `/components/layout/app-layout-content.tsx` — client component for layout data fetching
 - `/components/shared/gender-badge.tsx` — `GenderBadge` component: blue for male, pink for female — use everywhere gender is displayed
+- `/lib/hooks/use-hex.ts` — hex analytics hooks (`useHexLeaning`, `useHexPartySupport`, `useHexCandidateSupport`) — no `useHexDominant` (removed)
+- `/components/settings/geography-view.tsx` — `HouseManagementView` component (used in maps/houses tab, NOT settings)
 
 ## Architecture
 - All pages are `"use client"` — data fetched via hooks, mutations via `lib/mutations.ts`
@@ -43,7 +45,7 @@
 - `Page` component `description` accepts `ReactNode` — can render styled badges/tooltips inline in page headers
 - Party affiliation display: colored left border (`border-l-4`) on list items (e.g., household card), or colored dots next to names in tables — resolved from `LatestAffiliation.PartyID` against `parties` array
 - Gender display: always use `<GenderBadge sex={...} />` from `components/shared/gender-badge.tsx` — blue for M, pink for F
-- **Tab layouts**: Dashboard (`/dashboard/*`) and Maps (`/maps/*`) use tab subpages with `layout.tsx` containing tab links. Pattern: parent `page.tsx` does `redirect()` to default tab.
+- **Tab layouts**: Dashboard (`/dashboard/*`) and Maps (`/maps/*`) use tab subpages with `layout.tsx` containing tab links. Pattern: parent `page.tsx` does `redirect()` to default tab. Maps default tab is `/maps/leaning`.
 - **Dashboard tabs**: Overview, Demographics, Campaign, Outreach, Election Day — each loads only its own data
 
 ## Environment Variables
@@ -77,5 +79,7 @@
 - Recharts `Pie` label: `percent` prop is possibly undefined — always use `(percent ?? 0)`
 - `/group/houses` returns `PaginatedResponse<House>` with `constituency_id`, `search`, `plotted` filters
 - House `H3Cell` (string|null) = base-plotted approximate area. `Lat`/`Lng` = group-plotted exact coords. Both null = unplotted.
-- maplibre-gl: must dynamic import (`import("maplibre-gl")`) — no top-level import (SSR breaks). Use `any` typed refs.
+- maplibre-gl: hex-map-inner uses top-level import (dynamic parent handles SSR). Plot map in geography-view uses `import("maplibre-gl")` dynamic import.
+- MapLibre popup default `maxWidth` is 240px — set `maxWidth: "360px"` when creating popups with wider content. Popup HTML uses inline styles (no Tailwind). Override `.maplibregl-popup-close-button` and `.maplibregl-popup-content` via `<style>` tag in component.
+- When merging branches where main is ahead, prefer HEAD versions for types/hooks/mutations and accept only genuinely new files from the feature branch. Check for renamed functions (e.g., `plotHouse` vs `updateHouseLocation`) and type field mismatches (e.g., `IsPlotted` vs `HasOverride`).
 - Google Satellite tiles: `https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}` — zoom 20+, good for Maldives house-level work

@@ -9,8 +9,6 @@ import {
   Megaphone,
   ClipboardList,
   Vote,
-  Settings,
-  FolderOpen,
   MapPin,
   Bus,
   LogOut,
@@ -26,7 +24,6 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarFooter,
-  SidebarSeparator,
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { logout } from "@/lib/auth";
@@ -44,9 +41,6 @@ const navItems = [
   { label: "Voting Day", href: "/voting", icon: Vote },
 ];
 
-const settingsNavItems = [
-  { label: "Geography", href: "/settings/geography", icon: FolderOpen },
-];
 
 export function AppSidebar({ groupName, partyCode }: { groupName: string; partyCode?: string }) {
   const pathname = usePathname();
@@ -85,33 +79,6 @@ export function AppSidebar({ groupName, partyCode }: { groupName: string; partyC
           </SidebarGroupContent>
         </SidebarGroup>
 
-        <SidebarSeparator />
-
-        <SidebarGroup>
-          <SidebarGroupLabel>
-            <div className="flex items-center gap-1">
-              <Settings className="h-3 w-3" />
-              Settings
-            </div>
-          </SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {settingsNavItems.map((item) => (
-                <SidebarMenuItem key={item.href}>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={pathname === item.href}
-                  >
-                    <Link href={item.href}>
-                      <item.icon className="h-4 w-4" />
-                      <span>{item.label}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
       </SidebarContent>
 
       <SidebarFooter className="p-4 space-y-2">

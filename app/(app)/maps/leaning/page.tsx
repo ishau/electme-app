@@ -1,66 +1,96 @@
 "use client";
 
 import { useCallback, useMemo } from "react";
-import { useHexDominant, useHexLeaning } from "@/lib/hooks/use-hex";
+import { useHexLeaning } from "@/lib/hooks/use-hex";
 import { HexMap } from "@/components/maps/hex-map";
 import { Badge } from "@/components/ui/badge";
 import type { HexLeaningParty } from "@/lib/types";
 
 export default function PartyLeaningPage() {
-  const { data: dominantGeo, isLoading: dominantLoading } = useHexDominant();
-  const { data: leaningGeo, isLoading: leaningLoading } = useHexLeaning();
+  const { data: leaningGeo, isLoading } = useHexLeaning();
 
-  const isLoading = dominantLoading || leaningLoading;
+  // Build processed GeoJSON: derive top party color for polygon fill
+  const { processedGeo, leaningDetailMap } = useMemo(() => {
+    const empty: Record<string, { total_in_hex: number; parties: HexLeaningParty[] }> = {};
+    if (!leaningGeo?.features?.length) return { processedGeo: null, leaningDetailMap: empty };
 
-  const leaningDetailMap = useMemo(() => {
-    if (!leaningGeo?.features) return {};
-    const map: Record<string, { total_in_hex: number; parties: HexLeaningParty[] }> = {};
-    for (const f of leaningGeo.features) {
+    const detailMap: Record<string, { total_in_hex: number; parties: HexLeaningParty[] }> = {};
+
+    const features = leaningGeo.features.map((f: { type: string; geometry: unknown; properties: Record<string, unknown> }) => {
       const props = f.properties;
-      map[props.hex] = {
-        total_in_hex: props.total_in_hex,
-        parties: typeof props.parties === "string" ? JSON.parse(props.parties) : props.parties,
+      const parties: HexLeaningParty[] =
+        typeof props.parties === "string" ? JSON.parse(props.parties as string) : (props.parties as HexLeaningParty[]) ?? [];
+
+      detailMap[props.hex as string] = {
+        total_in_hex: props.total_in_hex as number,
+        parties,
       };
-    }
-    return map;
+
+      const sorted = [...parties].sort((a, b) => b.voter_count - a.voter_count);
+      const topColor = sorted[0]?.party_color ?? "#6B7280";
+
+      return {
+        type: "Feature",
+        geometry: f.geometry,
+        properties: {
+          ...props,
+          _top_color: topColor,
+        },
+      };
+    });
+
+    return {
+      processedGeo: { type: "FeatureCollection", features },
+      leaningDetailMap: detailMap,
+    };
   }, [leaningGeo]);
 
-  const fillColorExpr = ["get", "party_color"];
+  const fillColorExpr = ["get", "_top_color"];
 
   const buildPopupHtml = useCallback((props: Record<string, unknown>) => {
     const hex = props.hex as string;
     const detail = leaningDetailMap[hex];
-    if (!detail) {
-      return `<div style="font-size:13px">${props.party_code}: ${props.voter_count}/${props.total_in_hex} (${props.pct}%)</div>`;
-    }
-    const rows = [...detail.parties]
-      .sort((a, b) => b.voter_count - a.voter_count)
+    if (!detail) return "";
+
+    const sorted = [...detail.parties].sort((a, b) => b.voter_count - a.voter_count);
+    const topId = sorted[0]?.party_id;
+
+    const rows = sorted
       .map(
-        (p) => `
-          <div style="display:flex;align-items:center;gap:6px;margin:3px 0">
+        (p, i) => `
+          <div style="display:flex;align-items:center;gap:8px;padding:4px 6px;border-radius:4px;${i === 0 ? "background:rgba(0,0,0,0.04);" : ""}">
             <div style="width:10px;height:10px;border-radius:50%;background:${p.party_color};flex-shrink:0"></div>
-            <span style="min-width:32px">${p.party_code}</span>
-            <div style="flex:1;background:#e5e7eb;border-radius:2px;height:8px;overflow:hidden">
-              <div style="width:${p.pct}%;background:${p.party_color};height:100%"></div>
+            <span style="min-width:36px;font-weight:${p.party_id === topId ? "600" : "400"}">${p.party_code}</span>
+            <div style="flex:1;background:#e5e7eb;border-radius:3px;height:7px;overflow:hidden;min-width:60px">
+              <div style="width:${p.pct}%;background:${p.party_color};height:100%;border-radius:3px"></div>
             </div>
-            <span style="min-width:36px;text-align:right">${p.pct}%</span>
+            <span style="min-width:64px;text-align:right;font-variant-numeric:tabular-nums;color:#555">${p.voter_count} <span style="color:#999">(${p.pct}%)</span></span>
           </div>
         `
       )
       .join("");
-    return `<div style="font-size:13px"><div style="font-weight:600;margin-bottom:6px">${detail.total_in_hex} voters</div>${rows}</div>`;
+
+    return `
+      <div style="font-size:13px;min-width:260px;font-family:system-ui,-apple-system,sans-serif">
+        <div style="font-weight:600;padding-bottom:6px;margin-bottom:6px;border-bottom:1px solid #e5e7eb">${detail.total_in_hex} voters</div>
+        <div style="display:flex;flex-direction:column;gap:2px">${rows}</div>
+      </div>
+    `;
   }, [leaningDetailMap]);
 
+  // Extract party legend from leaning data
   const partyLegend = useMemo(() => {
-    if (!dominantGeo?.features) return [];
+    if (!leaningGeo?.features) return [];
     const seen = new Map<string, string>();
-    for (const f of dominantGeo.features) {
-      const code = f.properties.party_code;
-      const color = f.properties.party_color;
-      if (code && color && !seen.has(code)) seen.set(code, color);
+    for (const f of leaningGeo.features) {
+      const parties: HexLeaningParty[] =
+        typeof f.properties.parties === "string" ? JSON.parse(f.properties.parties) : f.properties.parties ?? [];
+      for (const p of parties) {
+        if (!seen.has(p.party_code)) seen.set(p.party_code, p.party_color);
+      }
     }
     return Array.from(seen.entries()).map(([code, color]) => ({ code, color }));
-  }, [dominantGeo]);
+  }, [leaningGeo]);
 
   return (
     <div className="space-y-4">
@@ -68,7 +98,7 @@ export default function PartyLeaningPage() {
 
       <div className="relative">
         <HexMap
-          geojson={dominantGeo ?? null}
+          geojson={processedGeo ?? null}
           fillColorExpr={fillColorExpr}
           buildPopupHtml={buildPopupHtml}
           className="h-[600px] w-full rounded-md"

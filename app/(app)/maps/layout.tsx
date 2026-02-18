@@ -3,14 +3,13 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { Hexagon, BarChart3, Vote, User, MapPin } from "lucide-react";
+import { BarChart3, Vote, User, MapPin } from "lucide-react";
 
 const MAP_TABS = [
-  { label: "Dominant Party", href: "/maps/dominant", icon: Hexagon, description: "Winning party per hex cell based on voter affiliation" },
-  { label: "Party Leaning", href: "/maps/leaning", icon: BarChart3, description: "Multi-party voter distribution per hex cell" },
+  { label: "Party Leaning", href: "/maps/leaning", icon: BarChart3, description: "Voter distribution and dominant party per hex cell" },
   { label: "Party Support", href: "/maps/party-support", icon: Vote, description: "Support levels across hex cells, overall or per party" },
   { label: "Candidate Support", href: "/maps/candidate-support", icon: User, description: "Support levels for a specific candidate across hex cells" },
-  { label: "House Locations", href: "/maps/houses", icon: MapPin, description: "View and update house map positions for hex analytics" },
+  { label: "House Locations", href: "/maps/houses", icon: MapPin, description: "Plot and manage house locations" },
 ];
 
 export default function MapsLayout({ children }: { children: React.ReactNode }) {

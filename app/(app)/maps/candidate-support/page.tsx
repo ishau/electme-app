@@ -75,27 +75,39 @@ export default function CandidateSupportPage() {
     const levelsRaw = props._levels;
     const levels: HexCandidateSupportLevel[] =
       typeof levelsRaw === "string" ? JSON.parse(levelsRaw) : (levelsRaw as HexCandidateSupportLevel[]) ?? [];
+    const total = props.total_in_hex;
 
     if (!levels.length) {
-      return `<div style="font-size:13px">${props.total_in_hex} voters<br/><span style="color:#888">No assessment data</span></div>`;
+      return `
+        <div style="font-size:13px;min-width:260px;font-family:system-ui,-apple-system,sans-serif">
+          <div style="font-weight:600;padding-bottom:6px;margin-bottom:6px;border-bottom:1px solid #e5e7eb">${total} voters</div>
+          <div style="color:#888;padding:4px 0">No assessment data</div>
+        </div>
+      `;
     }
 
     const rows = [...levels]
       .sort((a, b) => b.voter_count - a.voter_count)
       .map(
         (l) => `
-          <div style="display:flex;align-items:center;gap:6px;margin:3px 0">
+          <div style="display:flex;align-items:center;gap:8px;padding:3px 6px;border-radius:4px">
             <div style="width:10px;height:10px;border-radius:50%;background:${SUPPORT_LEVEL_COLORS[l.level] ?? "#6B7280"};flex-shrink:0"></div>
-            <span style="min-width:80px">${SUPPORT_LEVEL_LABELS[l.level] ?? l.level}</span>
-            <div style="flex:1;background:#e5e7eb;border-radius:2px;height:8px;overflow:hidden">
-              <div style="width:${l.pct}%;background:${SUPPORT_LEVEL_COLORS[l.level] ?? "#6B7280"};height:100%"></div>
+            <span style="min-width:90px">${SUPPORT_LEVEL_LABELS[l.level] ?? l.level}</span>
+            <div style="flex:1;background:#e5e7eb;border-radius:3px;height:7px;overflow:hidden;min-width:50px">
+              <div style="width:${l.pct}%;background:${SUPPORT_LEVEL_COLORS[l.level] ?? "#6B7280"};height:100%;border-radius:3px"></div>
             </div>
-            <span style="min-width:36px;text-align:right">${l.pct}%</span>
+            <span style="min-width:64px;text-align:right;font-variant-numeric:tabular-nums;color:#555">${l.voter_count} <span style="color:#999">(${l.pct}%)</span></span>
           </div>
         `
       )
       .join("");
-    return `<div style="font-size:13px"><div style="font-weight:600;margin-bottom:6px">${props.total_in_hex} voters</div>${rows}</div>`;
+
+    return `
+      <div style="font-size:13px;min-width:260px;font-family:system-ui,-apple-system,sans-serif">
+        <div style="font-weight:600;padding-bottom:6px;margin-bottom:6px;border-bottom:1px solid #e5e7eb">${total} voters</div>
+        <div style="display:flex;flex-direction:column;gap:2px">${rows}</div>
+      </div>
+    `;
   }, []);
 
   return (

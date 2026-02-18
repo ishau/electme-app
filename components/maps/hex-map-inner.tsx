@@ -65,6 +65,7 @@ export function HexMapInner({
     popupRef.current = new maplibregl.Popup({
       closeButton: true,
       closeOnClick: false,
+      maxWidth: "360px",
     });
 
     return () => map.remove();
@@ -143,10 +144,41 @@ export function HexMapInner({
   }, [geojson, fillColorExpr, handleClick]);
 
   return (
-    <div
-      ref={containerRef}
-      className={className ?? "h-[600px] w-full rounded-md"}
-      style={{ zIndex: 0 }}
-    />
+    <>
+      <style>{`
+        .maplibregl-popup-close-button {
+          font-size: 0;
+          width: 24px;
+          height: 24px;
+          top: 6px;
+          right: 6px;
+          border-radius: 4px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: #888;
+          transition: background 0.15s, color 0.15s;
+        }
+        .maplibregl-popup-close-button:hover {
+          background: #f3f4f6;
+          color: #333;
+        }
+        .maplibregl-popup-close-button::after {
+          content: "\\2715";
+          font-size: 13px;
+          line-height: 1;
+        }
+        .maplibregl-popup-content {
+          border-radius: 8px;
+          padding: 12px;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+        }
+      `}</style>
+      <div
+        ref={containerRef}
+        className={className ?? "h-[600px] w-full rounded-md"}
+        style={{ zIndex: 0 }}
+      />
+    </>
   );
 }

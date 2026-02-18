@@ -5,14 +5,6 @@ import { get } from "@/lib/api";
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type GeoJSON = any;
 
-export function useHexDominant() {
-  return useQuery<GeoJSON>({
-    queryKey: ["hexDominant"],
-    queryFn: () => get<GeoJSON>(`/group/hex/dominant`),
-    placeholderData: keepPreviousData,
-  });
-}
-
 export function useHexLeaning() {
   return useQuery<GeoJSON>({
     queryKey: ["hexLeaning"],
