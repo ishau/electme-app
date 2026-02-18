@@ -121,16 +121,11 @@ export function RelationshipList({ constituentId, relationships, parties }: Rela
                       )}
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 shrink-0">
-                    {rel.Derived && (
-                      <span className="text-xs text-muted-foreground italic">derived</span>
-                    )}
-                    {rel.Score > 0 && (
-                      <span className="text-xs text-muted-foreground">
-                        {rel.Score}/10
-                      </span>
-                    )}
-                  </div>
+                  {rel.Score > 0 && (
+                    <span className="text-xs text-muted-foreground shrink-0">
+                      {rel.Score}/10
+                    </span>
+                  )}
                 </div>
               ))}
             </div>
@@ -141,7 +136,7 @@ export function RelationshipList({ constituentId, relationships, parties }: Rela
       </Card>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Add Relationship</DialogTitle>
           </DialogHeader>
@@ -158,8 +153,9 @@ export function RelationshipList({ constituentId, relationships, parties }: Rela
               <Label>Type</Label>
               <Select
                 value={type}
-                onValueChange={setType}
+                onValueChange={(v) => setType(v ?? "")}
                 required
+                items={Object.fromEntries(relationshipTypes.map((r) => [r.value, r.label]))}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select type" />
@@ -176,7 +172,11 @@ export function RelationshipList({ constituentId, relationships, parties }: Rela
             {type === "parent_child" && (
               <div className="space-y-1">
                 <Label>This person is the...</Label>
-                <Select value={role} onValueChange={setRole}>
+                <Select
+                  value={role}
+                  onValueChange={(v) => setRole(v ?? "parent")}
+                  items={{ parent: "Parent (selected person is the child)", child: "Child (selected person is the parent)" }}
+                >
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>

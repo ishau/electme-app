@@ -15,7 +15,7 @@ export function FollowUpList({ followUps }: FollowUpListProps) {
     <div className="space-y-2">
       {followUps.map((fu) => (
         <Card key={fu.ID}>
-          <CardContent className="p-4">
+          <CardContent>
             <div className="flex items-center justify-between">
               <Link
                 href={`/constituents/${fu.ConstituentID}`}

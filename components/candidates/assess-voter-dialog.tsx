@@ -78,13 +78,11 @@ export function AssessVoterDialog({ candidateId }: AssessVoterDialogProps) {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button variant="outline" size="sm">
-          <ClipboardPlus className="h-4 w-4 mr-2" />
-          Assess Voter
-        </Button>
+      <DialogTrigger render={<Button variant="outline" size="sm" />}>
+        <ClipboardPlus className="h-4 w-4 mr-2" />
+        Assess Voter
       </DialogTrigger>
-      <DialogContent className="max-w-md">
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Assess Voter</DialogTitle>
         </DialogHeader>
@@ -100,7 +98,12 @@ export function AssessVoterDialog({ candidateId }: AssessVoterDialogProps) {
           </div>
           <div className="space-y-1">
             <Label>Support Level</Label>
-            <Select value={level} onValueChange={setLevel} required>
+            <Select
+              value={level}
+              onValueChange={(v) => setLevel(v ?? "")}
+              required
+              items={Object.fromEntries(supportLevels.map((l) => [l.value, l.label]))}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Select level" />
               </SelectTrigger>

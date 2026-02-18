@@ -20,7 +20,6 @@ import {
 } from "@/components/ui/dialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { logOutreach } from "@/lib/mutations";
 import { useQueryClient } from "@tanstack/react-query";
 import { formatDateTime, outreachMethodLabel, outreachOutcomeLabel } from "@/lib/utils";
@@ -100,7 +99,7 @@ export function OutreachForm({ constituentId, history }: OutreachFormProps) {
         </CardHeader>
         <CardContent>
           {history.length > 0 ? (
-            <ScrollArea className="max-h-80"><div className="space-y-1.5">
+            <div className="max-h-80 overflow-y-auto space-y-1.5">
               {history.map((log) => (
                 <div key={log.ID} className="flex items-start gap-2.5 py-1.5 px-2 border rounded text-sm">
                   <span
@@ -131,7 +130,7 @@ export function OutreachForm({ constituentId, history }: OutreachFormProps) {
                   </div>
                 </div>
               ))}
-            </div></ScrollArea>
+            </div>
           ) : (
             <p className="text-sm text-muted-foreground">No outreach contacts yet.</p>
           )}
@@ -139,7 +138,7 @@ export function OutreachForm({ constituentId, history }: OutreachFormProps) {
       </Card>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Log Outreach Contact</DialogTitle>
           </DialogHeader>
@@ -147,7 +146,12 @@ export function OutreachForm({ constituentId, history }: OutreachFormProps) {
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1">
                 <Label>Method</Label>
-                <Select value={method} onValueChange={setMethod} required>
+                <Select
+                  value={method}
+                  onValueChange={(v) => setMethod(v ?? "")}
+                  required
+                  items={Object.fromEntries(methods.map((m) => [m, outreachMethodLabel(m)]))}
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Select method" />
                   </SelectTrigger>
@@ -162,7 +166,12 @@ export function OutreachForm({ constituentId, history }: OutreachFormProps) {
               </div>
               <div className="space-y-1">
                 <Label>Outcome</Label>
-                <Select value={outcome} onValueChange={setOutcome} required>
+                <Select
+                  value={outcome}
+                  onValueChange={(v) => setOutcome(v ?? "")}
+                  required
+                  items={Object.fromEntries(outcomes.map((o) => [o, outreachOutcomeLabel(o)]))}
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Select outcome" />
                   </SelectTrigger>

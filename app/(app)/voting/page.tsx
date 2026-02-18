@@ -5,7 +5,7 @@ import { useConstituencies } from "@/lib/hooks/use-constituencies";
 import { useTurnout, useNonVoters, useVotersForConstituency } from "@/lib/hooks/use-voting";
 import { VotingView } from "@/components/voting/voting-view";
 import { Page } from "@/components/shared/page";
-import { PageSkeleton } from "@/components/shared/loading-skeleton";
+import { VotingPageSkeleton } from "@/components/shared/loading-skeleton";
 import { useQueryState, parseAsString } from "nuqs";
 
 export default function VotingDayPage() {
@@ -21,7 +21,7 @@ export default function VotingDayPage() {
   const { data: voters } = useVotersForConstituency(selectedConstituencyId);
 
   if (groupLoading) {
-    return <Page title="Voting Day" description="Loading..."><PageSkeleton /></Page>;
+    return <Page title="Voting Day" description="Loading..."><VotingPageSkeleton /></Page>;
   }
 
   return (

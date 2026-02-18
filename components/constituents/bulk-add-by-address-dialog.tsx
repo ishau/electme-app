@@ -38,7 +38,9 @@ const TYPE_ORDER: Record<string, number> = {
   mayor: 0,
   president: 1,
   wdc_president: 2,
-  council_member: 3,
+  member: 3,
+  "member_(reserved_for_female)": 3,
+  "reserved_seat_for_female": 3,
   wdc_member: 4,
 };
 
@@ -46,7 +48,9 @@ const TYPE_BADGE: Record<string, { label: string; className: string }> = {
   mayor: { label: "Mayor", className: "text-blue-600 border-blue-300 bg-blue-50 dark:text-blue-400 dark:border-blue-800 dark:bg-blue-950" },
   president: { label: "Pres", className: "text-blue-600 border-blue-300 bg-blue-50 dark:text-blue-400 dark:border-blue-800 dark:bg-blue-950" },
   wdc_president: { label: "WDC-P", className: "text-purple-600 border-purple-300 bg-purple-50 dark:text-purple-400 dark:border-purple-800 dark:bg-purple-950" },
-  council_member: { label: "CM", className: "text-slate-600 border-slate-300 bg-slate-50 dark:text-slate-400 dark:border-slate-700 dark:bg-slate-900" },
+  member: { label: "CM", className: "text-slate-600 border-slate-300 bg-slate-50 dark:text-slate-400 dark:border-slate-700 dark:bg-slate-900" },
+  "member_(reserved_for_female)": { label: "CM-F", className: "text-pink-600 border-pink-300 bg-pink-50 dark:text-pink-400 dark:border-pink-800 dark:bg-pink-950" },
+  "reserved_seat_for_female": { label: "CM-F", className: "text-pink-600 border-pink-300 bg-pink-50 dark:text-pink-400 dark:border-pink-800 dark:bg-pink-950" },
   wdc_member: { label: "WDC-M", className: "text-rose-600 border-rose-300 bg-rose-50 dark:text-rose-400 dark:border-rose-800 dark:bg-rose-950" },
 };
 
@@ -60,33 +64,33 @@ const supportLevels = [
 
 const dotColors: Record<string, { idle: string; active: string }> = {
   strong_supporter: {
-    idle: "border-green-300 bg-green-50 dark:border-green-700 dark:bg-green-950",
-    active: "bg-green-500 ring-2 ring-green-300 ring-offset-1 dark:ring-green-700 dark:ring-offset-background",
+    idle: "border-violet-300 bg-violet-50 dark:border-violet-700 dark:bg-violet-950",
+    active: "bg-support-strong ring-2 ring-violet-300 ring-offset-1 dark:ring-violet-700 dark:ring-offset-background",
   },
   leaning: {
-    idle: "border-yellow-300 bg-yellow-50 dark:border-yellow-700 dark:bg-yellow-950",
-    active: "bg-yellow-400 ring-2 ring-yellow-300 ring-offset-1 dark:ring-yellow-600 dark:ring-offset-background",
+    idle: "border-violet-200 bg-violet-50 dark:border-violet-600 dark:bg-violet-950",
+    active: "bg-support-leaning ring-2 ring-violet-200 ring-offset-1 dark:ring-violet-600 dark:ring-offset-background",
   },
   undecided: {
     idle: "border-gray-300 bg-gray-50 dark:border-gray-600 dark:bg-gray-800",
-    active: "bg-gray-400 ring-2 ring-gray-300 ring-offset-1 dark:ring-gray-500 dark:ring-offset-background",
+    active: "bg-support-undecided ring-2 ring-gray-300 ring-offset-1 dark:ring-gray-500 dark:ring-offset-background",
   },
   soft_opposition: {
-    idle: "border-orange-300 bg-orange-50 dark:border-orange-700 dark:bg-orange-950",
-    active: "bg-orange-400 ring-2 ring-orange-300 ring-offset-1 dark:ring-orange-600 dark:ring-offset-background",
+    idle: "border-fuchsia-300 bg-fuchsia-50 dark:border-fuchsia-700 dark:bg-fuchsia-950",
+    active: "bg-support-soft-opposition ring-2 ring-fuchsia-300 ring-offset-1 dark:ring-fuchsia-600 dark:ring-offset-background",
   },
   hard_opposition: {
-    idle: "border-red-300 bg-red-50 dark:border-red-700 dark:bg-red-950",
-    active: "bg-red-500 ring-2 ring-red-300 ring-offset-1 dark:ring-red-700 dark:ring-offset-background",
+    idle: "border-fuchsia-400 bg-fuchsia-50 dark:border-fuchsia-800 dark:bg-fuchsia-950",
+    active: "bg-support-hard-opposition ring-2 ring-fuchsia-400 ring-offset-1 dark:ring-fuchsia-700 dark:ring-offset-background",
   },
 };
 
 const legendDotColors: Record<string, string> = {
-  strong_supporter: "bg-green-500",
-  leaning: "bg-yellow-400",
-  undecided: "bg-gray-400",
-  soft_opposition: "bg-orange-400",
-  hard_opposition: "bg-red-500",
+  strong_supporter: "bg-support-strong",
+  leaning: "bg-support-leaning",
+  undecided: "bg-support-undecided",
+  soft_opposition: "bg-support-soft-opposition",
+  hard_opposition: "bg-support-hard-opposition",
 };
 
 const outcomes = [
@@ -309,7 +313,7 @@ export function AddressSupportDialog({
         if (!v) reset();
       }}
     >
-      <DialogContent className="sm:max-w-2xl max-h-[85vh]">
+      <DialogContent className="sm:max-w-2xl max-h-[85vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Door-to-Door — {address}</DialogTitle>
           <DialogDescription>{islandName}</DialogDescription>
@@ -402,21 +406,21 @@ export function AddressSupportDialog({
                     <div className="space-y-1">
                       <div className="rounded-md border">
                         {/* Set all row — sticky header */}
-                        <div className="sticky top-0 z-10 flex items-center justify-between px-3 py-2 bg-muted border-b">
+                        <div className="sticky top-0 z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between px-3 py-2 bg-muted border-b gap-1">
                           <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Set all</span>
                           <SupportDots value={undefined} onChange={setAll} />
                         </div>
                         {/* Candidate rows */}
-                        <ScrollArea className="max-h-56"><div className="divide-y">
+                        <ScrollArea className="h-56"><div className="divide-y">
                           {candidates.map((c) => {
                             const party = c.PartyID ? partyMap[c.PartyID] : null;
                             const typeBadge = TYPE_BADGE[normalizeType(c.CandidateType)];
                             return (
                               <div
                                 key={c.ID}
-                                className="flex items-center justify-between px-3 py-2"
+                                className="flex flex-col sm:flex-row sm:items-center sm:justify-between px-3 py-2 gap-1"
                               >
-                                <div className="flex items-center gap-1.5 min-w-0 mr-3">
+                                <div className="flex items-center gap-1.5 min-w-0">
                                   <span
                                     className="shrink-0 inline-flex items-center rounded px-1 py-0.5 text-[10px] font-semibold text-white leading-none"
                                     style={{ backgroundColor: party ? party.Color : "#9ca3af" }}
@@ -457,7 +461,11 @@ export function AddressSupportDialog({
                     <Rating value={confidence} onChange={setConfidence} max={5} label="Confidence" />
                     <div className="space-y-1">
                       <Label className="text-xs">Visit Outcome</Label>
-                      <Select value={outcome} onValueChange={setOutcome}>
+                      <Select
+                        value={outcome}
+                        onValueChange={(v) => setOutcome(v ?? "")}
+                        items={Object.fromEntries(outcomes.map((o) => [o.value, o.label]))}
+                      >
                         <SelectTrigger>
                           <SelectValue placeholder="Optional" />
                         </SelectTrigger>

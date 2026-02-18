@@ -7,7 +7,7 @@ import { TransportView } from "@/components/transport/transport-view";
 import { Page } from "@/components/shared/page";
 import { StatCard } from "@/components/shared/stat-card";
 import { EmptyState } from "@/components/shared/empty-state";
-import { PageSkeleton } from "@/components/shared/loading-skeleton";
+import { StatsPageSkeleton } from "@/components/shared/loading-skeleton";
 import { Bus, Ship, Car, CheckCircle, MapPin } from "lucide-react";
 import { useQueryState, parseAsString } from "nuqs";
 
@@ -35,7 +35,7 @@ export default function TransportPage() {
   const { data: stats } = useTransportStats(constituencyParam || undefined);
 
   if (groupLoading) {
-    return <Page title="Transport" description="Loading..."><PageSkeleton /></Page>;
+    return <Page title="Transport" description="Loading..."><StatsPageSkeleton statCount={4} /></Page>;
   }
 
   if (!constituencyId) {

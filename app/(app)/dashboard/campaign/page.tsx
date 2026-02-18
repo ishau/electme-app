@@ -16,14 +16,15 @@ import { useSupportTrend, useSupportByConstituency } from "@/lib/hooks/use-analy
 import { SupportSummaryChart } from "@/components/groups/support-summary-chart";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { PageSkeleton } from "@/components/shared/loading-skeleton";
+import { DashboardSkeleton } from "@/components/shared/loading-skeleton";
+import { SUPPORT_LEVEL_HEX } from "@/lib/utils";
 
 const SUPPORT_LEVELS = [
-  { key: "StrongSupporter" as const, color: "#22c55e", label: "Strong" },
-  { key: "Leaning" as const, color: "#facc15", label: "Leaning" },
-  { key: "Undecided" as const, color: "#d1d5db", label: "Undecided" },
-  { key: "SoftOpposition" as const, color: "#fb923c", label: "Soft Opp" },
-  { key: "HardOpposition" as const, color: "#ef4444", label: "Hard Opp" },
+  { key: "StrongSupporter" as const, color: SUPPORT_LEVEL_HEX.strong_supporter, label: "Strong" },
+  { key: "Leaning" as const, color: SUPPORT_LEVEL_HEX.leaning, label: "Leaning" },
+  { key: "Undecided" as const, color: SUPPORT_LEVEL_HEX.undecided, label: "Undecided" },
+  { key: "SoftOpposition" as const, color: SUPPORT_LEVEL_HEX.soft_opposition, label: "Soft Opp" },
+  { key: "HardOpposition" as const, color: SUPPORT_LEVEL_HEX.hard_opposition, label: "Hard Opp" },
 ];
 
 export default function CampaignPage() {
@@ -39,7 +40,7 @@ export default function CampaignPage() {
   const candidateStats = candidateSupport ?? [];
 
   if (groupLoading) {
-    return <PageSkeleton />;
+    return <DashboardSkeleton statCount={0} />;
   }
 
   // Outreach funnel

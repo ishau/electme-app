@@ -69,7 +69,7 @@ export function TeamMemberForm({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>{member ? "Edit Team Member" : "Add Team Member"}</DialogTitle>
         </DialogHeader>
@@ -80,7 +80,11 @@ export function TeamMemberForm({
           </div>
           <div className="space-y-2">
             <Label>Role</Label>
-            <Select value={role} onValueChange={setRole}>
+            <Select
+              value={role}
+              onValueChange={(v) => setRole(v ?? "volunteer")}
+              items={Object.fromEntries(roles.map((r) => [r, teamRoleLabel(r)]))}
+            >
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>

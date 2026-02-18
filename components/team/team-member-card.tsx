@@ -16,7 +16,7 @@ interface TeamMemberCardProps {
 export function TeamMemberCard({ member, onEdit, onDelete }: TeamMemberCardProps) {
   return (
     <Card className={!member.IsActive ? "opacity-60" : ""}>
-      <CardContent className="p-4">
+      <CardContent>
         <div className="flex items-start justify-between">
           <div>
             <div className="flex items-center gap-2">

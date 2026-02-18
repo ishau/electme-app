@@ -15,7 +15,7 @@ import { useDemographics } from "@/lib/hooks/use-demographics";
 import { StatCard } from "@/components/shared/stat-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users } from "lucide-react";
-import { PageSkeleton } from "@/components/shared/loading-skeleton";
+import { DashboardSkeleton } from "@/components/shared/loading-skeleton";
 
 const AGE_ORDER = ["Under 18", "18-24", "25-34", "35-44", "45-54", "55-64", "65+", "Unknown"];
 const AGE_COLORS: Record<string, string> = {
@@ -33,7 +33,7 @@ export default function DemographicsPage() {
   const { data: demo, isLoading } = useDemographics();
 
   if (isLoading || !demo) {
-    return <PageSkeleton />;
+    return <DashboardSkeleton statCount={3} />;
   }
 
   const malePercent = demo.TotalVoters > 0 ? Math.round((demo.BySex.Male / demo.TotalVoters) * 100) : 0;

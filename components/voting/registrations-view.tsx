@@ -88,7 +88,14 @@ export function RegistrationsView({
   return (
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row gap-3">
-        <Select value={currentConstituencyId || "all"} onValueChange={handleConstituencyChange}>
+        <Select
+          value={currentConstituencyId || "all"}
+          onValueChange={(v) => handleConstituencyChange(v ?? "all")}
+          items={{
+            all: "All constituencies",
+            ...Object.fromEntries(constituencies.map((c) => [c.ID, `${c.Code} — ${c.Name}`])),
+          }}
+        >
           <SelectTrigger>
             <SelectValue placeholder="All constituencies" />
           </SelectTrigger>
@@ -150,8 +157,14 @@ export function RegistrationsView({
                   <TableCell>
                     <Select
                       value={reg.TransportStatus}
-                      onValueChange={(value) => handleTransportUpdate(reg.ID, value, reg.TransportMode)}
+                      onValueChange={(value) => handleTransportUpdate(reg.ID, value ?? reg.TransportStatus, reg.TransportMode)}
                       disabled={isPending}
+                      items={{
+                        not_needed: "Not Needed",
+                        needed: "Needed",
+                        arranged: "Arranged",
+                        confirmed: "Confirmed",
+                      }}
                     >
                       <SelectTrigger className="h-8 text-xs">
                         <SelectValue />
@@ -167,8 +180,14 @@ export function RegistrationsView({
                   <TableCell>
                     <Select
                       value={reg.TransportMode || "none"}
-                      onValueChange={(value) => handleModeUpdate(reg.ID, value === "none" ? "" : value, reg.TransportStatus)}
+                      onValueChange={(value) => handleModeUpdate(reg.ID, (value ?? "none") === "none" ? "" : (value ?? "none"), reg.TransportStatus)}
                       disabled={isPending}
+                      items={{
+                        none: "None",
+                        air: "Air",
+                        sea: "Sea",
+                        vehicle: "Vehicle",
+                      }}
                     >
                       <SelectTrigger className="h-8 text-xs">
                         <SelectValue />

@@ -251,7 +251,11 @@ function AddTransportForm({
             {interIslandNeeded && (
               <div className="space-y-1">
                 <Label className="text-xs text-muted-foreground">Mode</Label>
-                <Select value={interIslandMode} onValueChange={setInterIslandMode}>
+                <Select
+                  value={interIslandMode}
+                  onValueChange={(v) => setInterIslandMode(v ?? "")}
+                  items={{ air: "Air", sea: "Sea" }}
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Select mode" />
                   </SelectTrigger>
@@ -279,7 +283,11 @@ function AddTransportForm({
             {votingDayNeeded && (
               <div className="space-y-1">
                 <Label className="text-xs text-muted-foreground">Direction</Label>
-                <Select value={votingDayDirection} onValueChange={setVotingDayDirection}>
+                <Select
+                  value={votingDayDirection}
+                  onValueChange={(v) => setVotingDayDirection(v ?? "")}
+                  items={{ to_center: "To Center", from_center: "From Center", both: "Both Ways" }}
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Select direction" />
                   </SelectTrigger>
@@ -390,7 +398,11 @@ function EditTransportForm({
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
                   <Label className="text-xs text-muted-foreground">Mode</Label>
-                  <Select value={interIslandMode} onValueChange={setInterIslandMode}>
+                  <Select
+                    value={interIslandMode}
+                    onValueChange={(v) => setInterIslandMode(v ?? "")}
+                    items={{ air: "Air", sea: "Sea" }}
+                  >
                     <SelectTrigger><SelectValue placeholder="Mode" /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="air">Air</SelectItem>
@@ -400,7 +412,11 @@ function EditTransportForm({
                 </div>
                 <div className="space-y-1">
                   <Label className="text-xs text-muted-foreground">Status</Label>
-                  <Select value={interIslandStatus} onValueChange={setInterIslandStatus}>
+                  <Select
+                    value={interIslandStatus}
+                    onValueChange={(v) => setInterIslandStatus(v ?? "")}
+                    items={Object.fromEntries(statusOptions.map((o) => [o.value, o.label]))}
+                  >
                     <SelectTrigger><SelectValue placeholder="Status" /></SelectTrigger>
                     <SelectContent>
                       {statusOptions.map((o) => (
@@ -429,7 +445,11 @@ function EditTransportForm({
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
                   <Label className="text-xs text-muted-foreground">Direction</Label>
-                  <Select value={votingDayDirection} onValueChange={setVotingDayDirection}>
+                  <Select
+                    value={votingDayDirection}
+                    onValueChange={(v) => setVotingDayDirection(v ?? "")}
+                    items={{ to_center: "To Center", from_center: "From Center", both: "Both Ways" }}
+                  >
                     <SelectTrigger><SelectValue placeholder="Direction" /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="to_center">To Center</SelectItem>
@@ -440,7 +460,11 @@ function EditTransportForm({
                 </div>
                 <div className="space-y-1">
                   <Label className="text-xs text-muted-foreground">Status</Label>
-                  <Select value={votingDayStatus} onValueChange={setVotingDayStatus}>
+                  <Select
+                    value={votingDayStatus}
+                    onValueChange={(v) => setVotingDayStatus(v ?? "")}
+                    items={Object.fromEntries(statusOptions.map((o) => [o.value, o.label]))}
+                  >
                     <SelectTrigger><SelectValue placeholder="Status" /></SelectTrigger>
                     <SelectContent>
                       {statusOptions.map((o) => (

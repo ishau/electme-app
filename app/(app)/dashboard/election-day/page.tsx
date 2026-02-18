@@ -20,7 +20,7 @@ import { useConstituencies } from "@/lib/hooks/use-constituencies";
 import { StatCard } from "@/components/shared/stat-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Bus, Vote, Users, Clock } from "lucide-react";
-import { PageSkeleton } from "@/components/shared/loading-skeleton";
+import { DashboardSkeleton } from "@/components/shared/loading-skeleton";
 
 const TRANSPORT_SEGMENTS = [
   { key: "Pending" as const, label: "Pending", color: "#facc15" },
@@ -45,7 +45,7 @@ export default function ElectionDayPage() {
   const { data: turnout } = useTurnout(activeConstituency);
 
   if (groupLoading) {
-    return <PageSkeleton />;
+    return <DashboardSkeleton statCount={4} />;
   }
 
   const totalVoters = demo?.TotalVoters ?? 0;

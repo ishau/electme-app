@@ -14,15 +14,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { X } from "lucide-react";
+import { SUPPORT_LEVEL_HEX } from "@/lib/utils";
 import type { HexPartySupportEntry, HexCandidateSupportLevel } from "@/lib/types";
 
-const SUPPORT_LEVEL_COLORS: Record<string, string> = {
-  strong_supporter: "#16a34a",
-  leaning: "#86efac",
-  undecided: "#fbbf24",
-  soft_opposition: "#fb923c",
-  hard_opposition: "#dc2626",
-};
+const SUPPORT_LEVEL_COLORS = SUPPORT_LEVEL_HEX;
 
 const SUPPORT_LEVEL_LABELS: Record<string, string> = {
   strong_supporter: "Strong Supporter",
@@ -246,7 +241,11 @@ export default function PartySupportPage() {
         <div>
           <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Party</label>
           <div className="flex items-center gap-1.5 mt-1.5">
-            <Select value={selectedParty} onValueChange={setSelectedParty}>
+            <Select
+              value={selectedParty}
+              onValueChange={(v) => setSelectedParty(v ?? "")}
+              items={Object.fromEntries((parties ?? []).map((p) => [p.ID, `${p.Code} - ${p.Name}`]))}
+            >
               <SelectTrigger className="w-[240px]">
                 <SelectValue placeholder="All parties (by score)" />
               </SelectTrigger>

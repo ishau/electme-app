@@ -12,11 +12,11 @@ interface StatCardProps {
 export function StatCard({ title, value, description, icon: Icon, className }: StatCardProps) {
   return (
     <Card className={className}>
-      <CardContent className="p-6">
+      <CardContent>
         <div className="flex items-center justify-between">
           <div>
             <p className="text-sm font-medium text-muted-foreground">{title}</p>
-            <p className="text-2xl font-bold mt-1">{value}</p>
+            <p className="text-2xl font-bold">{value}</p>
             {description && (
               <p className="text-xs text-muted-foreground mt-1">{description}</p>
             )}

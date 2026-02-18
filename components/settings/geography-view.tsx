@@ -110,7 +110,14 @@ export function HouseManagementView() {
     <div className="space-y-4">
       {/* Filter bar */}
       <div className="flex flex-col sm:flex-row gap-3">
-        <Select value={constituencyId || "all"} onValueChange={(v) => { setConstituencyId(v === "all" ? "" : v); setPage(0); }}>
+        <Select
+          value={constituencyId || "all"}
+          onValueChange={(v) => { setConstituencyId((v ?? "") === "all" ? "" : (v ?? "")); setPage(0); }}
+          items={{
+            all: "All constituencies",
+            ...Object.fromEntries((constituencies ?? []).map((c) => [c.ID, `${c.Code} — ${c.Name}`])),
+          }}
+        >
           <SelectTrigger className="w-full sm:w-[200px]">
             <SelectValue placeholder="All constituencies" />
           </SelectTrigger>
@@ -142,7 +149,11 @@ export function HouseManagementView() {
           )}
         </div>
 
-        <Select value={plotted} onValueChange={(v) => { setPlotted(v); setPage(0); }}>
+        <Select
+          value={plotted}
+          onValueChange={(v) => { setPlotted(v ?? ""); setPage(0); }}
+          items={Object.fromEntries(PLOTTED_OPTIONS.map((o) => [o.value, o.label]))}
+        >
           <SelectTrigger className="w-full sm:w-[140px]">
             <SelectValue />
           </SelectTrigger>
@@ -390,17 +401,18 @@ function PlotMap({ initialLat, initialLng, islandLat, islandLng, h3Cell, onSelec
             satellite: {
               type: "raster" as const,
               tiles: [
-                "https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}",
+                "https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}",
               ],
               tileSize: 256,
-              maxzoom: 20,
+              minzoom: 13,
+              maxzoom: 18,
               attribution: "&copy; Google",
             },
             osm: {
               type: "raster" as const,
-              tiles: ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"],
+              tiles: ["https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}"],
               tileSize: 256,
-              attribution: "&copy; OpenStreetMap contributors",
+              attribution: "&copy; Google",
             },
           },
           layers: [
@@ -408,8 +420,8 @@ function PlotMap({ initialLat, initialLng, islandLat, islandLng, h3Cell, onSelec
               id: "satellite",
               type: "raster" as const,
               source: "satellite",
-              minzoom: 0,
-              maxzoom: 20,
+              minzoom: 13,
+              maxzoom: 18,
             },
             {
               id: "osm",

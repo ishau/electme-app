@@ -18,7 +18,6 @@ export default function ConstituentsPage() {
   const [filters] = useQueryStates(
     {
       q: parseAsString.withDefault(""),
-      sex: parseAsString.withDefault(""),
       page: parseAsString.withDefault(""),
       constituency_id: parseAsString.withDefault(""),
     },
@@ -46,7 +45,6 @@ export default function ConstituentsPage() {
   };
   if (constituencyId) apiParams.constituency_id = constituencyId;
   if (filters.q) apiParams.q = filters.q;
-  if (filters.sex) apiParams.sex = filters.sex;
 
   const { data: result, isLoading: constituentsLoading } = useConstituents(apiParams);
 

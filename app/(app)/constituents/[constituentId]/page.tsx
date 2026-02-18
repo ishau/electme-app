@@ -56,18 +56,13 @@ export default function ConstituentDetailPage() {
 
   const affiliationBadge = affiliationParty ? (
     <Tooltip>
-      <TooltipTrigger asChild>
+      <TooltipTrigger render={<span className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold text-white cursor-default" style={{ backgroundColor: affiliationParty.Color }} />}>
         <span
-          className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold text-white cursor-default"
-          style={{ backgroundColor: affiliationParty.Color }}
+          className="w-4 h-4 rounded-full bg-white/20 flex items-center justify-center text-[9px] font-bold"
         >
-          <span
-            className="w-4 h-4 rounded-full bg-white/20 flex items-center justify-center text-[9px] font-bold"
-          >
-            {affiliationParty.Code?.[0]}
-          </span>
-          {affiliationParty.Code}
+          {affiliationParty.Code?.[0]}
         </span>
+        {affiliationParty.Code}
       </TooltipTrigger>
       <TooltipContent>
         <p>{affiliationParty.Name}</p>

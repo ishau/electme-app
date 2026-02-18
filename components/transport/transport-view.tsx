@@ -100,7 +100,14 @@ export function TransportView({
   return (
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row gap-3">
-        <Select value={currentConstituencyId || "all"} onValueChange={handleConstituencyChange}>
+        <Select
+          value={currentConstituencyId || "all"}
+          onValueChange={(v) => handleConstituencyChange(v ?? "")}
+          items={{
+            all: "All constituencies",
+            ...Object.fromEntries(constituencies.map((c) => [c.ID, `${c.Code} — ${c.Name}`])),
+          }}
+        >
           <SelectTrigger className="sm:w-[220px]">
             <SelectValue placeholder="All constituencies" />
           </SelectTrigger>
@@ -114,7 +121,18 @@ export function TransportView({
           </SelectContent>
         </Select>
 
-        <Select value={currentStatus || "all"} onValueChange={handleStatusChange}>
+        <Select
+          value={currentStatus || "all"}
+          onValueChange={(v) => handleStatusChange(v ?? "")}
+          items={{
+            all: "All statuses",
+            pending: "Pending",
+            arranged: "Arranged",
+            in_progress: "In Progress",
+            completed: "Completed",
+            cancelled: "Cancelled",
+          }}
+        >
           <SelectTrigger className="sm:w-[180px]">
             <SelectValue placeholder="All statuses" />
           </SelectTrigger>

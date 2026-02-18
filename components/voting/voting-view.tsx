@@ -13,10 +13,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TurnoutCard } from "@/components/voting/turnout-card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { recordVote } from "@/lib/mutations";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import type { Group, Constituency, TurnoutStats, Constituent } from "@/lib/types";
 
 interface VotingViewProps {
@@ -72,7 +72,14 @@ export function VotingView({
 
   return (
     <>
-      <Select value={currentConstituencyId} onValueChange={handleConstituencyChange}>
+      <Select
+        value={currentConstituencyId}
+        onValueChange={(v) => handleConstituencyChange(v ?? "")}
+        items={Object.fromEntries((group?.Constituencies ?? []).map((cId) => {
+          const c = constituencies.find((x) => x.ID === cId);
+          return [cId, c ? `${c.Code} — ${c.Name}` : cId.slice(0, 8)];
+        }))}
+      >
         <SelectTrigger>
           <SelectValue placeholder="Select constituency" />
         </SelectTrigger>
@@ -137,35 +144,37 @@ export function VotingView({
               {nonVoters.length === 0 ? (
                 <p className="text-sm text-muted-foreground">Everyone has voted!</p>
               ) : (
-                <ScrollArea className="max-h-96"><div className="space-y-1.5">
-                  {nonVoters.map((id) => {
-                    const voter = voterMap[id];
-                    return (
-                      <div
-                        key={id}
-                        className="flex items-center justify-between p-2 border rounded-md hover:bg-muted/50 transition-colors"
-                      >
-                        <div className="min-w-0">
-                          <p className="text-sm font-medium truncate">
-                            {voter?.FullName ?? id.slice(0, 12) + "..."}
-                          </p>
-                          {voter && (
-                            <p className="text-xs text-muted-foreground">{voter.FullNationalID ?? voter.MaskedNationalID}</p>
-                          )}
-                        </div>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="shrink-0 ml-2"
-                          onClick={() => handleQuickRecord(id)}
-                          disabled={isPending}
+                <ScrollArea className="h-96">
+                  <div className="space-y-1.5">
+                    {nonVoters.map((id) => {
+                      const voter = voterMap[id];
+                      return (
+                        <div
+                          key={id}
+                          className="flex items-center justify-between p-2 border rounded-md hover:bg-muted/50 transition-colors"
                         >
-                          Mark Voted
-                        </Button>
-                      </div>
-                    );
-                  })}
-                </div></ScrollArea>
+                          <div className="min-w-0">
+                            <p className="text-sm font-medium truncate">
+                              {voter?.FullName ?? id.slice(0, 12) + "..."}
+                            </p>
+                            {voter && (
+                              <p className="text-xs text-muted-foreground">{voter.FullNationalID ?? voter.MaskedNationalID}</p>
+                            )}
+                          </div>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="shrink-0 ml-2"
+                            onClick={() => handleQuickRecord(id)}
+                            disabled={isPending}
+                          >
+                            Mark Voted
+                          </Button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </ScrollArea>
               )}
             </CardContent>
           </Card>

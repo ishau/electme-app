@@ -12,15 +12,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { SUPPORT_LEVEL_HEX } from "@/lib/utils";
 import type { HexCandidateSupportLevel } from "@/lib/types";
 
-const SUPPORT_LEVEL_COLORS: Record<string, string> = {
-  strong_supporter: "#16a34a",
-  leaning: "#86efac",
-  undecided: "#fbbf24",
-  soft_opposition: "#fb923c",
-  hard_opposition: "#dc2626",
-};
+const SUPPORT_LEVEL_COLORS = SUPPORT_LEVEL_HEX;
 
 const SUPPORT_LEVEL_LABELS: Record<string, string> = {
   strong_supporter: "Strong Supporter",
@@ -115,7 +110,11 @@ export default function CandidateSupportPage() {
       <div className="flex items-end gap-4 flex-wrap">
         <div>
           <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Candidate</label>
-          <Select value={selectedCandidate} onValueChange={setSelectedCandidate}>
+          <Select
+            value={selectedCandidate}
+            onValueChange={(v) => setSelectedCandidate(v ?? "")}
+            items={Object.fromEntries(candidates.map((c) => [c.ID, `${c.Name} (${c.CandidateType})`]))}
+          >
             <SelectTrigger className="w-[300px] mt-1.5">
               <SelectValue placeholder="Select candidate" />
             </SelectTrigger>

@@ -43,25 +43,18 @@ export function VoterCombobox({
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Button
-          variant="outline"
-          role="combobox"
-          aria-expanded={open}
-          className="w-full justify-between font-normal"
-        >
-          {selected ? (
-            <span className="truncate">{selected.name}</span>
-          ) : (
-            <span className="text-muted-foreground flex items-center gap-2">
-              <Search className="h-3.5 w-3.5" />
-              {placeholder}
-            </span>
-          )}
-          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-        </Button>
+      <PopoverTrigger render={<Button variant="outline" role="combobox" aria-expanded={open} className="w-full justify-between font-normal" />}>
+        {selected ? (
+          <span className="truncate">{selected.name}</span>
+        ) : (
+          <span className="text-muted-foreground flex items-center gap-2">
+            <Search className="h-3.5 w-3.5" />
+            {placeholder}
+          </span>
+        )}
+        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
       </PopoverTrigger>
-      <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start">
+      <PopoverContent className="w-[var(--anchor-width)] p-0" align="start">
         <Command>
           <CommandInput placeholder="Type a name..." />
           <CommandList>

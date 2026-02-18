@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 import { login } from "@/lib/auth";
 import { useAuth } from "@/lib/hooks/use-auth";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -11,6 +12,7 @@ import { Button } from "@/components/ui/button";
 
 export default function LoginPage() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const { isAuthenticated, isLoading } = useAuth();
 
   useEffect(() => {
@@ -31,7 +33,8 @@ export default function LoginPage() {
 
     try {
       await login(username, password);
-      router.push("/");
+      await queryClient.invalidateQueries({ queryKey: ["auth"] });
+      router.push("/dashboard");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Login failed");
     } finally {

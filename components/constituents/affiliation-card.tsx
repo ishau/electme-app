@@ -140,7 +140,11 @@ export function AffiliationCard({ constituentId, affiliations, parties }: Affili
             <div className="grid grid-cols-2 gap-2">
               <div className="space-y-1">
                 <Label className="text-xs">Party</Label>
-                <Select value={newPartyId} onValueChange={setNewPartyId}>
+                <Select
+                  value={newPartyId}
+                  onValueChange={(v) => setNewPartyId(v ?? "")}
+                  items={Object.fromEntries(parties.map((p) => [p.ID, `${p.Code} - ${p.Name}`]))}
+                >
                   <SelectTrigger className="h-8 text-xs">
                     <SelectValue placeholder="Select party" />
                   </SelectTrigger>
@@ -166,7 +170,11 @@ export function AffiliationCard({ constituentId, affiliations, parties }: Affili
             <div className="grid grid-cols-2 gap-2">
               <div className="space-y-1">
                 <Label className="text-xs">Source</Label>
-                <Select value={newSource} onValueChange={setNewSource}>
+                <Select
+                  value={newSource}
+                  onValueChange={(v) => setNewSource(v ?? "unknown")}
+                  items={{ self_declared: "Self-declared", observed: "Observed", voter_list: "Voter list", unknown: "Unknown" }}
+                >
                   <SelectTrigger className="h-8 text-xs">
                     <SelectValue />
                   </SelectTrigger>

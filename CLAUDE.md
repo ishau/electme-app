@@ -4,7 +4,8 @@
 - Next.js app router with `(app)` route group — pages are client-side, auth/proxy via API routes (SSR)
 - Go backend API — all response fields are PascalCase (e.g., `CandidateType`, `IsOwnCandidate`)
 - TanStack Query for data fetching (`useQuery`) and cache invalidation after mutations (`queryClient.invalidateQueries`)
-- UI: shadcn/ui components in `/components/ui`
+- UI: shadcn/ui (base-nova style, Base UI primitives) in `/components/ui` — DO NOT modify these files, fix consumers instead
+- Font: Public Sans (sans), Geist Mono (mono)
 - Charts: Recharts (`recharts`) for bar charts, pie charts, etc. CSS heatmaps for calendar grids.
 - nuqs for URL search param state in filter components (`useQueryStates`, `parseAsString`)
 - Auth: HttpOnly cookie session, Next.js API routes for login/logout, catch-all proxy for Go backend
@@ -28,6 +29,7 @@
 - `/components/shared/gender-badge.tsx` — `GenderBadge` component: blue for male, pink for female — use everywhere gender is displayed
 - `/lib/hooks/use-hex.ts` — hex analytics hooks (`useHexLeaning`, `useHexPartySupport`, `useHexCandidateSupport`) — no `useHexDominant` (removed)
 - `/components/settings/geography-view.tsx` — `HouseManagementView` component (used in maps/houses tab, NOT settings)
+- `/lib/utils.ts` — label/color helpers. `SUPPORT_LEVEL_HEX` for Recharts/MapLibre hex colors; `bg-support-*` CSS classes (from globals.css vars) for Tailwind usage
 
 ## Architecture
 - All pages are `"use client"` — data fetched via hooks, mutations via `lib/mutations.ts`
@@ -41,7 +43,7 @@
 - `useLatestSupport` returns `Record<string, SupportAssessment[]>` (full history per person) — household card and support card group assessments by candidate type (mayor/president/wdc/etc), show latest prominently with compact history below
 - `keepPreviousData` on filter-dependent hooks to prevent "No results" flash during refetch
 - Layout split: `app/(app)/layout.tsx` (server component with `<Suspense>` + `<NuqsAdapter>`) wraps `AuthGuard` > `AppLayoutContent` (client component)
-- Loading skeletons: use `PageSkeleton`/`TableSkeleton` from `components/shared/loading-skeleton.tsx` gated on `isLoading`
+- Loading skeletons: `components/shared/loading-skeleton.tsx` has page-specific variants (PageSkeleton, ListPageSkeleton, CardGridSkeleton, DetailWithStatsSkeleton, StatsPageSkeleton, DashboardSkeleton, VotingPageSkeleton) — gate on `isLoading`
 - `Page` component `description` accepts `ReactNode` — can render styled badges/tooltips inline in page headers
 - Party affiliation display: colored left border (`border-l-4`) on list items (e.g., household card), or colored dots next to names in tables — resolved from `LatestAffiliation.PartyID` against `parties` array
 - Gender display: always use `<GenderBadge sex={...} />` from `components/shared/gender-badge.tsx` — blue for M, pink for F
@@ -83,3 +85,10 @@
 - MapLibre popup default `maxWidth` is 240px — set `maxWidth: "360px"` when creating popups with wider content. Popup HTML uses inline styles (no Tailwind). Override `.maplibregl-popup-close-button` and `.maplibregl-popup-content` via `<style>` tag in component.
 - When merging branches where main is ahead, prefer HEAD versions for types/hooks/mutations and accept only genuinely new files from the feature branch. Check for renamed functions (e.g., `plotHouse` vs `updateHouseLocation`) and type field mismatches (e.g., `IsPlotted` vs `HasOverride`).
 - Google Satellite tiles: `https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}` — zoom 20+, good for Maldives house-level work
+- shadcn uses Base UI (not Radix) — `asChild` prop doesn't exist, use `render` prop for element polymorphism (e.g., `<DialogTrigger render={<Button />}>`)
+- Base UI Select `onValueChange` signature is `(value: string | null, eventDetails) => void` — wrap setState: `onValueChange={(v) => setState(v ?? "")}`
+- Base UI Select `SelectValue` shows raw value by default — must pass `items` prop to `<Select>` mapping values to labels (e.g., `items={{ foo: "Foo Label" }}`)
+- CSS custom properties: `--radix-*` vars don't exist — use `--anchor-width`, `--transform-origin`, `--available-height`
+- shadcn nova Card has built-in `py-4` on Card wrapper, `px-4` on CardContent — don't add custom `p-4`/`p-6` to CardContent
+- Support level colors: use `bg-support-strong`/`bg-support-leaning`/`bg-support-undecided`/`bg-support-soft-opposition`/`bg-support-hard-opposition` (CSS vars in globals.css). For Recharts/MapLibre hex values, import `SUPPORT_LEVEL_HEX` from `lib/utils`. Never hardcode support colors.
+- Actual CandidateType API values: `member`, `WDC President`, `member (Reserved for Female)`, `Mayor`, `President`, `reserved seat for female`, `WDC member` — TYPE_LABEL maps exist in candidates page, household-card, support-form, bulk-add-by-address-dialog
