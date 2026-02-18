@@ -12,10 +12,29 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { SupportLevelBadge } from "@/components/campaign/support-level-badge";
+import { GenderBadge } from "@/components/shared/gender-badge";
 import { AddressSupportDialog } from "@/components/constituents/bulk-add-by-address-dialog";
-import { supportLevelColor, formatDateTime } from "@/lib/utils";
+import { supportLevelColor, supportLevelLabel, formatDate } from "@/lib/utils";
 import { Users } from "lucide-react";
 import type { Constituent, SupportAssessment, CandidateView, Party } from "@/lib/types";
+
+const normalizeType = (t: string) => t.toLowerCase().replace(/\s+/g, "_");
+
+const TYPE_ORDER: Record<string, number> = {
+  mayor: 0,
+  president: 1,
+  wdc_president: 2,
+  council_member: 3,
+  wdc_member: 4,
+};
+
+const TYPE_LABEL: Record<string, string> = {
+  mayor: "Mayor",
+  president: "President",
+  wdc_president: "WDC President",
+  council_member: "Council Member",
+  wdc_member: "WDC Member",
+};
 
 interface HouseholdCardProps {
   currentConstituentId: string;
@@ -75,32 +94,24 @@ export function HouseholdCard({
           <div className="space-y-2">
             {others.map((n) => {
               const assessments = latestSupport[n.ID];
+              const partyColor = n.LatestAffiliation
+                ? (parties ?? []).find((p) => p.ID === n.LatestAffiliation!.PartyID)?.Color
+                : undefined;
               return (
                 <div
                   key={n.ID}
-                  className="flex items-center justify-between p-2 border rounded"
+                  className="flex items-center justify-between p-2 border rounded border-l-4"
+                  style={partyColor ? { borderLeftColor: partyColor } : undefined}
                 >
                   <div>
-                    <div className="flex items-center gap-1.5">
-                      {(() => {
-                        const party = n.LatestAffiliation ? (parties ?? []).find((p) => p.ID === n.LatestAffiliation!.PartyID) : null;
-                        return party ? (
-                          <span
-                            className="w-2 h-2 rounded-full shrink-0"
-                            style={{ backgroundColor: party.Color }}
-                            title={party.Code}
-                          />
-                        ) : null;
-                      })()}
-                      <Link
-                        href={`/constituents/${n.ID}`}
-                        className="text-sm font-medium hover:underline"
-                      >
-                        {n.FullName}
-                      </Link>
-                    </div>
+                    <Link
+                      href={`/constituents/${n.ID}`}
+                      className="text-sm font-medium hover:underline"
+                    >
+                      {n.FullName}
+                    </Link>
                     <div className="flex items-center gap-2 mt-0.5">
-                      <Badge variant="outline">{n.Sex}</Badge>
+                      <GenderBadge sex={n.Sex} />
                       {n.Age != null && (
                         <span className="text-xs text-muted-foreground">{n.Age} yrs</span>
                       )}
@@ -149,40 +160,78 @@ export function HouseholdCard({
       </Card>
 
       <Dialog open={!!preview} onOpenChange={(v) => { if (!v) setPreview(null); }}>
-        <DialogContent className="max-w-sm">
+        <DialogContent className="sm:max-w-2xl max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-sm">{preview?.name} — Assessments</DialogTitle>
           </DialogHeader>
-          <div className="space-y-2 max-h-60 overflow-y-auto">
-            {preview?.assessments.map((a) => {
-              const cand = a.CandidateID ? candidateMap[a.CandidateID] : null;
-              const candParty = cand?.PartyID ? (parties ?? []).find((p) => p.ID === cand.PartyID) : null;
-              return (
-                <div key={a.ID} className="flex items-center justify-between p-2 border rounded text-sm">
-                  <div className="flex items-center gap-2">
-                    <SupportLevelBadge level={a.Level} />
-                    {cand && (
-                      <span className="flex items-center gap-1.5">
-                        {candParty && (
-                          <span
-                            className="w-3 h-3 rounded-full flex items-center justify-center text-[7px] font-bold text-white shrink-0"
-                            style={{ backgroundColor: candParty.Color }}
-                          >
-                            {candParty.Code?.[0]}
-                          </span>
-                        )}
-                        <span className="text-xs text-muted-foreground">
-                          #{cand.Number} {cand.Name}
-                        </span>
-                      </span>
-                    )}
-                  </div>
-                  <span className="text-xs text-muted-foreground">
-                    {formatDateTime(a.AssessedAt)}
-                  </span>
-                </div>
+          <div className="space-y-3">
+            {(() => {
+              if (!preview) return null;
+              const byCand = new Map<string, SupportAssessment[]>();
+              for (const a of preview.assessments) {
+                const key = a.CandidateID ?? "_none";
+                if (!byCand.has(key)) byCand.set(key, []);
+                byCand.get(key)!.push(a);
+              }
+              for (const arr of byCand.values()) {
+                arr.sort((a, b) => new Date(b.AssessedAt).getTime() - new Date(a.AssessedAt).getTime());
+              }
+              const byType = new Map<string, { candId: string; cand: CandidateView | null; assessments: SupportAssessment[] }[]>();
+              for (const [candId, assessments] of byCand) {
+                const cand = candId !== "_none" ? candidateMap[candId] ?? null : null;
+                const type = cand ? normalizeType(cand.CandidateType) : "_unknown";
+                if (!byType.has(type)) byType.set(type, []);
+                byType.get(type)!.push({ candId, cand, assessments });
+              }
+              const sortedTypes = [...byType.entries()].sort(
+                ([a], [b]) => (TYPE_ORDER[a] ?? 99) - (TYPE_ORDER[b] ?? 99)
               );
-            })}
+
+              return sortedTypes.map(([type, candEntries]) => (
+                <div key={type}>
+                  <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">
+                    {TYPE_LABEL[type] ?? type}
+                  </h4>
+                  <div className="space-y-1.5">
+                    {candEntries.map(({ candId, cand, assessments: candAssessments }) => {
+                      const latest = candAssessments[0];
+                      const history = candAssessments.slice(1);
+                      const candParty = cand?.PartyID ? (parties ?? []).find((p) => p.ID === cand.PartyID) : null;
+                      return (
+                        <div key={candId} className="py-1.5 px-2 border rounded text-sm">
+                          <div className="flex items-center gap-2">
+                            <span
+                              className="w-3 h-3 rounded-full shrink-0"
+                              style={{ backgroundColor: candParty?.Color ?? "#a3a3a3" }}
+                              title={candParty?.Code ?? "IND"}
+                            />
+                            <span className="font-medium truncate">
+                              {cand ? `#${cand.Number} ${cand.Name}` : "General"}
+                            </span>
+                            <span className="text-xs text-muted-foreground whitespace-nowrap ml-auto">
+                              {formatDate(latest.AssessedAt)}
+                            </span>
+                            <SupportLevelBadge level={latest.Level} />
+                          </div>
+                          {history.length > 0 && (
+                            <div className="mt-1.5 ml-5 space-y-1">
+                              {history.map((h) => (
+                                <div key={h.ID} className="flex items-center gap-2 text-xs text-muted-foreground">
+                                  <span className={`w-2 h-2 rounded-sm shrink-0 ${supportLevelColor(h.Level).split(" ")[0]}`} />
+                                  <span>{supportLevelLabel(h.Level)}</span>
+                                  <span>—</span>
+                                  <span>{formatDate(h.AssessedAt)}</span>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              ));
+            })()}
           </div>
         </DialogContent>
       </Dialog>

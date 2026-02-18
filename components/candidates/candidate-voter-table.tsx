@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { GenderBadge } from "@/components/shared/gender-badge";
 import { Card } from "@/components/ui/card";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { SupportLevelBadge } from "@/components/campaign/support-level-badge";
@@ -87,7 +88,7 @@ export function CandidateVoterTable({ voters, candidateId }: CandidateVoterTable
                   {v.FullNationalID ?? v.MaskedNationalID}
                 </TableCell>
                 <TableCell className="hidden md:table-cell">
-                  <Badge variant="outline">{v.Sex}</Badge>
+                  <GenderBadge sex={v.Sex} />
                 </TableCell>
                 <TableCell>
                   <SupportLevelBadge level={v.Level} />

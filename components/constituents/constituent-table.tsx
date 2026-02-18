@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { GenderBadge } from "@/components/shared/gender-badge";
 import { Card } from "@/components/ui/card";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { AddressSupportDialog } from "@/components/constituents/bulk-add-by-address-dialog";
@@ -101,13 +102,13 @@ export function ConstituentTable({
                   {c.Age ?? "—"}
                 </TableCell>
                 <TableCell className="hidden md:table-cell">
-                  <Badge variant="outline">{c.Sex}</Badge>
+                  <GenderBadge sex={c.Sex} />
                 </TableCell>
                 <TableCell className="hidden md:table-cell text-muted-foreground text-sm">
                   {c.PermanentAddress?.Name ? (
                     <button
                       type="button"
-                      className="hover:text-accent-foreground hover:underline text-left"
+                      className="hover:text-foreground hover:underline text-left cursor-pointer"
                       onClick={() => {
                         setBulkAdd({
                           address: c.PermanentAddress.Name,

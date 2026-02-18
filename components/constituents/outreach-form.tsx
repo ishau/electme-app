@@ -46,6 +46,14 @@ function outcomeBadgeVariant(outcome: string) {
   }
 }
 
+const OUTCOME_DOT: Record<string, string> = {
+  positive: "bg-green-500",
+  neutral: "bg-gray-400",
+  negative: "bg-red-500",
+  not_home: "bg-yellow-400",
+  refused: "bg-orange-400",
+};
+
 export function OutreachForm({ constituentId, history }: OutreachFormProps) {
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
@@ -91,27 +99,35 @@ export function OutreachForm({ constituentId, history }: OutreachFormProps) {
         </CardHeader>
         <CardContent>
           {history.length > 0 ? (
-            <div className="space-y-2">
+            <div className="space-y-1.5 max-h-80 overflow-y-auto">
               {history.map((log) => (
-                <div key={log.ID} className="p-2 border rounded">
-                  <div className="flex items-center justify-between">
+                <div key={log.ID} className="flex items-start gap-2.5 py-1.5 px-2 border rounded text-sm">
+                  <span
+                    className={`w-2.5 h-2.5 rounded-full shrink-0 mt-1 ${OUTCOME_DOT[log.Outcome] ?? "bg-gray-300"}`}
+                    title={outreachOutcomeLabel(log.Outcome)}
+                  />
+                  <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
-                      <Badge variant="outline">{outreachMethodLabel(log.Method)}</Badge>
-                      <Badge variant={outcomeBadgeVariant(log.Outcome)}>
+                      <span className="font-medium">{outreachMethodLabel(log.Method)}</span>
+                      <Badge variant={outcomeBadgeVariant(log.Outcome)} className="text-[10px] px-1.5 py-0">
                         {outreachOutcomeLabel(log.Outcome)}
                       </Badge>
+                      <span className="text-xs text-muted-foreground whitespace-nowrap ml-auto">
+                        {formatDateTime(log.ContactedAt)}
+                      </span>
                     </div>
-                    <span className="text-xs text-muted-foreground">
-                      {formatDateTime(log.ContactedAt)}
-                    </span>
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
+                      <span>by {log.ContactedBy}</span>
+                      {log.FollowUpDate && (
+                        <span className="text-yellow-600 dark:text-yellow-400">
+                          Follow-up {log.FollowUpDate.split("T")[0]}
+                        </span>
+                      )}
+                    </div>
+                    {log.Notes && (
+                      <p className="text-xs text-muted-foreground mt-0.5 truncate">{log.Notes}</p>
+                    )}
                   </div>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    By {log.ContactedBy}
-                    {log.FollowUpDate && ` | Follow-up: ${log.FollowUpDate.split("T")[0]}`}
-                  </p>
-                  {log.Notes && (
-                    <p className="text-xs mt-1">{log.Notes}</p>
-                  )}
                 </div>
               ))}
             </div>

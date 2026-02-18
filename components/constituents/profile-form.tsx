@@ -5,9 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
+import { GenderBadge } from "@/components/shared/gender-badge";
 import { updateProfile } from "@/lib/mutations";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -35,7 +34,6 @@ export function ProfileForm({ constituentId, profile, basicInfo }: ProfileFormPr
   const [phone, setPhone] = useState(
     profile?.ContactInfo?.PhoneNumbers?.join(", ") ?? ""
   );
-  const [email, setEmail] = useState(profile?.ContactInfo?.Email ?? "");
   const [notes, setNotes] = useState(profile?.Notes ?? "");
   const [isPending, startTransition] = useTransition();
 
@@ -47,7 +45,6 @@ export function ProfileForm({ constituentId, profile, basicInfo }: ProfileFormPr
           full_national_id: fullNationalId || undefined,
           contact_info: {
             phone_numbers: phone ? phone.split(",").map((s) => s.trim()) : [],
-            email: email || undefined,
           },
           notes: notes || undefined,
         });
@@ -66,43 +63,6 @@ export function ProfileForm({ constituentId, profile, basicInfo }: ProfileFormPr
       : basicInfo.address
     : undefined;
 
-  const basicInfoRows = (
-    <div className="space-y-2 text-sm">
-      <div className="flex justify-between">
-        <span className="text-muted-foreground">National ID</span>
-        <span>{basicInfo.nationalId}</span>
-      </div>
-      <div className="flex justify-between">
-        <span className="text-muted-foreground">Gender</span>
-        <Badge variant="outline">{basicInfo.sex}</Badge>
-      </div>
-      {basicInfo.age != null && (
-        <div className="flex justify-between">
-          <span className="text-muted-foreground">Age</span>
-          <span>{basicInfo.age} yrs</span>
-        </div>
-      )}
-      {addressDisplay && (
-        <div className="flex justify-between">
-          <span className="text-muted-foreground">Address</span>
-          <span>{addressDisplay}</span>
-        </div>
-      )}
-      {basicInfo.nicknames && basicInfo.nicknames.length > 0 && (
-        <div className="flex justify-between items-start">
-          <span className="text-muted-foreground">Nicknames</span>
-          <div className="flex flex-wrap gap-1 justify-end">
-            {basicInfo.nicknames.map((n) => (
-              <Badge key={n.ID} variant={n.IsPrimary ? "default" : "secondary"}>
-                {n.Name}{n.IsPrimary && " (primary)"}
-              </Badge>
-            ))}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-
   if (!editing) {
     return (
       <Card>
@@ -112,47 +72,53 @@ export function ProfileForm({ constituentId, profile, basicInfo }: ProfileFormPr
             Edit Profile
           </Button>
         </CardHeader>
-        <CardContent className="space-y-4">
-          {basicInfoRows}
-
-          {profile && (
-            <>
-              <Separator />
-              <div className="space-y-2 text-sm">
-                {profile.FullNationalID && (
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Full National ID</span>
-                    <span>{profile.FullNationalID}</span>
-                  </div>
-                )}
-                {profile.ContactInfo?.PhoneNumbers?.length > 0 && (
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Phone</span>
-                    <span>{profile.ContactInfo.PhoneNumbers.join(", ")}</span>
-                  </div>
-                )}
-                {profile.ContactInfo?.Email && (
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Email</span>
-                    <span>{profile.ContactInfo.Email}</span>
-                  </div>
-                )}
-                {profile.Notes && (
-                  <div>
-                    <span className="text-muted-foreground">Notes: </span>
-                    <span>{profile.Notes}</span>
-                  </div>
-                )}
+        <CardContent>
+          <div className="space-y-2 text-sm">
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">National ID</span>
+              <span>{profile?.FullNationalID || basicInfo.nationalId}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Gender</span>
+              <GenderBadge sex={basicInfo.sex} />
+            </div>
+            {basicInfo.age != null && (
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Age</span>
+                <span>{basicInfo.age} yrs</span>
               </div>
-            </>
-          )}
-
-          {!profile && (
-            <>
-              <Separator />
-              <p className="text-sm text-muted-foreground">No profile data yet.</p>
-            </>
-          )}
+            )}
+            {addressDisplay && (
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Address</span>
+                <span>{addressDisplay}</span>
+              </div>
+            )}
+            {basicInfo.nicknames && basicInfo.nicknames.length > 0 && (
+              <div className="flex justify-between items-start">
+                <span className="text-muted-foreground">Nicknames</span>
+                <div className="flex flex-wrap gap-1 justify-end">
+                  {basicInfo.nicknames.map((n) => (
+                    <span key={n.ID} className={`text-xs px-1.5 py-0.5 rounded ${n.IsPrimary ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>
+                      {n.Name}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+            {profile?.ContactInfo?.PhoneNumbers && profile.ContactInfo.PhoneNumbers.length > 0 && (
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Phone</span>
+                <span>{profile.ContactInfo.PhoneNumbers.join(", ")}</span>
+              </div>
+            )}
+            {profile?.Notes && (
+              <div className="flex justify-between items-start">
+                <span className="text-muted-foreground">Notes</span>
+                <span className="text-right max-w-[60%]">{profile.Notes}</span>
+              </div>
+            )}
+          </div>
         </CardContent>
       </Card>
     );
@@ -163,9 +129,25 @@ export function ProfileForm({ constituentId, profile, basicInfo }: ProfileFormPr
       <CardHeader>
         <CardTitle className="text-base">Edit Profile</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
-        {basicInfoRows}
-        <Separator />
+      <CardContent>
+        <div className="space-y-2 text-sm mb-4">
+          <div className="flex justify-between">
+            <span className="text-muted-foreground">Gender</span>
+            <GenderBadge sex={basicInfo.sex} />
+          </div>
+          {basicInfo.age != null && (
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Age</span>
+              <span>{basicInfo.age} yrs</span>
+            </div>
+          )}
+          {addressDisplay && (
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Address</span>
+              <span>{addressDisplay}</span>
+            </div>
+          )}
+        </div>
         <form onSubmit={handleSubmit} className="space-y-3">
           <div className="space-y-1">
             <Label>Full National ID</Label>
@@ -181,14 +163,6 @@ export function ProfileForm({ constituentId, profile, basicInfo }: ProfileFormPr
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
               placeholder="+960..."
-            />
-          </div>
-          <div className="space-y-1">
-            <Label>Email</Label>
-            <Input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
             />
           </div>
           <div className="space-y-1">

@@ -11,7 +11,6 @@ import {
   Vote,
   Settings,
   FolderOpen,
-  ChevronRight,
   MapPin,
   Bus,
   LogOut,
@@ -106,7 +105,6 @@ export function AppSidebar({ groupName, partyCode }: { groupName: string; partyC
                     <Link href={item.href}>
                       <item.icon className="h-4 w-4" />
                       <span>{item.label}</span>
-                      <ChevronRight className="ml-auto h-4 w-4" />
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>

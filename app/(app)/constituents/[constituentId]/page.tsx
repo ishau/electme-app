@@ -18,6 +18,7 @@ import { RelationshipList } from "@/components/constituents/relationship-list";
 import { AffiliationCard } from "@/components/constituents/affiliation-card";
 import { HouseholdCard } from "@/components/constituents/household-card";
 import { Page } from "@/components/shared/page";
+import { GenderBadge } from "@/components/shared/gender-badge";
 import { PageSkeleton } from "@/components/shared/loading-skeleton";
 import {
   Tooltip,
@@ -86,7 +87,9 @@ export default function ConstituentDetailPage() {
       title={constituent.FullName}
       description={
         <span className="flex items-center gap-2 flex-wrap">
-          <span>{constituent.FullNationalID ?? constituent.MaskedNationalID} | {constituent.Sex === "M" ? "Male" : "Female"}{constituent.Age != null ? ` | ${constituent.Age} yrs` : ""}</span>
+          <span>{constituent.FullNationalID ?? constituent.MaskedNationalID}</span>
+          <GenderBadge sex={constituent.Sex} />
+          {constituent.Age != null && <span>{constituent.Age} yrs</span>}
           {affiliationBadge}
         </span>
       }
@@ -106,10 +109,8 @@ export default function ConstituentDetailPage() {
             }}
           />
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <SupportForm constituentId={constituentId} constituencyId={constituent?.ConstituencyID ?? ""} history={supportHistory ?? []} candidates={group?.Candidates ?? []} parties={parties ?? []} />
-            <OutreachForm constituentId={constituentId} history={outreachHistory ?? []} />
-          </div>
+          <SupportForm constituentId={constituentId} constituencyId={constituent?.ConstituencyID ?? ""} history={supportHistory ?? []} candidates={group?.Candidates ?? []} parties={parties ?? []} />
+          <OutreachForm constituentId={constituentId} history={outreachHistory ?? []} />
 
           <RelationshipList
             constituentId={constituentId}

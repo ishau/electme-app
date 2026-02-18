@@ -15,7 +15,7 @@ import { Rating } from "@/components/ui/rating";
 import { SupportLevelBadge } from "@/components/campaign/support-level-badge";
 import { logSupport } from "@/lib/mutations";
 import { useQueryClient } from "@tanstack/react-query";
-import { formatDateTime } from "@/lib/utils";
+import { formatDateTime, supportLevelColor, supportLevelLabel } from "@/lib/utils";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import type { SupportAssessment, CandidateView, Party } from "@/lib/types";
@@ -215,29 +215,82 @@ export function SupportForm({ constituentId, constituencyId, history, candidates
         </CardHeader>
         <CardContent>
           {history.length > 0 ? (
-            <div className="space-y-2 max-h-60 overflow-y-auto">
-              {history.map((assessment) => (
-                <div
-                  key={assessment.ID}
-                  className="flex items-center justify-between p-2 border rounded"
-                >
-                  <div>
-                    <SupportLevelBadge level={assessment.Level} />
-                    {assessment.CandidateID && candidateMap[assessment.CandidateID] && (
-                      <span className="text-xs text-muted-foreground ml-2">
-                        for #{candidateMap[assessment.CandidateID].Number} {candidateMap[assessment.CandidateID].Name}
-                      </span>
-                    )}
-                    <span className="text-xs text-muted-foreground ml-2">
-                      Confidence: {assessment.Confidence}/5
-                    </span>
+            <div className="space-y-4 max-h-80 overflow-y-auto">
+              {(() => {
+                const partyMap2 = Object.fromEntries(parties.map((p) => [p.ID, p]));
+                // Group by candidate
+                const byCand = new Map<string, SupportAssessment[]>();
+                for (const a of history) {
+                  const key = a.CandidateID ?? "_none";
+                  if (!byCand.has(key)) byCand.set(key, []);
+                  byCand.get(key)!.push(a);
+                }
+                for (const arr of byCand.values()) {
+                  arr.sort((a, b) => new Date(b.AssessedAt).getTime() - new Date(a.AssessedAt).getTime());
+                }
+                // Group by type
+                const byType = new Map<string, { candId: string; cand: CandidateView | undefined; assessments: SupportAssessment[] }[]>();
+                for (const [candId, assessments] of byCand) {
+                  const cand = candId !== "_none" ? candidateMap[candId] : undefined;
+                  const type = cand ? normalizeType(cand.CandidateType) : "_unknown";
+                  if (!byType.has(type)) byType.set(type, []);
+                  byType.get(type)!.push({ candId, cand, assessments });
+                }
+                const sortedTypes = [...byType.entries()].sort(
+                  ([a], [b]) => (TYPE_ORDER[a] ?? 99) - (TYPE_ORDER[b] ?? 99)
+                );
+
+                return sortedTypes.map(([type, candEntries]) => (
+                  <div key={type}>
+                    <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">
+                      {TYPE_BADGE[type]?.label ?? type.replace(/_/g, " ")}
+                    </h4>
+                    <div className="space-y-1.5">
+                      {candEntries.map(({ candId, cand, assessments }) => {
+                        const latest = assessments[0];
+                        const older = assessments.slice(1);
+                        const candParty = cand?.PartyID ? partyMap2[cand.PartyID] : undefined;
+                        return (
+                          <div key={candId} className="py-1.5 px-2 border rounded text-sm">
+                            <div className="flex items-center gap-2">
+                              <span
+                                className="w-3 h-3 rounded-full shrink-0"
+                                style={{ backgroundColor: candParty?.Color ?? "#a3a3a3" }}
+                                title={candParty?.Code ?? "IND"}
+                              />
+                              <span className="font-medium truncate">
+                                {cand ? `#${cand.Number} ${cand.Name}` : "General"}
+                              </span>
+                              <span className="text-xs text-muted-foreground whitespace-nowrap ml-auto">
+                                {formatDateTime(latest.AssessedAt)}
+                              </span>
+                              <SupportLevelBadge level={latest.Level} />
+                            </div>
+                            <div className="flex items-center gap-3 mt-1 ml-5 text-xs text-muted-foreground">
+                              <span>by {latest.AssessedBy}</span>
+                              <span>{latest.Confidence}/5 conf.</span>
+                              {latest.Notes && <span className="truncate">{latest.Notes}</span>}
+                            </div>
+                            {older.length > 0 && (
+                              <div className="mt-1.5 ml-5 space-y-1">
+                                {older.map((h) => (
+                                  <div key={h.ID} className="flex items-center gap-2 text-xs text-muted-foreground">
+                                    <span className={`w-2 h-2 rounded-sm shrink-0 ${supportLevelColor(h.Level).split(" ")[0]}`} />
+                                    <span>{supportLevelLabel(h.Level)}</span>
+                                    <span>—</span>
+                                    <span>{formatDateTime(h.AssessedAt)}</span>
+                                    <span className="text-muted-foreground/60">by {h.AssessedBy}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
-                  <div className="text-right text-xs text-muted-foreground">
-                    <p>{assessment.AssessedBy}</p>
-                    <p>{formatDateTime(assessment.AssessedAt)}</p>
-                  </div>
-                </div>
-              ))}
+                ));
+              })()}
             </div>
           ) : (
             <p className="text-sm text-muted-foreground">No assessments yet.</p>

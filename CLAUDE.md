@@ -25,6 +25,7 @@
 - `/components/auth-guard.tsx` — uses `useAuth()`, redirects to /login if not authenticated
 - `/components/providers.tsx` — QueryClientProvider + TooltipProvider
 - `/components/layout/app-layout-content.tsx` — client component for layout data fetching
+- `/components/shared/gender-badge.tsx` — `GenderBadge` component: blue for male, pink for female — use everywhere gender is displayed
 
 ## Architecture
 - All pages are `"use client"` — data fetched via hooks, mutations via `lib/mutations.ts`
@@ -35,12 +36,13 @@
 - `AuthGuard` in `app/(app)/layout.tsx` uses `useAuth()` hook to check session. Login page at `app/login/page.tsx`.
 - Reference data hooks (atolls, islands, parties, constituencies) use `staleTime: Infinity` — fetched once per session
 - `AssessedBy`/`ContactedBy` are server-set from JWT — campaign forms should NOT include these fields
-- `useLatestSupport` returns `Record<string, SupportAssessment[]>` (full history per person) — household card shows one colored bar per candidate (most recent assessment)
+- `useLatestSupport` returns `Record<string, SupportAssessment[]>` (full history per person) — household card and support card group assessments by candidate type (mayor/president/wdc/etc), show latest prominently with compact history below
 - `keepPreviousData` on filter-dependent hooks to prevent "No results" flash during refetch
 - Layout split: `app/(app)/layout.tsx` (server component with `<Suspense>` + `<NuqsAdapter>`) wraps `AuthGuard` > `AppLayoutContent` (client component)
 - Loading skeletons: use `PageSkeleton`/`TableSkeleton` from `components/shared/loading-skeleton.tsx` gated on `isLoading`
 - `Page` component `description` accepts `ReactNode` — can render styled badges/tooltips inline in page headers
-- Compact party affiliation display: small colored dot (`w-2 h-2 rounded-full`) next to names, resolved from `LatestAffiliation.PartyID` against `parties` array
+- Party affiliation display: colored left border (`border-l-4`) on list items (e.g., household card), or colored dots next to names in tables — resolved from `LatestAffiliation.PartyID` against `parties` array
+- Gender display: always use `<GenderBadge sex={...} />` from `components/shared/gender-badge.tsx` — blue for M, pink for F
 - **Tab layouts**: Dashboard (`/dashboard/*`) and Maps (`/maps/*`) use tab subpages with `layout.tsx` containing tab links. Pattern: parent `page.tsx` does `redirect()` to default tab.
 - **Dashboard tabs**: Overview, Demographics, Campaign, Outreach, Election Day — each loads only its own data
 
@@ -61,7 +63,8 @@
 - `/group/constituents` supports optional `constituency_id` param — omit it to fetch across all constituencies
 - Age is server-calculated (integer, nullable) — no client-side DOB conversion needed
 - `PermanentAddress` includes `IslandName` — display as "Address / IslandName"
-- `ContactInfo` has only `PhoneNumbers` and `Email` (no MobileNumbers/Viber)
+- `ContactInfo` has only `PhoneNumbers` and `Email` (no MobileNumbers/Viber) — Email is not editable in the profile form
+- Profile form (`ProfileForm`) displays all voter info seamlessly in one list — no "No profile data" empty state, no separator between base and enriched data
 - `ConstituentSearchResult.PermanentAddress` is a plain string (not the nested object)
 - Relationships use `RelationshipView` — API returns `PersonID`, `Name`, `Address`, `RelLabel`, `Derived`, `Score` (no N+1 queries needed)
 - Relationship input types: `parent_child`, `spouse`, `influencer`, `friend`, `colleague` — siblings/in-laws/grandparents are derived server-side
