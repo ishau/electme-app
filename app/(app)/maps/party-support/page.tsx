@@ -14,15 +14,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { X } from "lucide-react";
+import { SUPPORT_LEVEL_HEX } from "@/lib/utils";
 import type { HexPartySupportEntry, HexCandidateSupportLevel } from "@/lib/types";
 
-const SUPPORT_LEVEL_COLORS: Record<string, string> = {
-  strong_supporter: "#16a34a",
-  leaning: "#86efac",
-  undecided: "#fbbf24",
-  soft_opposition: "#fb923c",
-  hard_opposition: "#dc2626",
-};
+const SUPPORT_LEVEL_COLORS = SUPPORT_LEVEL_HEX;
 
 const SUPPORT_LEVEL_LABELS: Record<string, string> = {
   strong_supporter: "Strong Supporter",

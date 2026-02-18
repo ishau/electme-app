@@ -25,18 +25,27 @@ export function formatDateTime(dateStr: string | null | undefined): string {
   });
 }
 
+/** Hex colors for support levels — use in Recharts fills, MapLibre styles, inline styles */
+export const SUPPORT_LEVEL_HEX: Record<string, string> = {
+  strong_supporter: "#7f2df7",
+  leaning: "#a37dff",
+  undecided: "#9ba0a9",
+  soft_opposition: "#e66eee",
+  hard_opposition: "#a100b7",
+};
+
 export function supportLevelColor(level: string): string {
   switch (level) {
     case "strong_supporter":
-      return "bg-green-500 text-white";
+      return "bg-support-strong text-white";
     case "leaning":
-      return "bg-yellow-400 text-yellow-900";
+      return "bg-support-leaning text-white";
     case "undecided":
-      return "bg-gray-400 text-white";
+      return "bg-support-undecided text-white";
     case "soft_opposition":
-      return "bg-orange-400 text-white";
+      return "bg-support-soft-opposition text-white";
     case "hard_opposition":
-      return "bg-red-500 text-white";
+      return "bg-support-hard-opposition text-white";
     default:
       return "bg-gray-200 text-gray-700";
   }

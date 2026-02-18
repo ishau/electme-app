@@ -10,6 +10,7 @@ import {
   Cell,
 } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { SUPPORT_LEVEL_HEX } from "@/lib/utils";
 import type { SupportSummary } from "@/lib/types";
 
 interface SupportSummaryChartProps {
@@ -17,11 +18,11 @@ interface SupportSummaryChartProps {
 }
 
 const levels = [
-  { key: "StrongSupporter" as const, label: "Strong Supporter", color: "#22c55e" },
-  { key: "Leaning" as const, label: "Leaning", color: "#facc15" },
-  { key: "Undecided" as const, label: "Undecided", color: "#9ca3af" },
-  { key: "SoftOpposition" as const, label: "Soft Opposition", color: "#fb923c" },
-  { key: "HardOpposition" as const, label: "Hard Opposition", color: "#ef4444" },
+  { key: "StrongSupporter" as const, label: "Strong Supporter", color: SUPPORT_LEVEL_HEX.strong_supporter },
+  { key: "Leaning" as const, label: "Leaning", color: SUPPORT_LEVEL_HEX.leaning },
+  { key: "Undecided" as const, label: "Undecided", color: SUPPORT_LEVEL_HEX.undecided },
+  { key: "SoftOpposition" as const, label: "Soft Opposition", color: SUPPORT_LEVEL_HEX.soft_opposition },
+  { key: "HardOpposition" as const, label: "Hard Opposition", color: SUPPORT_LEVEL_HEX.hard_opposition },
   { key: "NotAssessed" as const, label: "Not Assessed", color: "#e5e7eb" },
 ];
 

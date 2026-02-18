@@ -87,35 +87,35 @@ export default function CandidateDetailPage() {
         <div className="flex h-3 rounded-full overflow-hidden">
           {summary!.StrongSupporter > 0 && (
             <div
-              className="bg-green-500"
+              className="bg-support-strong"
               style={{ width: `${(summary!.StrongSupporter / total) * 100}%` }}
               title={`Strong: ${summary!.StrongSupporter}`}
             />
           )}
           {summary!.Leaning > 0 && (
             <div
-              className="bg-yellow-400"
+              className="bg-support-leaning"
               style={{ width: `${(summary!.Leaning / total) * 100}%` }}
               title={`Leaning: ${summary!.Leaning}`}
             />
           )}
           {summary!.Undecided > 0 && (
             <div
-              className="bg-gray-400"
+              className="bg-support-undecided"
               style={{ width: `${(summary!.Undecided / total) * 100}%` }}
               title={`Undecided: ${summary!.Undecided}`}
             />
           )}
           {summary!.SoftOpposition > 0 && (
             <div
-              className="bg-orange-400"
+              className="bg-support-soft-opposition"
               style={{ width: `${(summary!.SoftOpposition / total) * 100}%` }}
               title={`Soft Opp: ${summary!.SoftOpposition}`}
             />
           )}
           {summary!.HardOpposition > 0 && (
             <div
-              className="bg-red-500"
+              className="bg-support-hard-opposition"
               style={{ width: `${(summary!.HardOpposition / total) * 100}%` }}
               title={`Hard Opp: ${summary!.HardOpposition}`}
             />

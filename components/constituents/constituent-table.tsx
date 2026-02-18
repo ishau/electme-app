@@ -87,12 +87,27 @@ export function ConstituentTable({
                         />
                       ) : null;
                     })()}
-                    <Link
-                      href={`/constituents/${c.ID}`}
-                      className="font-medium hover:underline"
-                    >
-                      {c.FullName}
-                    </Link>
+                    <div className="min-w-0">
+                      <Link
+                        href={`/constituents/${c.ID}`}
+                        className="font-medium hover:underline"
+                      >
+                        {c.FullName}
+                      </Link>
+                      <div className="flex items-center gap-1.5 mt-0.5 md:hidden">
+                        <GenderBadge sex={c.Sex} />
+                        {c.Age != null && (
+                          <span className="text-xs text-muted-foreground">{c.Age} yrs</span>
+                        )}
+                        {c.PermanentAddress?.Name && (
+                          <span className="text-xs text-muted-foreground truncate">
+                            {c.PermanentAddress.IslandName
+                              ? `${c.PermanentAddress.Name} / ${c.PermanentAddress.IslandName}`
+                              : c.PermanentAddress.Name}
+                          </span>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 </TableCell>
                 <TableCell className="hidden sm:table-cell text-muted-foreground">

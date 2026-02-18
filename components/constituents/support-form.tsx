@@ -62,33 +62,33 @@ const supportLevels = [
 
 const dotColors: Record<string, { idle: string; active: string }> = {
   strong_supporter: {
-    idle: "border-green-300 bg-green-50 dark:border-green-700 dark:bg-green-950",
-    active: "bg-green-500 ring-2 ring-green-300 ring-offset-1 dark:ring-green-700 dark:ring-offset-background",
+    idle: "border-violet-300 bg-violet-50 dark:border-violet-700 dark:bg-violet-950",
+    active: "bg-support-strong ring-2 ring-violet-300 ring-offset-1 dark:ring-violet-700 dark:ring-offset-background",
   },
   leaning: {
-    idle: "border-yellow-300 bg-yellow-50 dark:border-yellow-700 dark:bg-yellow-950",
-    active: "bg-yellow-400 ring-2 ring-yellow-300 ring-offset-1 dark:ring-yellow-600 dark:ring-offset-background",
+    idle: "border-violet-200 bg-violet-50 dark:border-violet-600 dark:bg-violet-950",
+    active: "bg-support-leaning ring-2 ring-violet-200 ring-offset-1 dark:ring-violet-600 dark:ring-offset-background",
   },
   undecided: {
     idle: "border-gray-300 bg-gray-50 dark:border-gray-600 dark:bg-gray-800",
-    active: "bg-gray-400 ring-2 ring-gray-300 ring-offset-1 dark:ring-gray-500 dark:ring-offset-background",
+    active: "bg-support-undecided ring-2 ring-gray-300 ring-offset-1 dark:ring-gray-500 dark:ring-offset-background",
   },
   soft_opposition: {
-    idle: "border-orange-300 bg-orange-50 dark:border-orange-700 dark:bg-orange-950",
-    active: "bg-orange-400 ring-2 ring-orange-300 ring-offset-1 dark:ring-orange-600 dark:ring-offset-background",
+    idle: "border-fuchsia-300 bg-fuchsia-50 dark:border-fuchsia-700 dark:bg-fuchsia-950",
+    active: "bg-support-soft-opposition ring-2 ring-fuchsia-300 ring-offset-1 dark:ring-fuchsia-600 dark:ring-offset-background",
   },
   hard_opposition: {
-    idle: "border-red-300 bg-red-50 dark:border-red-700 dark:bg-red-950",
-    active: "bg-red-500 ring-2 ring-red-300 ring-offset-1 dark:ring-red-700 dark:ring-offset-background",
+    idle: "border-fuchsia-400 bg-fuchsia-50 dark:border-fuchsia-800 dark:bg-fuchsia-950",
+    active: "bg-support-hard-opposition ring-2 ring-fuchsia-400 ring-offset-1 dark:ring-fuchsia-700 dark:ring-offset-background",
   },
 };
 
 const legendDotColors: Record<string, string> = {
-  strong_supporter: "bg-green-500",
-  leaning: "bg-yellow-400",
-  undecided: "bg-gray-400",
-  soft_opposition: "bg-orange-400",
-  hard_opposition: "bg-red-500",
+  strong_supporter: "bg-support-strong",
+  leaning: "bg-support-leaning",
+  undecided: "bg-support-undecided",
+  soft_opposition: "bg-support-soft-opposition",
+  hard_opposition: "bg-support-hard-opposition",
 };
 
 function SupportDots({
