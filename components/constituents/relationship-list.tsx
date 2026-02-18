@@ -34,8 +34,8 @@ interface RelationshipListProps {
 }
 
 const relationshipTypes = [
-  { value: "parent_child", label: "Parent / Child" },
-  { value: "sibling", label: "Sibling" },
+  { value: "parent", label: "Parent" },
+  { value: "child", label: "Child" },
   { value: "spouse", label: "Spouse" },
   { value: "influencer", label: "Influencer" },
   { value: "friend", label: "Friend" },
@@ -47,7 +47,6 @@ export function RelationshipList({ constituentId, relationships, parties }: Rela
   const [open, setOpen] = useState(false);
   const [toId, setToId] = useState("");
   const [type, setType] = useState("");
-  const [role, setRole] = useState("parent");
   const [influenceScore, setInfluenceScore] = useState(0);
   const [notes, setNotes] = useState("");
   const [isPending, startTransition] = useTransition();
@@ -56,10 +55,11 @@ export function RelationshipList({ constituentId, relationships, parties }: Rela
     e.preventDefault();
     startTransition(async () => {
       try {
+        const isParentChild = type === "parent" || type === "child";
         await createRelationship(constituentId, {
           to_id: toId,
-          type,
-          role: type === "parent_child" ? role : undefined,
+          type: isParentChild ? "parent_child" : type,
+          role: isParentChild ? type : undefined,
           influence_score: influenceScore,
           notes: notes || undefined,
         });
@@ -68,7 +68,6 @@ export function RelationshipList({ constituentId, relationships, parties }: Rela
         setOpen(false);
         setToId("");
         setType("");
-        setRole("parent");
         setInfluenceScore(0);
         setNotes("");
       } catch (err) {
@@ -169,24 +168,6 @@ export function RelationshipList({ constituentId, relationships, parties }: Rela
                 </SelectContent>
               </Select>
             </div>
-            {type === "parent_child" && (
-              <div className="space-y-1">
-                <Label>This person is the...</Label>
-                <Select
-                  value={role}
-                  onValueChange={(v) => setRole(v ?? "parent")}
-                  items={{ parent: "Parent (selected person is the child)", child: "Child (selected person is the parent)" }}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="parent">Parent (selected person is the child)</SelectItem>
-                    <SelectItem value="child">Child (selected person is the parent)</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
             {type === "influencer" && (
               <Rating value={influenceScore} onChange={setInfluenceScore} max={10} label="Influence Score" />
             )}

@@ -80,7 +80,7 @@ export default function ElectionDayPage() {
           value={turnout ? `${turnout.TurnoutPercent.toFixed(1)}%` : "\u2014"}
           description={
             turnout
-              ? `${turnout.TotalVoted} / ${turnout.TotalRegistered}`
+              ? `${turnout.TotalVoted} / ${turnout.TotalConstituents}`
               : "Select constituency"
           }
           icon={Vote}
@@ -143,28 +143,28 @@ export default function ElectionDayPage() {
         {/* Registration Progress */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Registration Progress</CardTitle>
+            <CardTitle className="text-base">Voter Turnout Progress</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
             {turnout && totalVoters > 0 ? (
               <>
                 <div>
                   <div className="flex justify-between text-sm mb-1.5">
-                    <span>Registered for Ballot Boxes</span>
+                    <span>Total Voters</span>
                     <span className="text-muted-foreground tabular-nums">
-                      {turnout.TotalRegistered.toLocaleString()} / {totalVoters.toLocaleString()}
+                      {turnout.TotalConstituents.toLocaleString()} / {totalVoters.toLocaleString()}
                     </span>
                   </div>
                   <div className="h-5 bg-muted rounded-full overflow-hidden">
                     <div
                       className="h-full bg-blue-500 rounded-full transition-all"
                       style={{
-                        width: `${Math.min((turnout.TotalRegistered / totalVoters) * 100, 100)}%`,
+                        width: `${Math.min((turnout.TotalConstituents / totalVoters) * 100, 100)}%`,
                       }}
                     />
                   </div>
                   <p className="text-xs text-muted-foreground mt-1">
-                    {((turnout.TotalRegistered / totalVoters) * 100).toFixed(1)}% registered
+                    {((turnout.TotalConstituents / totalVoters) * 100).toFixed(1)}% of total voters
                     {activeConstituency ? " in selected constituency" : ""}
                   </p>
                 </div>
@@ -172,7 +172,7 @@ export default function ElectionDayPage() {
                   <div className="flex justify-between text-sm mb-1.5">
                     <span>Voted</span>
                     <span className="text-muted-foreground tabular-nums">
-                      {turnout.TotalVoted.toLocaleString()} / {turnout.TotalRegistered.toLocaleString()}
+                      {turnout.TotalVoted.toLocaleString()} / {turnout.TotalConstituents.toLocaleString()}
                     </span>
                   </div>
                   <div className="h-5 bg-muted rounded-full overflow-hidden">
@@ -189,8 +189,8 @@ export default function ElectionDayPage() {
             ) : (
               <p className="text-sm text-muted-foreground">
                 {activeConstituency
-                  ? "No registration data for this constituency."
-                  : "Select a constituency to view registration progress."}
+                  ? "No turnout data for this constituency."
+                  : "Select a constituency to view turnout progress."}
               </p>
             )}
           </CardContent>

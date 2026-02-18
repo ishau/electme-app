@@ -10,7 +10,7 @@ const DASHBOARD_TABS = [
   { label: "Demographics", href: "/dashboard/demographics", icon: Users, description: "Voter demographics by age, sex, island, and constituency" },
   { label: "Campaign", href: "/dashboard/campaign", icon: BarChart3, description: "Support trends, candidate performance, and constituency comparison" },
   { label: "Outreach", href: "/dashboard/outreach", icon: Phone, description: "Contact activity, team performance, and outreach methods" },
-  { label: "Election Day", href: "/dashboard/election-day", icon: Flag, description: "Transport logistics, turnout tracking, and registration progress" },
+  { label: "Election Day", href: "/dashboard/election-day", icon: Flag, description: "Transport logistics and turnout tracking" },
 ];
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {

@@ -6,7 +6,6 @@ import {
   LayoutDashboard,
   Users,
   Megaphone,
-  ClipboardList,
   Vote,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -15,7 +14,6 @@ const mobileNavItems = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { label: "Voters", href: "/constituents", icon: Users },
   { label: "Campaign", href: "/campaign", icon: Megaphone },
-  { label: "Register", href: "/registrations", icon: ClipboardList },
   { label: "Voting", href: "/voting", icon: Vote },
 ];
 

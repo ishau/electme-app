@@ -86,6 +86,8 @@
 - When merging branches where main is ahead, prefer HEAD versions for types/hooks/mutations and accept only genuinely new files from the feature branch. Check for renamed functions (e.g., `plotHouse` vs `updateHouseLocation`) and type field mismatches (e.g., `IsPlotted` vs `HasOverride`).
 - Google Satellite tiles: `https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}` — zoom 20+, good for Maldives house-level work
 - shadcn uses Base UI (not Radix) — `asChild` prop doesn't exist, use `render` prop for element polymorphism (e.g., `<DialogTrigger render={<Button />}>`)
+- `SelectTrigger` base class uses `w-full` (changed from upstream `w-fit`) — if shadcn regenerates select.tsx, re-apply this change or selects collapse when empty
+- Voting day flow: `/voting` (ballot box list by constituency) → `/voting/[boxId]` (turnout card + voter table with vote recording). Vote recording removed from constituent detail page.
 - Base UI Select `onValueChange` signature is `(value: string | null, eventDetails) => void` — wrap setState: `onValueChange={(v) => setState(v ?? "")}`
 - Base UI Select `SelectValue` shows raw value by default — must pass `items` prop to `<Select>` mapping values to labels (e.g., `items={{ foo: "Foo Label" }}`)
 - CSS custom properties: `--radix-*` vars don't exist — use `--anchor-width`, `--transform-origin`, `--available-height`
