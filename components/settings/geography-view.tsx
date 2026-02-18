@@ -390,17 +390,18 @@ function PlotMap({ initialLat, initialLng, islandLat, islandLng, h3Cell, onSelec
             satellite: {
               type: "raster" as const,
               tiles: [
-                "https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}",
+                "https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}",
               ],
               tileSize: 256,
-              maxzoom: 20,
+              minzoom: 13,
+              maxzoom: 18,
               attribution: "&copy; Google",
             },
             osm: {
               type: "raster" as const,
-              tiles: ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"],
+              tiles: ["https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}"],
               tileSize: 256,
-              attribution: "&copy; OpenStreetMap contributors",
+              attribution: "&copy; Google",
             },
           },
           layers: [
@@ -408,8 +409,8 @@ function PlotMap({ initialLat, initialLng, islandLat, islandLng, h3Cell, onSelec
               id: "satellite",
               type: "raster" as const,
               source: "satellite",
-              minzoom: 0,
-              maxzoom: 20,
+              minzoom: 13,
+              maxzoom: 18,
             },
             {
               id: "osm",
