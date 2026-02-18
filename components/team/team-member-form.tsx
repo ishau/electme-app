@@ -39,7 +39,7 @@ interface TeamMemberFormProps {
     name: string;
     role: string;
     is_active?: boolean;
-    username?: string;
+    username?: string; // only for add
     password?: string;
   }) => void;
   isPending: boolean;
@@ -62,7 +62,7 @@ export function TeamMemberForm({
     onSubmit({
       name,
       role,
-      username: username || undefined,
+      ...(!member && username ? { username } : {}),
       password: password || undefined,
     });
   };
@@ -93,10 +93,12 @@ export function TeamMemberForm({
               </SelectContent>
             </Select>
           </div>
-          <div className="space-y-2">
-            <Label>Username</Label>
-            <Input value={username} onChange={(e) => setUsername(e.target.value)} placeholder="For login access" />
-          </div>
+          {!member && (
+            <div className="space-y-2">
+              <Label>Username</Label>
+              <Input value={username} onChange={(e) => setUsername(e.target.value)} placeholder="For login access" />
+            </div>
+          )}
           <div className="space-y-2">
             <Label>{member ? "New Password" : "Password"}</Label>
             <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder={member ? "Leave blank to keep current" : "Set password"} />

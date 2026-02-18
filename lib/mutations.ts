@@ -153,7 +153,6 @@ export async function updateTeamMember(memberId: string, data: {
   name?: string;
   role?: string;
   is_active?: boolean;
-  username?: string;
   password?: string;
 }) {
   return put<Group>(`/group/team-members/${memberId}`, data);

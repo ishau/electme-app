@@ -23,7 +23,6 @@ export function TeamView({ members }: TeamViewProps) {
     name: string;
     role: string;
     is_active?: boolean;
-    username?: string;
     password?: string;
   }) => {
     if (!editingMember) return;
