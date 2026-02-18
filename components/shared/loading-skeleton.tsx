@@ -154,17 +154,15 @@ export function DashboardSkeleton({ statCount = 4 }: { statCount?: number }) {
   );
 }
 
-/** Select + 3-col layout with cards (voting page) */
+/** Select + card grid (voting ballot box list) */
 export function VotingPageSkeleton() {
   return (
     <div className="space-y-6">
       <Skeleton className="h-8 w-full sm:w-[280px]" />
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 space-y-6">
-          <CardSkeleton />
-          <ChartCardSkeleton />
-        </div>
-        <CardSkeleton />
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <CardSkeleton key={i} />
+        ))}
       </div>
     </div>
   );

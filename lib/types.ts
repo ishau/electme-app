@@ -266,17 +266,10 @@ export interface OutreachStats {
 }
 
 // Voting
-export interface VoterRegistration {
+export interface ExitPollVote {
   ID: string;
-  GroupID: string;
-  ConstituentID: string;
-  ConstituencyID: string;
-  BallotBoxID: string | null;
-  IsReregistered: boolean;
-  ReregSource: string;
-  TransportStatus: string;
-  TransportMode: string;
-  TransportNotes: string;
+  CandidateID: string;
+  CandidateType: string;
 }
 
 export interface VotingRecord {
@@ -284,16 +277,15 @@ export interface VotingRecord {
   GroupID: string;
   ConstituentID: string;
   ConstituencyID: string;
-  BallotBoxID: string | null;
   HasVoted: boolean;
   VotedAt: string | null;
-  ExitPollCandidateID: string | null;
   RecordedBy: string;
   Notes: string;
+  ExitPolls: ExitPollVote[];
 }
 
 export interface TurnoutStats {
-  TotalRegistered: number;
+  TotalConstituents: number;
   TotalVoted: number;
   TurnoutPercent: number;
   VotedByHour: Record<number, number>;
@@ -342,7 +334,27 @@ export interface BallotBox {
   ConstituencyID: string;
   IsOverseas: boolean;
   Country: string;
-  Capacity: number;
+}
+
+export interface BallotBoxWithStats extends BallotBox {
+  TotalVoters: number;
+  VotedCount: number;
+  TurnoutPercent: number;
+}
+
+export interface BoxVoter {
+  ID: string;
+  MaskedNationalID: string;
+  FullName: string;
+  Sex: string;
+  Age: number | null;
+  IslandName: string;
+  PermanentAddress: string;
+  ConstituencyID: string;
+  HasVoted: boolean;
+  VotedAt: string | null;
+  VotingRecordID: string | null;
+  ExitPolls: ExitPollVote[];
 }
 
 // Support levels enum
@@ -381,13 +393,6 @@ export type TeamRole =
   | "transport_lead"
   | "polling_agent"
   | "volunteer";
-
-// Transport status
-export type TransportStatus =
-  | "not_needed"
-  | "needed"
-  | "arranged"
-  | "confirmed";
 
 // House
 export interface House {

@@ -9,7 +9,6 @@ import type {
   SupportAssessment,
   OutreachLog,
   Group,
-  VoterRegistration,
   VotingRecord,
   TransportRequest,
 } from "@/lib/types";
@@ -171,38 +170,25 @@ export async function unplotHouse(houseId: string) {
 
 // ── Voting ──
 
-export async function createRegistration(data: {
-  constituent_id: string;
-  constituency_id: string;
-  ballot_box_id?: string;
-  is_reregistered: boolean;
-  rereg_source: string;
-}) {
-  return post<VoterRegistration>(`/group/registrations`, data);
-}
-
-export async function updateTransport(registrationId: string, data: {
-  status: string;
-  mode?: string;
-  notes?: string;
-}) {
-  return put<void>(`/group/registrations/${registrationId}/transport`, data);
-}
-
 export async function recordVote(data: {
   constituent_id: string;
   constituency_id: string;
-  ballot_box_id?: string;
-  recorded_by: string;
+  candidate_ids?: string[];
   notes?: string;
 }) {
   return post<VotingRecord>(`/group/votes`, data);
 }
 
-export async function recordExitPoll(voteId: string, candidateId: string) {
-  return put<void>(`/group/votes/${voteId}/exit-poll`, { candidate_id: candidateId });
+export async function updateVote(voteId: string, data: {
+  candidate_ids?: string[];
+  notes?: string;
+}) {
+  return put<void>(`/group/votes/${voteId}`, data);
 }
 
+export async function deleteVote(voteId: string) {
+  return del(`/group/votes/${voteId}`);
+}
 
 // ── Transport ──
 

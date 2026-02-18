@@ -304,7 +304,7 @@ export function SupportForm({ constituentId, constituencyId, history, candidates
       </Card>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="sm:max-w-md max-h-[85vh] overflow-y-auto">
+        <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Log Support Assessment</DialogTitle>
           </DialogHeader>

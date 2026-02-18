@@ -2,11 +2,16 @@
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Users, Vote, UserX } from "lucide-react";
-import type { TurnoutStats } from "@/lib/types";
 
-export function TurnoutCard({ stats }: { stats: TurnoutStats }) {
-  const percent = stats.TurnoutPercent;
-  const remaining = stats.TotalRegistered - stats.TotalVoted;
+interface TurnoutCardProps {
+  total: number;
+  voted: number;
+  percent: number;
+  totalLabel?: string;
+}
+
+export function TurnoutCard({ total, voted, percent, totalLabel = "Voters" }: TurnoutCardProps) {
+  const remaining = total - voted;
 
   // Ring parameters
   const radius = 54;
@@ -64,12 +69,12 @@ export function TurnoutCard({ stats }: { stats: TurnoutStats }) {
           <div className="grid grid-cols-3 gap-4 flex-1 w-full">
             <div className="flex flex-col items-center p-3 rounded-lg bg-muted/50">
               <Users className="h-5 w-5 text-muted-foreground mb-1" />
-              <span className="text-2xl font-bold">{stats.TotalRegistered}</span>
-              <span className="text-xs text-muted-foreground">Registered</span>
+              <span className="text-2xl font-bold">{total}</span>
+              <span className="text-xs text-muted-foreground">{totalLabel}</span>
             </div>
             <div className="flex flex-col items-center p-3 rounded-lg bg-green-500/10">
               <Vote className="h-5 w-5 text-green-600 mb-1" />
-              <span className="text-2xl font-bold text-green-600">{stats.TotalVoted}</span>
+              <span className="text-2xl font-bold text-green-600">{voted}</span>
               <span className="text-xs text-muted-foreground">Voted</span>
             </div>
             <div className="flex flex-col items-center p-3 rounded-lg bg-orange-500/10">
@@ -83,7 +88,7 @@ export function TurnoutCard({ stats }: { stats: TurnoutStats }) {
         {/* Progress bar */}
         <div className="mt-6">
           <div className="flex justify-between text-xs text-muted-foreground mb-1.5">
-            <span>{stats.TotalVoted} voted</span>
+            <span>{voted} voted</span>
             <span>{remaining} remaining</span>
           </div>
           <div className="h-2.5 bg-muted rounded-full overflow-hidden">

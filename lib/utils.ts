@@ -129,21 +129,6 @@ export function teamRoleLabel(role: string): string {
   }
 }
 
-export function transportStatusLabel(status: string): string {
-  switch (status) {
-    case "not_needed":
-      return "Not Needed";
-    case "needed":
-      return "Needed";
-    case "arranged":
-      return "Arranged";
-    case "confirmed":
-      return "Confirmed";
-    default:
-      return status;
-  }
-}
-
 export function transportModeLabel(mode: string): string {
   switch (mode) {
     case "air":
@@ -154,21 +139,6 @@ export function transportModeLabel(mode: string): string {
       return "Vehicle";
     default:
       return "—";
-  }
-}
-
-export function transportStatusColor(status: string): string {
-  switch (status) {
-    case "not_needed":
-      return "bg-gray-100 text-gray-700";
-    case "needed":
-      return "bg-red-100 text-red-700";
-    case "arranged":
-      return "bg-yellow-100 text-yellow-700";
-    case "confirmed":
-      return "bg-green-100 text-green-700";
-    default:
-      return "bg-gray-100 text-gray-700";
   }
 }
 
