@@ -50,7 +50,7 @@ export function AppSidebar({ groupName, partyCode }: { groupName: string; partyC
     <Sidebar>
       <SidebarHeader className="p-4">
         <Link href="/" className="flex items-center gap-2 font-bold text-lg">
-          <Vote className="h-6 w-6 text-accent" />
+          <Vote className="h-6 w-6 text-primary" />
           ElectMe
         </Link>
       </SidebarHeader>
@@ -66,11 +66,9 @@ export function AppSidebar({ groupName, partyCode }: { groupName: string; partyC
                 const isActive = pathname.startsWith(item.href);
                 return (
                   <SidebarMenuItem key={item.label}>
-                    <SidebarMenuButton asChild isActive={isActive}>
-                      <Link href={item.href}>
-                        <item.icon className="h-4 w-4" />
-                        <span>{item.label}</span>
-                      </Link>
+                    <SidebarMenuButton render={<Link href={item.href} />} isActive={isActive}>
+                      <item.icon className="h-4 w-4" />
+                      <span>{item.label}</span>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 );

@@ -130,7 +130,11 @@ export function UpdateTransportDialog({
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1">
                     <Label className="text-xs text-muted-foreground">Mode</Label>
-                    <Select value={interIslandMode} onValueChange={setInterIslandMode}>
+                    <Select
+                      value={interIslandMode}
+                      onValueChange={(v) => setInterIslandMode(v ?? "")}
+                      items={{ air: "Air", sea: "Sea" }}
+                    >
                       <SelectTrigger>
                         <SelectValue placeholder="Mode" />
                       </SelectTrigger>
@@ -142,7 +146,11 @@ export function UpdateTransportDialog({
                   </div>
                   <div className="space-y-1">
                     <Label className="text-xs text-muted-foreground">Status</Label>
-                    <Select value={interIslandStatus} onValueChange={setInterIslandStatus}>
+                    <Select
+                      value={interIslandStatus}
+                      onValueChange={(v) => setInterIslandStatus(v ?? "")}
+                      items={Object.fromEntries(statusOptions.map((opt) => [opt.value, opt.label]))}
+                    >
                       <SelectTrigger>
                         <SelectValue placeholder="Status" />
                       </SelectTrigger>
@@ -186,7 +194,11 @@ export function UpdateTransportDialog({
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1">
                     <Label className="text-xs text-muted-foreground">Direction</Label>
-                    <Select value={votingDayDirection} onValueChange={setVotingDayDirection}>
+                    <Select
+                      value={votingDayDirection}
+                      onValueChange={(v) => setVotingDayDirection(v ?? "")}
+                      items={{ to_center: "To Center", from_center: "From Center", both: "Both Ways" }}
+                    >
                       <SelectTrigger>
                         <SelectValue placeholder="Direction" />
                       </SelectTrigger>
@@ -199,7 +211,11 @@ export function UpdateTransportDialog({
                   </div>
                   <div className="space-y-1">
                     <Label className="text-xs text-muted-foreground">Status</Label>
-                    <Select value={votingDayStatus} onValueChange={setVotingDayStatus}>
+                    <Select
+                      value={votingDayStatus}
+                      onValueChange={(v) => setVotingDayStatus(v ?? "")}
+                      items={Object.fromEntries(statusOptions.map((opt) => [opt.value, opt.label]))}
+                    >
                       <SelectTrigger>
                         <SelectValue placeholder="Status" />
                       </SelectTrigger>

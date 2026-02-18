@@ -246,7 +246,11 @@ export default function PartySupportPage() {
         <div>
           <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Party</label>
           <div className="flex items-center gap-1.5 mt-1.5">
-            <Select value={selectedParty} onValueChange={setSelectedParty}>
+            <Select
+              value={selectedParty}
+              onValueChange={(v) => setSelectedParty(v ?? "")}
+              items={Object.fromEntries((parties ?? []).map((p) => [p.ID, `${p.Code} - ${p.Name}`]))}
+            >
               <SelectTrigger className="w-[240px]">
                 <SelectValue placeholder="All parties (by score)" />
               </SelectTrigger>

@@ -147,7 +147,12 @@ export function OutreachForm({ constituentId, history }: OutreachFormProps) {
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1">
                 <Label>Method</Label>
-                <Select value={method} onValueChange={setMethod} required>
+                <Select
+                  value={method}
+                  onValueChange={(v) => setMethod(v ?? "")}
+                  required
+                  items={Object.fromEntries(methods.map((m) => [m, outreachMethodLabel(m)]))}
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Select method" />
                   </SelectTrigger>
@@ -162,7 +167,12 @@ export function OutreachForm({ constituentId, history }: OutreachFormProps) {
               </div>
               <div className="space-y-1">
                 <Label>Outcome</Label>
-                <Select value={outcome} onValueChange={setOutcome} required>
+                <Select
+                  value={outcome}
+                  onValueChange={(v) => setOutcome(v ?? "")}
+                  required
+                  items={Object.fromEntries(outcomes.map((o) => [o, outreachOutcomeLabel(o)]))}
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Select outcome" />
                   </SelectTrigger>

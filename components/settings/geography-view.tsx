@@ -110,7 +110,14 @@ export function HouseManagementView() {
     <div className="space-y-4">
       {/* Filter bar */}
       <div className="flex flex-col sm:flex-row gap-3">
-        <Select value={constituencyId || "all"} onValueChange={(v) => { setConstituencyId(v === "all" ? "" : v); setPage(0); }}>
+        <Select
+          value={constituencyId || "all"}
+          onValueChange={(v) => { setConstituencyId((v ?? "") === "all" ? "" : (v ?? "")); setPage(0); }}
+          items={{
+            all: "All constituencies",
+            ...Object.fromEntries((constituencies ?? []).map((c) => [c.ID, `${c.Code} — ${c.Name}`])),
+          }}
+        >
           <SelectTrigger className="w-full sm:w-[200px]">
             <SelectValue placeholder="All constituencies" />
           </SelectTrigger>
@@ -142,7 +149,11 @@ export function HouseManagementView() {
           )}
         </div>
 
-        <Select value={plotted} onValueChange={(v) => { setPlotted(v); setPage(0); }}>
+        <Select
+          value={plotted}
+          onValueChange={(v) => { setPlotted(v ?? ""); setPage(0); }}
+          items={Object.fromEntries(PLOTTED_OPTIONS.map((o) => [o.value, o.label]))}
+        >
           <SelectTrigger className="w-full sm:w-[140px]">
             <SelectValue />
           </SelectTrigger>

@@ -8,7 +8,6 @@ import { useParties } from "@/lib/hooks/use-parties";
 import { Page } from "@/components/shared/page";
 import { EmptyState } from "@/components/shared/empty-state";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { UserCog } from "lucide-react";
 import { PageSkeleton } from "@/components/shared/loading-skeleton";
 import type { CandidateView } from "@/lib/types";
@@ -131,7 +130,7 @@ export default function CandidatesPage() {
               const party = c.PartyID ? partyMap[c.PartyID] : null;
               return (
                 <Link key={c.ID} href={`/candidates/${c.ID}`}>
-                  <Card className="border-accent/30 hover:border-accent transition-colors cursor-pointer">
+                  <Card className="transition-colors cursor-pointer">
                     <CardContent className="p-4 flex items-center justify-between">
                       <div className="flex items-center gap-3">
                         {party ? (
@@ -160,8 +159,7 @@ export default function CandidatesPage() {
                         </div>
                       </div>
                       <div className="text-right">
-                        <span className="text-2xl font-bold text-accent">#{c.Number}</span>
-                        <Badge variant="default" className="ml-2">Own</Badge>
+                        <span className="text-2xl font-bold">{c.Number}</span>
                       </div>
                     </CardContent>
                   </Card>
@@ -173,7 +171,7 @@ export default function CandidatesPage() {
               const party = c.PartyID ? partyMap[c.PartyID] : null;
               return (
                 <Link key={c.ID} href={`/candidates/${c.ID}`}>
-                  <Card className="hover:border-muted-foreground/30 transition-colors cursor-pointer">
+                  <Card className="transition-colors cursor-pointer">
                     <CardContent className="p-4 flex items-center justify-between">
                       <div className="flex items-center gap-3">
                         {party ? (
@@ -201,7 +199,7 @@ export default function CandidatesPage() {
                           )}
                         </div>
                       </div>
-                      <span className="text-2xl font-bold text-muted-foreground">#{c.Number}</span>
+                      <span className="text-2xl font-bold text-muted-foreground">{c.Number}</span>
                     </CardContent>
                   </Card>
                 </Link>

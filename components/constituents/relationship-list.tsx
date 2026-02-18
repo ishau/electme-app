@@ -158,8 +158,9 @@ export function RelationshipList({ constituentId, relationships, parties }: Rela
               <Label>Type</Label>
               <Select
                 value={type}
-                onValueChange={setType}
+                onValueChange={(v) => setType(v ?? "")}
                 required
+                items={Object.fromEntries(relationshipTypes.map((r) => [r.value, r.label]))}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select type" />
@@ -176,7 +177,11 @@ export function RelationshipList({ constituentId, relationships, parties }: Rela
             {type === "parent_child" && (
               <div className="space-y-1">
                 <Label>This person is the...</Label>
-                <Select value={role} onValueChange={setRole}>
+                <Select
+                  value={role}
+                  onValueChange={(v) => setRole(v ?? "parent")}
+                  items={{ parent: "Parent (selected person is the child)", child: "Child (selected person is the parent)" }}
+                >
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>

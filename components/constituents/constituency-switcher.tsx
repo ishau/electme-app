@@ -22,13 +22,21 @@ export function ConstituencySwitcher({
   const [, setConstituencyId] = useQueryState("constituency_id", parseAsString.withDefault(""));
   const [, setPage] = useQueryState("page");
 
-  const handleSwitch = (value: string) => {
-    setConstituencyId(value === "all" ? null : value);
+  const handleSwitch = (value: string | null) => {
+    const v = value ?? "";
+    setConstituencyId(v === "all" ? null : v);
     setPage(null);
   };
 
   return (
-    <Select value={currentConstituencyId || "all"} onValueChange={handleSwitch}>
+    <Select
+      value={currentConstituencyId || "all"}
+      onValueChange={handleSwitch}
+      items={{
+        all: "All constituencies",
+        ...Object.fromEntries(constituencies.map((c) => [c.ID, `${c.Code} — ${c.Name}`])),
+      }}
+    >
       <SelectTrigger className="w-full sm:w-[280px]">
         <SelectValue placeholder="All constituencies" />
       </SelectTrigger>

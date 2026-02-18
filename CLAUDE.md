@@ -4,7 +4,8 @@
 - Next.js app router with `(app)` route group — pages are client-side, auth/proxy via API routes (SSR)
 - Go backend API — all response fields are PascalCase (e.g., `CandidateType`, `IsOwnCandidate`)
 - TanStack Query for data fetching (`useQuery`) and cache invalidation after mutations (`queryClient.invalidateQueries`)
-- UI: shadcn/ui components in `/components/ui`
+- UI: shadcn/ui (base-nova style, Base UI primitives) in `/components/ui` — DO NOT modify these files, fix consumers instead
+- Font: Public Sans (sans), Geist Mono (mono)
 - Charts: Recharts (`recharts`) for bar charts, pie charts, etc. CSS heatmaps for calendar grids.
 - nuqs for URL search param state in filter components (`useQueryStates`, `parseAsString`)
 - Auth: HttpOnly cookie session, Next.js API routes for login/logout, catch-all proxy for Go backend
@@ -83,3 +84,7 @@
 - MapLibre popup default `maxWidth` is 240px — set `maxWidth: "360px"` when creating popups with wider content. Popup HTML uses inline styles (no Tailwind). Override `.maplibregl-popup-close-button` and `.maplibregl-popup-content` via `<style>` tag in component.
 - When merging branches where main is ahead, prefer HEAD versions for types/hooks/mutations and accept only genuinely new files from the feature branch. Check for renamed functions (e.g., `plotHouse` vs `updateHouseLocation`) and type field mismatches (e.g., `IsPlotted` vs `HasOverride`).
 - Google Satellite tiles: `https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}` — zoom 20+, good for Maldives house-level work
+- shadcn uses Base UI (not Radix) — `asChild` prop doesn't exist, use `render` prop for element polymorphism (e.g., `<DialogTrigger render={<Button />}>`)
+- Base UI Select `onValueChange` signature is `(value: string | null, eventDetails) => void` — wrap setState: `onValueChange={(v) => setState(v ?? "")}`
+- Base UI Select `SelectValue` shows raw value by default — must pass `items` prop to `<Select>` mapping values to labels (e.g., `items={{ foo: "Foo Label" }}`)
+- CSS custom properties: `--radix-*` vars don't exist — use `--anchor-width`, `--transform-origin`, `--available-height`

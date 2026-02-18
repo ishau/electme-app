@@ -115,7 +115,11 @@ export default function CandidateSupportPage() {
       <div className="flex items-end gap-4 flex-wrap">
         <div>
           <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Candidate</label>
-          <Select value={selectedCandidate} onValueChange={setSelectedCandidate}>
+          <Select
+            value={selectedCandidate}
+            onValueChange={(v) => setSelectedCandidate(v ?? "")}
+            items={Object.fromEntries(candidates.map((c) => [c.ID, `${c.Name} (${c.CandidateType})`]))}
+          >
             <SelectTrigger className="w-[300px] mt-1.5">
               <SelectValue placeholder="Select candidate" />
             </SelectTrigger>

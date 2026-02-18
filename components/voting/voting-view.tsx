@@ -72,7 +72,14 @@ export function VotingView({
 
   return (
     <>
-      <Select value={currentConstituencyId} onValueChange={handleConstituencyChange}>
+      <Select
+        value={currentConstituencyId}
+        onValueChange={(v) => handleConstituencyChange(v ?? "")}
+        items={Object.fromEntries((group?.Constituencies ?? []).map((cId) => {
+          const c = constituencies.find((x) => x.ID === cId);
+          return [cId, c ? `${c.Code} — ${c.Name}` : cId.slice(0, 8)];
+        }))}
+      >
         <SelectTrigger>
           <SelectValue placeholder="Select constituency" />
         </SelectTrigger>

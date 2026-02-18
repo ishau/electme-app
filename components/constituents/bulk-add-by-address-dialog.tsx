@@ -457,7 +457,11 @@ export function AddressSupportDialog({
                     <Rating value={confidence} onChange={setConfidence} max={5} label="Confidence" />
                     <div className="space-y-1">
                       <Label className="text-xs">Visit Outcome</Label>
-                      <Select value={outcome} onValueChange={setOutcome}>
+                      <Select
+                        value={outcome}
+                        onValueChange={(v) => setOutcome(v ?? "")}
+                        items={Object.fromEntries(outcomes.map((o) => [o.value, o.label]))}
+                      >
                         <SelectTrigger>
                           <SelectValue placeholder="Optional" />
                         </SelectTrigger>

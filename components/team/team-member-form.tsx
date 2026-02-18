@@ -80,7 +80,11 @@ export function TeamMemberForm({
           </div>
           <div className="space-y-2">
             <Label>Role</Label>
-            <Select value={role} onValueChange={setRole}>
+            <Select
+              value={role}
+              onValueChange={(v) => setRole(v ?? "volunteer")}
+              items={Object.fromEntries(roles.map((r) => [r, teamRoleLabel(r)]))}
+            >
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>

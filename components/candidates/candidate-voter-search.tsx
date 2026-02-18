@@ -41,8 +41,9 @@ export function CandidateVoterSearch() {
       <Select
         value={filters.level || "all"}
         onValueChange={(value) =>
-          setFilters({ level: value === "all" ? null : value, page: null })
+          setFilters({ level: (value ?? "all") === "all" ? null : value, page: null })
         }
+        items={Object.fromEntries(supportLevels.map((l) => [l.value, l.label]))}
       >
         <SelectTrigger className="w-full sm:w-[180px]">
           <SelectValue placeholder="Support Level" />

@@ -42,7 +42,6 @@ export default function CandidateDetailPage() {
       description={candidate.CandidateType.replace(/_/g, " ")}
       actions={
         <div className="flex items-center gap-2">
-          {candidate.IsOwnCandidate && <Badge variant="default">Own</Badge>}
           {!candidate.IsOwnCandidate && <Badge variant="secondary">Competing</Badge>}
         </div>
       }

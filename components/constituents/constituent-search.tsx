@@ -31,9 +31,14 @@ export function ConstituentSearch({ constituencies }: ConstituentSearchProps) {
     <div className="flex flex-col sm:flex-row gap-3">
       <Select
         value={filters.constituency_id || "all"}
-        onValueChange={(value) =>
-          setFilters({ constituency_id: value === "all" ? null : value, page: null })
-        }
+        onValueChange={(value) => {
+          const v = value ?? "";
+          setFilters({ constituency_id: v === "all" ? null : v, page: null });
+        }}
+        items={{
+          all: "All constituencies",
+          ...Object.fromEntries(constituencies.map((c) => [c.ID, `${c.Code} — ${c.Name}`])),
+        }}
       >
         <SelectTrigger className="w-full sm:w-[240px]">
           <SelectValue placeholder="All constituencies" />
@@ -58,9 +63,11 @@ export function ConstituentSearch({ constituencies }: ConstituentSearchProps) {
       </div>
       <Select
         value={filters.sex || "all"}
-        onValueChange={(value) =>
-          setFilters({ sex: value === "all" ? null : value, page: null })
-        }
+        onValueChange={(value) => {
+          const v = value ?? "";
+          setFilters({ sex: v === "all" ? null : v, page: null });
+        }}
+        items={{ all: "All Genders", M: "Male", F: "Female" }}
       >
         <SelectTrigger className="w-full sm:w-[140px]">
           <SelectValue placeholder="Gender" />
