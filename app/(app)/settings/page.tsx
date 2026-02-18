@@ -1,14 +1,14 @@
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ChevronRight, Globe } from "lucide-react";
+import { ChevronRight, Home } from "lucide-react";
 import { Page } from "@/components/shared/page";
 
 const settingsItems = [
   {
-    title: "Geography",
-    description: "Atolls, islands, and constituencies",
+    title: "Houses",
+    description: "Plot and manage house locations",
     href: "/settings/geography",
-    icon: Globe,
+    icon: Home,
   },
 ];
 

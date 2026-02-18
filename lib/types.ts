@@ -393,8 +393,11 @@ export interface House {
   HouseName: string;
   IslandID: string;
   IslandName: string;
+  IslandLat: number | null;
+  IslandLng: number | null;
   Lat: number | null;
   Lng: number | null;
+  H3Cell: string | null;
   IsPlotted: boolean;
   ResidentCount: number;
 }

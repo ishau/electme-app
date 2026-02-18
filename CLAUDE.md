@@ -18,6 +18,8 @@
 - `/lib/hooks/use-demographics.ts` — demographics data hook
 - `/lib/hooks/use-analytics.ts` — analytics hooks (support trend, outreach by day, team activity, support by constituency)
 - `/lib/mutations.ts` — all mutation functions
+- `/lib/hooks/use-houses.ts` — house listing hook with pagination support
+- `h3-js` — H3 cell boundary rendering for base-plotted houses on maps
 - `/app/api/auth/` — login (POST), logout (POST), me (GET) — server-side, manages HttpOnly cookie
 - `/app/api/backend/[...path]/route.ts` — catch-all proxy: reads cookie, forwards to Go with Authorization header
 - `/components/auth-guard.tsx` — uses `useAuth()`, redirects to /login if not authenticated
@@ -65,3 +67,7 @@
 - 401 from API proxy redirects to /login — no manual error handling needed for auth failures
 - Recharts `Tooltip` formatter: use `(value: any)` with `// eslint-disable-next-line @typescript-eslint/no-explicit-any` — Recharts `ValueType` is a union type that doesn't accept plain `number`
 - Recharts `Pie` label: `percent` prop is possibly undefined — always use `(percent ?? 0)`
+- `/group/houses` returns `PaginatedResponse<House>` with `constituency_id`, `search`, `plotted` filters
+- House `H3Cell` (string|null) = base-plotted approximate area. `Lat`/`Lng` = group-plotted exact coords. Both null = unplotted.
+- maplibre-gl: must dynamic import (`import("maplibre-gl")`) — no top-level import (SSR breaks). Use `any` typed refs.
+- Google Satellite tiles: `https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}` — zoom 20+, good for Maldives house-level work

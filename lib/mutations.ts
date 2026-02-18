@@ -158,6 +158,16 @@ export async function deleteTeamMember(memberId: string) {
   return del(`/group/team-members/${memberId}`);
 }
 
+// ── Houses ──
+
+export async function plotHouse(houseId: string, data: { lat: number; lng: number }) {
+  return put<void>(`/group/houses/${houseId}`, data);
+}
+
+export async function unplotHouse(houseId: string) {
+  return del(`/group/houses/${houseId}`);
+}
+
 // ── Voting ──
 
 export async function createRegistration(data: {
