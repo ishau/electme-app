@@ -28,11 +28,14 @@ import type { WorkplaceAssignment } from "@/lib/types";
 
 const SECTOR_LABELS: Record<string, string> = {
   government: "Government",
-  fenaka: "Fenaka",
-  stelco: "Stelco",
-  road_corporation: "Road Corporation",
-  airport: "Airport",
-  other: "Other",
+  soe: "SOE",
+  private: "Private",
+  self_employed: "Self Employed",
+  resort: "Resort",
+  ngo: "NGO",
+  unemployed: "Unemployed",
+  retired: "Retired",
+  student: "Student",
 };
 
 interface WorkplaceDialogProps {

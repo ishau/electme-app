@@ -414,11 +414,14 @@ export interface House {
 // Workplace sectors
 export type WorkplaceSector =
   | "government"
-  | "fenaka"
-  | "stelco"
-  | "road_corporation"
-  | "airport"
-  | "other";
+  | "soe"
+  | "private"
+  | "self_employed"
+  | "resort"
+  | "ngo"
+  | "unemployed"
+  | "retired"
+  | "student";
 
 // Hex Analytics (GeoJSON)
 export interface HexLeaningParty {
