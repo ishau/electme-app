@@ -29,10 +29,18 @@ const AGE_COLORS: Record<number, string> = {
 };
 
 export default function NewVotersPage() {
-  const { data: stats, isLoading } = useNewVoterStats();
+  const { data: stats, isLoading, isError } = useNewVoterStats();
 
-  if (isLoading || !stats) {
+  if (isLoading) {
     return <DashboardSkeleton statCount={4} />;
+  }
+
+  if (isError || !stats) {
+    return (
+      <div className="text-center py-12 text-muted-foreground">
+        <p>Failed to load new voter data. Make sure the backend is running.</p>
+      </div>
+    );
   }
 
   const malePercent = stats.Total > 0 ? Math.round((stats.BySex.Male / stats.Total) * 100) : 0;
