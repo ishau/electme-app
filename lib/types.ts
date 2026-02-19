@@ -253,6 +253,7 @@ export interface AssessedVoter {
   MaskedNationalID: string;
   FullNationalID: string | null;
   Sex: string;
+  Age?: number;
   Level: string;
   Confidence: number;
   AssessedBy: string;
