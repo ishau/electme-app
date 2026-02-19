@@ -7,14 +7,15 @@ import {
   YAxis,
   Tooltip,
   ResponsiveContainer,
+  CartesianGrid,
   Cell,
   PieChart,
   Pie,
 } from "recharts";
-import { useDemographics } from "@/lib/hooks/use-demographics";
+import { useDemographics, useNewVoterStats } from "@/lib/hooks/use-demographics";
 import { StatCard } from "@/components/shared/stat-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users } from "lucide-react";
+import { Users, Sparkles } from "lucide-react";
 import { DashboardSkeleton } from "@/components/shared/loading-skeleton";
 
 const AGE_ORDER = ["Under 18", "18-24", "25-34", "35-44", "45-54", "55-64", "65+", "Unknown"];
@@ -29,8 +30,18 @@ const AGE_COLORS: Record<string, string> = {
   "Unknown": "#d1d5db",
 };
 
+const TOOLTIP_STYLE = { fontSize: 13, borderRadius: 8, border: "none", boxShadow: "0 4px 12px rgba(0,0,0,0.1)", padding: "8px 12px" };
+const truncate = (s: string, max: number) => s.length > max ? s.slice(0, max - 1) + "…" : s;
+
+const NEW_VOTER_AGE_COLORS: Record<number, string> = {
+  18: "#60a5fa",
+  19: "#38bdf8",
+  20: "#06b6d4",
+};
+
 export default function DemographicsPage() {
   const { data: demo, isLoading } = useDemographics();
+  const { data: newVoters } = useNewVoterStats();
 
   if (isLoading || !demo) {
     return <DashboardSkeleton statCount={3} />;
@@ -54,13 +65,15 @@ export default function DemographicsPage() {
     }));
 
   const islandData = (demo.ByIsland ?? []).map((i) => ({
-    name: i.IslandName || "Unknown",
+    name: truncate(i.IslandName || "Unknown", 18),
+    fullName: i.IslandName || "Unknown",
     count: i.Count,
     pct: ((i.Count / demo.TotalVoters) * 100).toFixed(1),
   }));
 
   const constData = (demo.ByConstituency ?? []).map((c) => ({
-    name: c.ConstituencyName || "Unknown",
+    name: truncate(c.ConstituencyName || "Unknown", 18),
+    fullName: c.ConstituencyName || "Unknown",
     count: c.Count,
     pct: ((c.Count / demo.TotalVoters) * 100).toFixed(1),
   }));
@@ -82,16 +95,18 @@ export default function DemographicsPage() {
             <CardTitle className="text-base">Gender Distribution</CardTitle>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={200}>
+            <ResponsiveContainer width="100%" height={280}>
               <PieChart>
                 <Pie
                   data={genderData}
                   cx="50%"
                   cy="50%"
-                  innerRadius={55}
-                  outerRadius={80}
+                  innerRadius={70}
+                  outerRadius={100}
                   dataKey="value"
                   paddingAngle={3}
+                  strokeWidth={2}
+                  stroke="#fff"
                   label={({ name, percent }) => `${name} ${((percent ?? 0) * 100).toFixed(0)}%`}
                 >
                   {genderData.map((entry, i) => (
@@ -99,7 +114,8 @@ export default function DemographicsPage() {
                   ))}
                 </Pie>
                 <Tooltip // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                formatter={(value: any) => Number(value).toLocaleString()} />
+                formatter={(value: any) => Number(value).toLocaleString()}
+                contentStyle={TOOLTIP_STYLE} />
               </PieChart>
             </ResponsiveContainer>
           </CardContent>
@@ -111,19 +127,21 @@ export default function DemographicsPage() {
             <CardTitle className="text-base">Age Distribution</CardTitle>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={200}>
-              <BarChart data={sortedAgeGroups} layout="vertical" margin={{ left: 0, right: 8, top: 0, bottom: 0 }}>
-                <XAxis type="number" hide />
-                <YAxis type="category" dataKey="name" width={60} tick={{ fontSize: 11 }} axisLine={false} tickLine={false} />
+            <ResponsiveContainer width="100%" height={280}>
+              <BarChart data={sortedAgeGroups} margin={{ left: 0, right: 4, top: 4, bottom: 4 }}>
+                <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#e5e7eb" opacity={0.5} />
+                <XAxis dataKey="name" tick={{ fontSize: 11 }} axisLine={false} tickLine={false} interval={0} />
+                <YAxis tick={{ fontSize: 11 }} axisLine={false} tickLine={false} width={40} />
                 <Tooltip
+                  cursor={{ fill: "rgba(0,0,0,0.04)" }}
                   // eslint-disable-next-line @typescript-eslint/no-explicit-any
                   formatter={(value: any, _name: any, props: any) => [
                     `${Number(value).toLocaleString()} (${props?.payload?.pct ?? ""}%)`,
                     "Voters",
                   ]}
-                  contentStyle={{ fontSize: 12 }}
+                  contentStyle={TOOLTIP_STYLE}
                 />
-                <Bar dataKey="count" radius={[0, 4, 4, 0]} barSize={14}>
+                <Bar dataKey="count" radius={[6, 6, 0, 0]}>
                   {sortedAgeGroups.map((entry, i) => (
                     <Cell key={i} fill={entry.color} />
                   ))}
@@ -141,19 +159,23 @@ export default function DemographicsPage() {
             <CardTitle className="text-base">By Island</CardTitle>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={Math.max(islandData.length * 30, 120)}>
-              <BarChart data={islandData} layout="vertical" margin={{ left: 0, right: 12, top: 0, bottom: 0 }}>
+            <ResponsiveContainer width="100%" height={Math.max(islandData.length * 42, 160)}>
+              <BarChart data={islandData} layout="vertical" margin={{ left: 0, right: 16, top: 4, bottom: 4 }}>
+                <CartesianGrid horizontal={false} strokeDasharray="3 3" stroke="#e5e7eb" opacity={0.5} />
                 <XAxis type="number" hide />
-                <YAxis type="category" dataKey="name" width={120} tick={{ fontSize: 11 }} axisLine={false} tickLine={false} />
+                <YAxis type="category" dataKey="name" width={140} tick={{ fontSize: 12 }} axisLine={false} tickLine={false} />
                 <Tooltip
+                  cursor={{ fill: "rgba(0,0,0,0.04)" }}
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  labelFormatter={(_label: any, payload: any) => payload?.[0]?.payload?.fullName ?? _label}
                   // eslint-disable-next-line @typescript-eslint/no-explicit-any
                   formatter={(value: any, _name: any, props: any) => [
                     `${Number(value).toLocaleString()} (${props?.payload?.pct ?? ""}%)`,
                     "Voters",
                   ]}
-                  contentStyle={{ fontSize: 12 }}
+                  contentStyle={TOOLTIP_STYLE}
                 />
-                <Bar dataKey="count" fill="#10b981" radius={[0, 4, 4, 0]} barSize={14} />
+                <Bar dataKey="count" fill="#10b981" radius={[0, 6, 6, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
@@ -167,24 +189,197 @@ export default function DemographicsPage() {
             <CardTitle className="text-base">By Constituency</CardTitle>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={Math.max(constData.length * 30, 120)}>
-              <BarChart data={constData} layout="vertical" margin={{ left: 0, right: 12, top: 0, bottom: 0 }}>
+            <ResponsiveContainer width="100%" height={Math.max(constData.length * 42, 160)}>
+              <BarChart data={constData} layout="vertical" margin={{ left: 0, right: 16, top: 4, bottom: 4 }}>
+                <CartesianGrid horizontal={false} strokeDasharray="3 3" stroke="#e5e7eb" opacity={0.5} />
                 <XAxis type="number" hide />
-                <YAxis type="category" dataKey="name" width={120} tick={{ fontSize: 11 }} axisLine={false} tickLine={false} />
+                <YAxis type="category" dataKey="name" width={140} tick={{ fontSize: 12 }} axisLine={false} tickLine={false} />
                 <Tooltip
+                  cursor={{ fill: "rgba(0,0,0,0.04)" }}
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  labelFormatter={(_label: any, payload: any) => payload?.[0]?.payload?.fullName ?? _label}
                   // eslint-disable-next-line @typescript-eslint/no-explicit-any
                   formatter={(value: any, _name: any, props: any) => [
                     `${Number(value).toLocaleString()} (${props?.payload?.pct ?? ""}%)`,
                     "Voters",
                   ]}
-                  contentStyle={{ fontSize: 12 }}
+                  contentStyle={TOOLTIP_STYLE}
                 />
-                <Bar dataKey="count" fill="#8b5cf6" radius={[0, 4, 4, 0]} barSize={14} />
+                <Bar dataKey="count" fill="#8b5cf6" radius={[0, 6, 6, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>
       )}
+
+      {/* New Voters Section */}
+      {newVoters && newVoters.Total > 0 && <NewVotersSection stats={newVoters} totalVoters={demo.TotalVoters} />}
     </div>
+  );
+}
+
+function NewVotersSection({ stats, totalVoters }: { stats: NonNullable<ReturnType<typeof useNewVoterStats>["data"]>; totalVoters: number }) {
+  const pctOfTotal = totalVoters > 0 ? ((stats.Total / totalVoters) * 100).toFixed(1) : "0";
+  const malePercent = stats.Total > 0 ? Math.round((stats.BySex.Male / stats.Total) * 100) : 0;
+  const femalePercent = stats.Total > 0 ? Math.round((stats.BySex.Female / stats.Total) * 100) : 0;
+
+  const genderData = [
+    { name: "Male", value: stats.BySex.Male, color: "#3b82f6" },
+    { name: "Female", value: stats.BySex.Female, color: "#ec4899" },
+  ];
+
+  const ageData = (stats.ByAge ?? []).map((a) => ({
+    name: `Age ${a.Age}`,
+    count: a.Count,
+    color: NEW_VOTER_AGE_COLORS[a.Age] ?? "#94a3b8",
+  }));
+
+  const nvConstData = (stats.ByConstituency ?? []).map((c) => ({
+    name: truncate(c.ConstituencyName || "Unknown", 18),
+    fullName: c.ConstituencyName || "Unknown",
+    count: c.Count,
+  }));
+
+  const nvIslandData = (stats.ByIsland ?? []).map((i) => ({
+    name: truncate(i.IslandName || "Unknown", 18),
+    fullName: i.IslandName || "Unknown",
+    count: i.Count,
+  }));
+
+  return (
+    <>
+      {/* Section header */}
+      <div className="flex items-center gap-2 pt-2">
+        <Sparkles className="h-5 w-5 text-cyan-500" />
+        <h2 className="text-lg font-semibold">New Voters (18–20)</h2>
+        <span className="text-sm text-muted-foreground">{stats.Total.toLocaleString()} voters · {pctOfTotal}% of total</span>
+      </div>
+
+      {/* Stat cards */}
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+        <StatCard title="New Voters" value={stats.Total.toLocaleString()} description={`${pctOfTotal}% of all voters`} icon={Sparkles} />
+        <StatCard title="Male" value={stats.BySex.Male.toLocaleString()} description={`${malePercent}%`} />
+        <StatCard title="Female" value={stats.BySex.Female.toLocaleString()} description={`${femalePercent}%`} />
+      </div>
+
+      {/* Gender + Age side by side */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Gender Split</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={240}>
+              <PieChart>
+                <Pie
+                  data={genderData}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={60}
+                  outerRadius={90}
+                  dataKey="value"
+                  paddingAngle={3}
+                  strokeWidth={2}
+                  stroke="#fff"
+                  label={({ name, percent }) => `${name} ${((percent ?? 0) * 100).toFixed(0)}%`}
+                >
+                  {genderData.map((entry, i) => (
+                    <Cell key={i} fill={entry.color} />
+                  ))}
+                </Pie>
+                <Tooltip
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  formatter={(value: any) => [Number(value).toLocaleString(), "Voters"]}
+                  contentStyle={TOOLTIP_STYLE}
+                />
+              </PieChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+
+        {ageData.length > 0 && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">By Age</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={240}>
+                <BarChart data={ageData} margin={{ left: 0, right: 4, top: 4, bottom: 4 }}>
+                  <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#e5e7eb" opacity={0.5} />
+                  <XAxis dataKey="name" tick={{ fontSize: 12 }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fontSize: 11 }} axisLine={false} tickLine={false} width={35} />
+                  <Tooltip
+                    cursor={{ fill: "rgba(0,0,0,0.04)" }}
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    formatter={(value: any) => [Number(value).toLocaleString(), "Voters"]}
+                    contentStyle={TOOLTIP_STYLE}
+                  />
+                  <Bar dataKey="count" radius={[6, 6, 0, 0]}>
+                    {ageData.map((entry, i) => (
+                      <Cell key={i} fill={entry.color} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+        )}
+      </div>
+
+      {/* By Constituency + By Island side by side */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {nvConstData.length > 0 && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">By Constituency</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={Math.max(nvConstData.length * 42, 160)}>
+                <BarChart data={nvConstData} layout="vertical" margin={{ left: 0, right: 16, top: 4, bottom: 4 }}>
+                  <CartesianGrid horizontal={false} strokeDasharray="3 3" stroke="#e5e7eb" opacity={0.5} />
+                  <XAxis type="number" hide />
+                  <YAxis type="category" dataKey="name" width={140} tick={{ fontSize: 12 }} axisLine={false} tickLine={false} />
+                  <Tooltip
+                    cursor={{ fill: "rgba(0,0,0,0.04)" }}
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    labelFormatter={(_label: any, payload: any) => payload?.[0]?.payload?.fullName ?? _label}
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    formatter={(value: any) => [Number(value).toLocaleString(), "New Voters"]}
+                    contentStyle={TOOLTIP_STYLE}
+                  />
+                  <Bar dataKey="count" fill="#8b5cf6" radius={[0, 6, 6, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+        )}
+
+        {nvIslandData.length > 0 && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">By Island</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={Math.max(nvIslandData.length * 42, 160)}>
+                <BarChart data={nvIslandData} layout="vertical" margin={{ left: 0, right: 16, top: 4, bottom: 4 }}>
+                  <CartesianGrid horizontal={false} strokeDasharray="3 3" stroke="#e5e7eb" opacity={0.5} />
+                  <XAxis type="number" hide />
+                  <YAxis type="category" dataKey="name" width={140} tick={{ fontSize: 12 }} axisLine={false} tickLine={false} />
+                  <Tooltip
+                    cursor={{ fill: "rgba(0,0,0,0.04)" }}
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    labelFormatter={(_label: any, payload: any) => payload?.[0]?.payload?.fullName ?? _label}
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    formatter={(value: any) => [Number(value).toLocaleString(), "New Voters"]}
+                    contentStyle={TOOLTIP_STYLE}
+                  />
+                  <Bar dataKey="count" fill="#10b981" radius={[0, 6, 6, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+        )}
+      </div>
+    </>
   );
 }

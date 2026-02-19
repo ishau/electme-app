@@ -253,6 +253,7 @@ export interface AssessedVoter {
   MaskedNationalID: string;
   FullNationalID: string | null;
   Sex: string;
+  Age?: number;
   Level: string;
   Confidence: number;
   AssessedBy: string;
@@ -414,11 +415,14 @@ export interface House {
 // Workplace sectors
 export type WorkplaceSector =
   | "government"
-  | "fenaka"
-  | "stelco"
-  | "road_corporation"
-  | "airport"
-  | "other";
+  | "soe"
+  | "private"
+  | "self_employed"
+  | "resort"
+  | "ngo"
+  | "unemployed"
+  | "retired"
+  | "student";
 
 // Hex Analytics (GeoJSON)
 export interface HexLeaningParty {
@@ -489,6 +493,23 @@ export interface Demographics {
   ByAgeGroup: AgeGroupCount[];
   ByIsland: IslandCount[];
   ByConstituency: ConstituencyCount[];
+}
+
+// New Voter Stats (age 18-20)
+export interface NewVoterStats {
+  Total: number;
+  BySex: SexBreakdown;
+  ByAge: { Age: number; Count: number }[];
+  ByConstituency: ConstituencyCount[];
+  ByIsland: IslandCount[];
+  SupportBreakdown?: {
+    Assessed: number;
+    StrongSupporter: number;
+    Leaning: number;
+    Undecided: number;
+    SoftOpposition: number;
+    HardOpposition: number;
+  };
 }
 
 // Affiliation source values

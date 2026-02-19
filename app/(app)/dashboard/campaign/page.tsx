@@ -3,21 +3,28 @@
 import {
   BarChart,
   Bar,
+  LineChart,
+  Line,
+  PieChart,
+  Pie,
   XAxis,
   YAxis,
   Tooltip,
   ResponsiveContainer,
+  CartesianGrid,
   Legend,
   Cell,
 } from "recharts";
 import { useGroup } from "@/lib/hooks/use-group";
 import { useSupportSummary, useOutreachStats, useCandidateSupport } from "@/lib/hooks/use-campaign";
 import { useSupportTrend, useSupportByConstituency } from "@/lib/hooks/use-analytics";
+import { useNewVoterStats } from "@/lib/hooks/use-demographics";
 import { SupportSummaryChart } from "@/components/groups/support-summary-chart";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { DashboardSkeleton } from "@/components/shared/loading-skeleton";
 import { SUPPORT_LEVEL_HEX } from "@/lib/utils";
+import { Sparkles } from "lucide-react";
 
 const SUPPORT_LEVELS = [
   { key: "StrongSupporter" as const, color: SUPPORT_LEVEL_HEX.strong_supporter, label: "Strong" },
@@ -27,6 +34,9 @@ const SUPPORT_LEVELS = [
   { key: "HardOpposition" as const, color: SUPPORT_LEVEL_HEX.hard_opposition, label: "Hard Opp" },
 ];
 
+const TOOLTIP_STYLE = { fontSize: 13, borderRadius: 8, border: "none", boxShadow: "0 4px 12px rgba(0,0,0,0.1)", padding: "8px 12px" };
+const truncate = (s: string, max: number) => s.length > max ? s.slice(0, max - 1) + "…" : s;
+
 export default function CampaignPage() {
   const { data: group, isLoading: groupLoading } = useGroup();
   const { data: supportSummary } = useSupportSummary();
@@ -34,6 +44,7 @@ export default function CampaignPage() {
   const { data: candidateSupport } = useCandidateSupport();
   const { data: trend } = useSupportTrend();
   const { data: constSupport } = useSupportByConstituency();
+  const { data: newVoters } = useNewVoterStats();
 
   const allCandidates = group?.Candidates ?? [];
   const candidateMap = Object.fromEntries(allCandidates.map((c) => [c.ID, c]));
@@ -66,7 +77,8 @@ export default function CampaignPage() {
 
   // Constituency comparison: transform for stacked bar
   const constData = (constSupport ?? []).map((c) => ({
-    name: c.ConstituencyName,
+    name: truncate(c.ConstituencyName, 18),
+    fullName: c.ConstituencyName,
     ...c,
   }));
 
@@ -81,19 +93,21 @@ export default function CampaignPage() {
             <CardTitle className="text-base">Outreach Funnel</CardTitle>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={180}>
-              <BarChart data={funnelData} layout="vertical" margin={{ left: 0, right: 12, top: 0, bottom: 0 }}>
+            <ResponsiveContainer width="100%" height={240}>
+              <BarChart data={funnelData} layout="vertical" margin={{ left: 0, right: 16, top: 4, bottom: 4 }}>
+                <CartesianGrid horizontal={false} strokeDasharray="3 3" stroke="#e5e7eb" opacity={0.5} />
                 <XAxis type="number" hide />
-                <YAxis type="category" dataKey="name" width={90} tick={{ fontSize: 12 }} axisLine={false} tickLine={false} />
+                <YAxis type="category" dataKey="name" width={95} tick={{ fontSize: 12 }} axisLine={false} tickLine={false} />
                 <Tooltip
+                  cursor={{ fill: "rgba(0,0,0,0.04)" }}
                   // eslint-disable-next-line @typescript-eslint/no-explicit-any
                   formatter={(value: any) => [
                     `${Number(value).toLocaleString()} (${totalVoters > 0 ? ((Number(value) / totalVoters) * 100).toFixed(1) : 0}%)`,
                     "Count",
                   ]}
-                  contentStyle={{ fontSize: 12 }}
+                  contentStyle={TOOLTIP_STYLE}
                 />
-                <Bar dataKey="value" radius={[0, 4, 4, 0]} barSize={20}>
+                <Bar dataKey="value" radius={[0, 6, 6, 0]}>
                   {funnelData.map((entry, i) => (
                     <Cell key={i} fill={entry.color} />
                   ))}
@@ -111,26 +125,30 @@ export default function CampaignPage() {
             <CardTitle className="text-base">Support Trend (Last 12 Weeks)</CardTitle>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={260}>
-              <BarChart data={trendData} margin={{ left: 0, right: 0, top: 0, bottom: 0 }}>
-                <XAxis dataKey="week" tick={{ fontSize: 10 }} axisLine={false} tickLine={false} />
-                <YAxis tick={{ fontSize: 11 }} axisLine={false} tickLine={false} width={35} />
-                <Tooltip contentStyle={{ fontSize: 12 }} />
+            <ResponsiveContainer width="100%" height={320}>
+              <LineChart data={trendData} margin={{ left: 0, right: 12, top: 4, bottom: 4 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" opacity={0.5} />
+                <XAxis dataKey="week" tick={{ fontSize: 11 }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fontSize: 11 }} axisLine={false} tickLine={false} width={40} />
+                <Tooltip contentStyle={TOOLTIP_STYLE} />
                 <Legend
-                  iconType="square"
-                  iconSize={10}
-                  wrapperStyle={{ fontSize: 11 }}
+                  iconType="circle"
+                  iconSize={8}
+                  wrapperStyle={{ fontSize: 11, paddingTop: 8 }}
                 />
                 {SUPPORT_LEVELS.map((lvl) => (
-                  <Bar
+                  <Line
                     key={lvl.key}
+                    type="monotone"
                     dataKey={lvl.key}
-                    stackId="a"
-                    fill={lvl.color}
+                    stroke={lvl.color}
+                    strokeWidth={2.5}
+                    dot={{ r: 3, fill: lvl.color }}
+                    activeDot={{ r: 5 }}
                     name={lvl.label}
                   />
                 ))}
-              </BarChart>
+              </LineChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>
@@ -143,7 +161,7 @@ export default function CampaignPage() {
             <CardTitle className="text-base">Support by Candidate</CardTitle>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={Math.max(candidateStats.length * 50, 120)}>
+            <ResponsiveContainer width="100%" height={Math.max(candidateStats.length * 48, 160)}>
               <BarChart
                 data={candidateStats.map((cs) => {
                   const cand = candidateMap[cs.CandidateID];
@@ -153,12 +171,13 @@ export default function CampaignPage() {
                   };
                 })}
                 layout="vertical"
-                margin={{ left: 0, right: 12, top: 0, bottom: 0 }}
+                margin={{ left: 0, right: 16, top: 4, bottom: 4 }}
               >
+                <CartesianGrid horizontal={false} strokeDasharray="3 3" stroke="#e5e7eb" opacity={0.5} />
                 <XAxis type="number" tick={{ fontSize: 11 }} axisLine={false} tickLine={false} />
-                <YAxis type="category" dataKey="name" width={100} tick={{ fontSize: 11 }} axisLine={false} tickLine={false} />
-                <Tooltip contentStyle={{ fontSize: 12 }} />
-                <Legend iconType="square" iconSize={10} wrapperStyle={{ fontSize: 11 }} />
+                <YAxis type="category" dataKey="name" width={110} tick={{ fontSize: 12 }} axisLine={false} tickLine={false} />
+                <Tooltip cursor={{ fill: "rgba(0,0,0,0.04)" }} contentStyle={TOOLTIP_STYLE} />
+                <Legend iconType="square" iconSize={10} wrapperStyle={{ fontSize: 11, paddingTop: 8 }} />
                 {SUPPORT_LEVELS.map((lvl) => (
                   <Bar
                     key={lvl.key}
@@ -197,12 +216,18 @@ export default function CampaignPage() {
             <CardTitle className="text-base">Support by Constituency</CardTitle>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={Math.max(constData.length * 45, 120)}>
-              <BarChart data={constData} layout="vertical" margin={{ left: 0, right: 12, top: 0, bottom: 0 }}>
+            <ResponsiveContainer width="100%" height={Math.max(constData.length * 48, 160)}>
+              <BarChart data={constData} layout="vertical" margin={{ left: 0, right: 16, top: 4, bottom: 4 }}>
+                <CartesianGrid horizontal={false} strokeDasharray="3 3" stroke="#e5e7eb" opacity={0.5} />
                 <XAxis type="number" tick={{ fontSize: 11 }} axisLine={false} tickLine={false} />
-                <YAxis type="category" dataKey="name" width={120} tick={{ fontSize: 11 }} axisLine={false} tickLine={false} />
-                <Tooltip contentStyle={{ fontSize: 12 }} />
-                <Legend iconType="square" iconSize={10} wrapperStyle={{ fontSize: 11 }} />
+                <YAxis type="category" dataKey="name" width={140} tick={{ fontSize: 12 }} axisLine={false} tickLine={false} />
+                <Tooltip
+                  cursor={{ fill: "rgba(0,0,0,0.04)" }}
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  labelFormatter={(_label: any, payload: any) => payload?.[0]?.payload?.fullName ?? _label}
+                  contentStyle={TOOLTIP_STYLE}
+                />
+                <Legend iconType="square" iconSize={10} wrapperStyle={{ fontSize: 11, paddingTop: 8 }} />
                 {SUPPORT_LEVELS.map((lvl) => (
                   <Bar
                     key={lvl.key}
@@ -217,6 +242,73 @@ export default function CampaignPage() {
           </CardContent>
         </Card>
       )}
+
+      {/* New Voter Support */}
+      {newVoters && newVoters.SupportBreakdown && (() => {
+        const sb = newVoters.SupportBreakdown!;
+        const nvAssessed = sb.Assessed;
+        const nvSupportive = sb.StrongSupporter + sb.Leaning;
+        const nvSupportPct = nvAssessed > 0 ? ((nvSupportive / nvAssessed) * 100).toFixed(1) : "0";
+        const nvAssessedPct = newVoters.Total > 0 ? ((nvAssessed / newVoters.Total) * 100).toFixed(1) : "0";
+        const nvSupportData = [
+          { name: "Strong", value: sb.StrongSupporter, color: SUPPORT_LEVEL_HEX.strong_supporter },
+          { name: "Leaning", value: sb.Leaning, color: SUPPORT_LEVEL_HEX.leaning },
+          { name: "Undecided", value: sb.Undecided, color: SUPPORT_LEVEL_HEX.undecided },
+          { name: "Soft Opp", value: sb.SoftOpposition, color: SUPPORT_LEVEL_HEX.soft_opposition },
+          { name: "Hard Opp", value: sb.HardOpposition, color: SUPPORT_LEVEL_HEX.hard_opposition },
+        ].filter((d) => d.value > 0);
+
+        return nvSupportData.length > 0 ? (
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base flex items-center gap-2">
+                <Sparkles className="h-4 w-4 text-cyan-500" />
+                New Voter Support (18–20)
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <ResponsiveContainer width="100%" height={280}>
+                  <PieChart>
+                    <Pie
+                      data={nvSupportData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={70}
+                      outerRadius={100}
+                      dataKey="value"
+                      paddingAngle={3}
+                      strokeWidth={2}
+                      stroke="#fff"
+                      label={({ name, percent }) => `${name} ${((percent ?? 0) * 100).toFixed(0)}%`}
+                    >
+                      {nvSupportData.map((entry, i) => (
+                        <Cell key={i} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip
+                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                      formatter={(value: any) => [Number(value).toLocaleString(), "Voters"]}
+                      contentStyle={TOOLTIP_STYLE}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+                <div className="flex flex-col justify-center gap-3">
+                  <div className="text-sm text-muted-foreground">
+                    <span className="text-2xl font-bold text-foreground">{newVoters.Total.toLocaleString()}</span> new voters total
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    <span className="text-lg font-semibold text-foreground">{nvAssessed.toLocaleString()}</span> assessed ({nvAssessedPct}%)
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    <span className="text-lg font-semibold text-green-600">{nvSupportive.toLocaleString()}</span> supportive ({nvSupportPct}%)
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ) : null;
+      })()}
     </div>
   );
 }

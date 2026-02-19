@@ -7,6 +7,7 @@ import {
   YAxis,
   Tooltip,
   ResponsiveContainer,
+  CartesianGrid,
   Cell,
 } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -43,26 +44,21 @@ export function SupportSummaryChart({ summary }: SupportSummaryChartProps) {
         <CardTitle className="text-base">Support Breakdown</CardTitle>
       </CardHeader>
       <CardContent>
-        <ResponsiveContainer width="100%" height={220}>
-          <BarChart data={data} layout="vertical" margin={{ left: 0, right: 12, top: 0, bottom: 0 }}>
-            <XAxis type="number" hide />
-            <YAxis
-              type="category"
-              dataKey="name"
-              width={110}
-              tick={{ fontSize: 12 }}
-              axisLine={false}
-              tickLine={false}
-            />
+        <ResponsiveContainer width="100%" height={280}>
+          <BarChart data={data} margin={{ left: 0, right: 4, top: 4, bottom: 4 }}>
+            <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#e5e7eb" opacity={0.5} />
+            <XAxis dataKey="name" tick={{ fontSize: 11 }} axisLine={false} tickLine={false} interval={0} angle={-25} textAnchor="end" height={50} />
+            <YAxis tick={{ fontSize: 11 }} axisLine={false} tickLine={false} width={40} />
             <Tooltip
+              cursor={{ fill: "rgba(0,0,0,0.04)" }}
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
               formatter={(value: any, _name: any, props: any) => [
-                `${value} (${props?.payload?.pct ?? ""}%)`,
+                `${Number(value).toLocaleString()} (${props?.payload?.pct ?? ""}%)`,
                 "Count",
               ]}
-              contentStyle={{ fontSize: 12 }}
+              contentStyle={{ fontSize: 13, borderRadius: 8, border: "none", boxShadow: "0 4px 12px rgba(0,0,0,0.1)", padding: "8px 12px" }}
             />
-            <Bar dataKey="count" radius={[0, 4, 4, 0]} barSize={14}>
+            <Bar dataKey="count" radius={[6, 6, 0, 0]}>
               {data.map((entry, i) => (
                 <Cell key={i} fill={entry.color} />
               ))}

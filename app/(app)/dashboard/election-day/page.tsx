@@ -2,12 +2,13 @@
 
 import { useState } from "react";
 import {
-  BarChart,
-  Bar,
+  LineChart,
+  Line,
   XAxis,
   YAxis,
   Tooltip,
   ResponsiveContainer,
+  CartesianGrid,
   PieChart,
   Pie,
   Cell,
@@ -35,6 +36,8 @@ const TRANSPORT_SEGMENTS = [
   { key: "Completed" as const, label: "Completed", color: "#22c55e" },
   { key: "Cancelled" as const, label: "Cancelled", color: "#94a3b8" },
 ];
+
+const TOOLTIP_STYLE = { fontSize: 13, borderRadius: 8, border: "none", boxShadow: "0 4px 12px rgba(0,0,0,0.1)", padding: "8px 12px" };
 
 export default function ElectionDayPage() {
   const { data: group, isLoading: groupLoading } = useGroup();
@@ -108,16 +111,18 @@ export default function ElectionDayPage() {
           </CardHeader>
           <CardContent>
             {transportPieData.length > 0 ? (
-              <ResponsiveContainer width="100%" height={240}>
+              <ResponsiveContainer width="100%" height={280}>
                 <PieChart>
                   <Pie
                     data={transportPieData}
                     cx="50%"
                     cy="50%"
-                    innerRadius={55}
-                    outerRadius={80}
+                    innerRadius={70}
+                    outerRadius={100}
                     dataKey="value"
                     paddingAngle={3}
+                    strokeWidth={2}
+                    stroke="#fff"
                     label={({ name, value }) => `${name}: ${value}`}
                   >
                     {transportPieData.map((entry, i) => (
@@ -127,7 +132,7 @@ export default function ElectionDayPage() {
                   <Tooltip
                     // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     formatter={(value: any) => [Number(value).toLocaleString(), "Requests"]}
-                    contentStyle={{ fontSize: 12 }}
+                    contentStyle={TOOLTIP_STYLE}
                   />
                 </PieChart>
               </ResponsiveContainer>
@@ -151,17 +156,25 @@ export default function ElectionDayPage() {
           <CardContent>
             {hourData.length > 0 ? (
               <>
-                <ResponsiveContainer width="100%" height={220}>
-                  <BarChart data={hourData} margin={{ left: 0, right: 0, top: 0, bottom: 0 }}>
-                    <XAxis dataKey="hour" tick={{ fontSize: 10 }} axisLine={false} tickLine={false} />
-                    <YAxis tick={{ fontSize: 11 }} axisLine={false} tickLine={false} width={35} />
+                <ResponsiveContainer width="100%" height={280}>
+                  <LineChart data={hourData} margin={{ left: 0, right: 12, top: 4, bottom: 4 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" opacity={0.5} />
+                    <XAxis dataKey="hour" tick={{ fontSize: 11 }} axisLine={false} tickLine={false} />
+                    <YAxis tick={{ fontSize: 11 }} axisLine={false} tickLine={false} width={40} />
                     <Tooltip
                       // eslint-disable-next-line @typescript-eslint/no-explicit-any
                       formatter={(value: any) => [`${value} votes`, "Votes"]}
-                      contentStyle={{ fontSize: 12 }}
+                      contentStyle={TOOLTIP_STYLE}
                     />
-                    <Bar dataKey="count" fill="#6366f1" radius={[4, 4, 0, 0]} />
-                  </BarChart>
+                    <Line
+                      type="monotone"
+                      dataKey="count"
+                      stroke="#6366f1"
+                      strokeWidth={2.5}
+                      dot={{ r: 4, fill: "#6366f1", strokeWidth: 2, stroke: "#fff" }}
+                      activeDot={{ r: 6 }}
+                    />
+                  </LineChart>
                 </ResponsiveContainer>
                 <div className="text-xs text-muted-foreground text-right mt-1">
                   Total: {turnout?.TotalVoted ?? 0} votes ({turnout?.TurnoutPercent.toFixed(1)}% turnout)
