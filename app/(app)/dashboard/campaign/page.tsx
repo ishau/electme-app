@@ -5,6 +5,8 @@ import {
   Bar,
   LineChart,
   Line,
+  PieChart,
+  Pie,
   XAxis,
   YAxis,
   Tooltip,
@@ -16,11 +18,13 @@ import {
 import { useGroup } from "@/lib/hooks/use-group";
 import { useSupportSummary, useOutreachStats, useCandidateSupport } from "@/lib/hooks/use-campaign";
 import { useSupportTrend, useSupportByConstituency } from "@/lib/hooks/use-analytics";
+import { useNewVoterStats } from "@/lib/hooks/use-demographics";
 import { SupportSummaryChart } from "@/components/groups/support-summary-chart";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { DashboardSkeleton } from "@/components/shared/loading-skeleton";
 import { SUPPORT_LEVEL_HEX } from "@/lib/utils";
+import { Sparkles } from "lucide-react";
 
 const SUPPORT_LEVELS = [
   { key: "StrongSupporter" as const, color: SUPPORT_LEVEL_HEX.strong_supporter, label: "Strong" },
@@ -40,6 +44,7 @@ export default function CampaignPage() {
   const { data: candidateSupport } = useCandidateSupport();
   const { data: trend } = useSupportTrend();
   const { data: constSupport } = useSupportByConstituency();
+  const { data: newVoters } = useNewVoterStats();
 
   const allCandidates = group?.Candidates ?? [];
   const candidateMap = Object.fromEntries(allCandidates.map((c) => [c.ID, c]));
@@ -237,6 +242,73 @@ export default function CampaignPage() {
           </CardContent>
         </Card>
       )}
+
+      {/* New Voter Support */}
+      {newVoters && newVoters.SupportBreakdown && (() => {
+        const sb = newVoters.SupportBreakdown!;
+        const nvAssessed = sb.Assessed;
+        const nvSupportive = sb.StrongSupporter + sb.Leaning;
+        const nvSupportPct = nvAssessed > 0 ? ((nvSupportive / nvAssessed) * 100).toFixed(1) : "0";
+        const nvAssessedPct = newVoters.Total > 0 ? ((nvAssessed / newVoters.Total) * 100).toFixed(1) : "0";
+        const nvSupportData = [
+          { name: "Strong", value: sb.StrongSupporter, color: SUPPORT_LEVEL_HEX.strong_supporter },
+          { name: "Leaning", value: sb.Leaning, color: SUPPORT_LEVEL_HEX.leaning },
+          { name: "Undecided", value: sb.Undecided, color: SUPPORT_LEVEL_HEX.undecided },
+          { name: "Soft Opp", value: sb.SoftOpposition, color: SUPPORT_LEVEL_HEX.soft_opposition },
+          { name: "Hard Opp", value: sb.HardOpposition, color: SUPPORT_LEVEL_HEX.hard_opposition },
+        ].filter((d) => d.value > 0);
+
+        return nvSupportData.length > 0 ? (
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base flex items-center gap-2">
+                <Sparkles className="h-4 w-4 text-cyan-500" />
+                New Voter Support (18–20)
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <ResponsiveContainer width="100%" height={280}>
+                  <PieChart>
+                    <Pie
+                      data={nvSupportData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={70}
+                      outerRadius={100}
+                      dataKey="value"
+                      paddingAngle={3}
+                      strokeWidth={2}
+                      stroke="#fff"
+                      label={({ name, percent }) => `${name} ${((percent ?? 0) * 100).toFixed(0)}%`}
+                    >
+                      {nvSupportData.map((entry, i) => (
+                        <Cell key={i} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip
+                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                      formatter={(value: any) => [Number(value).toLocaleString(), "Voters"]}
+                      contentStyle={TOOLTIP_STYLE}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+                <div className="flex flex-col justify-center gap-3">
+                  <div className="text-sm text-muted-foreground">
+                    <span className="text-2xl font-bold text-foreground">{newVoters.Total.toLocaleString()}</span> new voters total
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    <span className="text-lg font-semibold text-foreground">{nvAssessed.toLocaleString()}</span> assessed ({nvAssessedPct}%)
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    <span className="text-lg font-semibold text-green-600">{nvSupportive.toLocaleString()}</span> supportive ({nvSupportPct}%)
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ) : null;
+      })()}
     </div>
   );
 }

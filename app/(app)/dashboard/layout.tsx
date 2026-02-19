@@ -3,12 +3,11 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { BarChart3, Activity, Users, Phone, Flag, Sparkles } from "lucide-react";
+import { BarChart3, Activity, Users, Phone, Flag } from "lucide-react";
 
 const DASHBOARD_TABS = [
   { label: "Overview", href: "/dashboard/overview", icon: Activity, description: "Key metrics, follow-ups, and quick actions" },
   { label: "Demographics", href: "/dashboard/demographics", icon: Users, description: "Voter demographics by age, sex, island, and constituency" },
-  { label: "New Voters", href: "/dashboard/new-voters", icon: Sparkles, description: "First-time voters aged 18\u201320: demographics, support, and outreach insights" },
   { label: "Campaign", href: "/dashboard/campaign", icon: BarChart3, description: "Support trends, candidate performance, and constituency comparison" },
   { label: "Outreach", href: "/dashboard/outreach", icon: Phone, description: "Contact activity, team performance, and outreach methods" },
   { label: "Election Day", href: "/dashboard/election-day", icon: Flag, description: "Transport logistics and turnout tracking" },
