@@ -17,7 +17,7 @@ import { GenderBadge } from "@/components/shared/gender-badge";
 import { Card } from "@/components/ui/card";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { VoteDialog } from "@/components/voting/vote-dialog";
-import type { BoxVoter, CandidateView } from "@/lib/types";
+import type { BoxVoter, CandidateView, Party } from "@/lib/types";
 
 interface BoxVoterTableProps {
   voters: BoxVoter[];
@@ -27,6 +27,7 @@ interface BoxVoterTableProps {
   boxId: string;
   constituencyId: string;
   candidates: CandidateView[];
+  parties: Party[];
 }
 
 export function BoxVoterTable({
@@ -37,6 +38,7 @@ export function BoxVoterTable({
   boxId,
   constituencyId,
   candidates,
+  parties,
 }: BoxVoterTableProps) {
   const searchParams = useSearchParams();
   const [dialogVoter, setDialogVoter] = useState<BoxVoter | null>(null);
@@ -161,6 +163,7 @@ export function BoxVoterTable({
           onOpenChange={(open) => { if (!open) setDialogVoter(null); }}
           voter={dialogVoter}
           candidates={candidates}
+          parties={parties}
           constituencyId={constituencyId}
         />
       )}

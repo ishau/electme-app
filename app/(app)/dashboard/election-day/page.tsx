@@ -14,12 +14,19 @@ import {
 } from "recharts";
 import { useTransportStats } from "@/lib/hooks/use-transport";
 import { useTurnout } from "@/lib/hooks/use-voting";
-import { useDemographics } from "@/lib/hooks/use-demographics";
 import { useGroup } from "@/lib/hooks/use-group";
 import { useConstituencies } from "@/lib/hooks/use-constituencies";
+import { TurnoutCard } from "@/components/voting/turnout-card";
 import { StatCard } from "@/components/shared/stat-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Bus, Vote, Users, Clock } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Bus, Clock } from "lucide-react";
 import { DashboardSkeleton } from "@/components/shared/loading-skeleton";
 
 const TRANSPORT_SEGMENTS = [
@@ -31,7 +38,6 @@ const TRANSPORT_SEGMENTS = [
 
 export default function ElectionDayPage() {
   const { data: group, isLoading: groupLoading } = useGroup();
-  const { data: demo } = useDemographics();
   const { data: transportStats } = useTransportStats();
   const { data: constituencies } = useConstituencies();
 
@@ -48,7 +54,6 @@ export default function ElectionDayPage() {
     return <DashboardSkeleton statCount={4} />;
   }
 
-  const totalVoters = demo?.TotalVoters ?? 0;
   const totalTransport = transportStats?.Total ?? 0;
 
   // Transport donut data
@@ -66,38 +71,36 @@ export default function ElectionDayPage() {
 
   return (
     <div className="space-y-6">
-      {/* Stat Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <StatCard title="Total Voters" value={totalVoters.toLocaleString()} icon={Users} />
-        <StatCard
-          title="Transport Requests"
-          value={totalTransport}
-          description={`${transportStats?.InterIslandNeeded ?? 0} inter-island`}
-          icon={Bus}
-        />
-        <StatCard
-          title="Turnout"
-          value={turnout ? `${turnout.TurnoutPercent.toFixed(1)}%` : "\u2014"}
-          description={
-            turnout
-              ? `${turnout.TotalVoted} / ${turnout.TotalConstituents}`
-              : "Select constituency"
-          }
-          icon={Vote}
-        />
-        <StatCard
-          title="Service Provided"
-          value={transportStats?.ServiceProvided ?? 0}
-          description={
-            transportStats?.ServiceDenied
-              ? `${transportStats.ServiceDenied} denied`
-              : undefined
-          }
-          icon={Clock}
-        />
-      </div>
+      {/* Constituency selector */}
+      {availableConstituencies.length > 1 && (
+        <Select
+          value={activeConstituency}
+          onValueChange={(value) => { if (value) setSelectedConstituency(value); }}
+          items={Object.fromEntries(availableConstituencies.map((c) => [c.ID, c.Name]))}
+        >
+          <SelectTrigger className="w-full sm:w-[240px]">
+            <SelectValue placeholder="Select constituency" />
+          </SelectTrigger>
+          <SelectContent>
+            {availableConstituencies.map((c) => (
+              <SelectItem key={c.ID} value={c.ID}>
+                {c.Name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      )}
 
-      {/* Transport Donut + Registration Progress */}
+      {/* Voter Turnout */}
+      {turnout && (
+        <TurnoutCard
+          total={turnout.TotalConstituents}
+          voted={turnout.TotalVoted}
+          percent={turnout.TurnoutPercent}
+        />
+      )}
+
+      {/* Transport + Turnout by Hour */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
@@ -140,110 +143,56 @@ export default function ElectionDayPage() {
           </CardContent>
         </Card>
 
-        {/* Registration Progress */}
+        {/* Turnout by Hour */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Voter Turnout Progress</CardTitle>
+            <CardTitle className="text-base">Voter Turnout by Hour</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-6">
-            {turnout && totalVoters > 0 ? (
+          <CardContent>
+            {hourData.length > 0 ? (
               <>
-                <div>
-                  <div className="flex justify-between text-sm mb-1.5">
-                    <span>Total Voters</span>
-                    <span className="text-muted-foreground tabular-nums">
-                      {turnout.TotalConstituents.toLocaleString()} / {totalVoters.toLocaleString()}
-                    </span>
-                  </div>
-                  <div className="h-5 bg-muted rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-blue-500 rounded-full transition-all"
-                      style={{
-                        width: `${Math.min((turnout.TotalConstituents / totalVoters) * 100, 100)}%`,
-                      }}
+                <ResponsiveContainer width="100%" height={220}>
+                  <BarChart data={hourData} margin={{ left: 0, right: 0, top: 0, bottom: 0 }}>
+                    <XAxis dataKey="hour" tick={{ fontSize: 10 }} axisLine={false} tickLine={false} />
+                    <YAxis tick={{ fontSize: 11 }} axisLine={false} tickLine={false} width={35} />
+                    <Tooltip
+                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                      formatter={(value: any) => [`${value} votes`, "Votes"]}
+                      contentStyle={{ fontSize: 12 }}
                     />
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {((turnout.TotalConstituents / totalVoters) * 100).toFixed(1)}% of total voters
-                    {activeConstituency ? " in selected constituency" : ""}
-                  </p>
-                </div>
-                <div>
-                  <div className="flex justify-between text-sm mb-1.5">
-                    <span>Voted</span>
-                    <span className="text-muted-foreground tabular-nums">
-                      {turnout.TotalVoted.toLocaleString()} / {turnout.TotalConstituents.toLocaleString()}
-                    </span>
-                  </div>
-                  <div className="h-5 bg-muted rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-green-500 rounded-full transition-all"
-                      style={{ width: `${turnout.TurnoutPercent}%` }}
-                    />
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {turnout.TurnoutPercent.toFixed(1)}% turnout
-                  </p>
+                    <Bar dataKey="count" fill="#6366f1" radius={[4, 4, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+                <div className="text-xs text-muted-foreground text-right mt-1">
+                  Total: {turnout?.TotalVoted ?? 0} votes ({turnout?.TurnoutPercent.toFixed(1)}% turnout)
                 </div>
               </>
             ) : (
-              <p className="text-sm text-muted-foreground">
-                {activeConstituency
-                  ? "No turnout data for this constituency."
-                  : "Select a constituency to view turnout progress."}
-              </p>
+              <p className="text-sm text-muted-foreground">No votes recorded yet.</p>
             )}
           </CardContent>
         </Card>
       </div>
 
-      {/* Turnout by Hour */}
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className="text-base">Voter Turnout by Hour</CardTitle>
-          <select
-            className="text-sm border rounded px-2 py-1 bg-background"
-            value={activeConstituency}
-            onChange={(e) => setSelectedConstituency(e.target.value)}
-          >
-            {availableConstituencies.map((c) => (
-              <option key={c.ID} value={c.ID}>
-                {c.Name}
-              </option>
-            ))}
-            {availableConstituencies.length === 0 && (
-              <option value="">No constituencies</option>
-            )}
-          </select>
-        </CardHeader>
-        <CardContent>
-          {hourData.length > 0 ? (
-            <>
-              <ResponsiveContainer width="100%" height={220}>
-                <BarChart data={hourData} margin={{ left: 0, right: 0, top: 0, bottom: 0 }}>
-                  <XAxis dataKey="hour" tick={{ fontSize: 10 }} axisLine={false} tickLine={false} />
-                  <YAxis tick={{ fontSize: 11 }} axisLine={false} tickLine={false} width={35} />
-                  <Tooltip
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    formatter={(value: any) => [`${value} votes`, "Votes"]}
-                    contentStyle={{ fontSize: 12 }}
-                  />
-                  <Bar dataKey="count" fill="#6366f1" radius={[4, 4, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-              <div className="text-xs text-muted-foreground text-right mt-1">
-                Total: {turnout?.TotalVoted ?? 0} votes ({turnout?.TurnoutPercent.toFixed(1)}% turnout)
-              </div>
-            </>
-          ) : (
-            <p className="text-sm text-muted-foreground">
-              {activeConstituency
-                ? "No votes recorded yet for this constituency."
-                : "Select a constituency to view turnout data."}
-            </p>
-          )}
-        </CardContent>
-      </Card>
+      {/* Stat Cards */}
+      <div className="grid grid-cols-2 gap-4">
+        <StatCard
+          title="Transport Requests"
+          value={totalTransport}
+          description={`${transportStats?.InterIslandNeeded ?? 0} inter-island`}
+          icon={Bus}
+        />
+        <StatCard
+          title="Service Provided"
+          value={transportStats?.ServiceProvided ?? 0}
+          description={
+            transportStats?.ServiceDenied
+              ? `${transportStats.ServiceDenied} denied`
+              : undefined
+          }
+          icon={Clock}
+        />
+      </div>
     </div>
   );
 }

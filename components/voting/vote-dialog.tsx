@@ -3,7 +3,8 @@
 import { useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
+import { GenderBadge } from "@/components/shared/gender-badge";
 import {
   Dialog,
   DialogContent,
@@ -14,13 +15,14 @@ import {
 import { recordVote, updateVote, deleteVote } from "@/lib/mutations";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import type { BoxVoter, CandidateView } from "@/lib/types";
+import type { BoxVoter, CandidateView, Party } from "@/lib/types";
 
 interface VoteDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   voter: BoxVoter;
   candidates: CandidateView[];
+  parties: Party[];
   constituencyId: string;
 }
 
@@ -29,16 +31,18 @@ export function VoteDialog({
   onOpenChange,
   voter,
   candidates,
+  parties,
   constituencyId,
 }: VoteDialogProps) {
   const queryClient = useQueryClient();
   const [isPending, startTransition] = useTransition();
   const isEdit = !!voter.VotingRecordID;
 
+  const partyMap = Object.fromEntries(parties.map((p) => [p.ID, p]));
+
   // Pre-select candidates from existing exit polls
   const initialSelected = new Set(voter.ExitPolls?.map((ep) => ep.CandidateID) ?? []);
   const [selectedCandidates, setSelectedCandidates] = useState<Set<string>>(initialSelected);
-  const [notes, setNotes] = useState("");
 
   // Filter candidates to those in this constituency
   const relevantCandidates = candidates.filter((c) =>
@@ -53,12 +57,22 @@ export function VoteDialog({
     return acc;
   }, {});
 
-  const toggleCandidate = (id: string) => {
+  // Single-seat types: only one candidate per type
+  const singleSeatTypes = new Set(["Mayor", "President", "WDC President"]);
+  const isSingleSeat = (type: string) => singleSeatTypes.has(type);
+
+  const toggleCandidate = (id: string, type: string) => {
     setSelectedCandidates((prev) => {
       const next = new Set(prev);
       if (next.has(id)) {
         next.delete(id);
       } else {
+        if (isSingleSeat(type)) {
+          const sameTypeCandidates = grouped[type] ?? [];
+          for (const c of sameTypeCandidates) {
+            next.delete(c.ID);
+          }
+        }
         next.add(id);
       }
       return next;
@@ -79,7 +93,6 @@ export function VoteDialog({
         if (isEdit) {
           await updateVote(voter.VotingRecordID!, {
             candidate_ids: candidateIds.length > 0 ? candidateIds : undefined,
-            notes: notes || undefined,
           });
           toast.success("Vote updated");
         } else {
@@ -87,7 +100,6 @@ export function VoteDialog({
             constituent_id: voter.ID,
             constituency_id: constituencyId,
             candidate_ids: candidateIds.length > 0 ? candidateIds : undefined,
-            notes: notes || undefined,
           });
           toast.success(`Vote recorded for ${voter.FullName}`);
         }
@@ -127,7 +139,16 @@ export function VoteDialog({
         <div className="space-y-4">
           <div className="p-3 border rounded-md bg-muted/50">
             <p className="font-medium">{voter.FullName}</p>
-            <p className="text-sm text-muted-foreground">{voter.MaskedNationalID}</p>
+            <div className="flex items-center gap-2 mt-1 text-sm text-muted-foreground">
+              <GenderBadge sex={voter.Sex} />
+              {voter.Age != null && <span>{voter.Age} yrs</span>}
+              {voter.PermanentAddress && (
+                <>
+                  <span>·</span>
+                  <span className="truncate">{voter.PermanentAddress}</span>
+                </>
+              )}
+            </div>
           </div>
 
           {Object.keys(grouped).length > 0 && (
@@ -138,43 +159,28 @@ export function VoteDialog({
                   <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">
                     {typeLabel(type)}
                   </p>
-                  {typeCandidates.map((c) => (
-                    <label
-                      key={c.ID}
-                      className="flex items-center gap-2 p-2 border rounded cursor-pointer hover:bg-muted/50 transition-colors"
-                    >
-                      <input
-                        type="checkbox"
-                        checked={selectedCandidates.has(c.ID)}
-                        onChange={() => toggleCandidate(c.ID)}
-                        className="rounded"
-                      />
-                      <div className="flex items-center gap-2 min-w-0">
-                        {c.Number > 0 && (
-                          <span className="text-xs font-mono bg-muted px-1.5 py-0.5 rounded">
-                            #{c.Number}
-                          </span>
-                        )}
-                        <span className="text-sm truncate">{c.Name}{c.Nickname ? ` (${c.Nickname})` : ""}</span>
-                        {c.IsOwnCandidate && (
-                          <span className="text-xs text-primary font-medium shrink-0">Ours</span>
-                        )}
-                      </div>
-                    </label>
-                  ))}
+                  <div className="space-y-1.5">
+                    {typeCandidates.map((c) => {
+                      const party = c.PartyID ? partyMap[c.PartyID] : null;
+                      return (
+                        <label
+                          key={c.ID}
+                          className="flex items-center gap-2.5 p-2 border rounded cursor-pointer hover:bg-muted/50 transition-colors"
+                        >
+                          <Checkbox
+                            checked={selectedCandidates.has(c.ID)}
+                            onCheckedChange={() => toggleCandidate(c.ID, type)}
+                          />
+                          <CandidateLabel candidate={c} party={party} />
+                        </label>
+                      );
+                    })}
+                  </div>
                 </div>
               ))}
             </div>
           )}
 
-          <div className="space-y-1">
-            <Label>Notes</Label>
-            <Input
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              placeholder="Optional notes"
-            />
-          </div>
         </div>
 
         <DialogFooter className="flex-col sm:flex-row gap-2">
@@ -197,5 +203,26 @@ export function VoteDialog({
         </DialogFooter>
       </DialogContent>
     </Dialog>
+  );
+}
+
+function CandidateLabel({ candidate: c, party }: { candidate: CandidateView; party: Party | null }) {
+  return (
+    <div className="flex items-center gap-2 min-w-0">
+      {c.Number > 0 && (
+        <span className="text-xs font-mono bg-muted px-1.5 py-0.5 rounded">
+          #{c.Number}
+        </span>
+      )}
+      <span className="text-sm truncate">{c.Name}{c.Nickname ? ` (${c.Nickname})` : ""}</span>
+      {party && (
+        <span
+          className="shrink-0 inline-flex items-center rounded px-1 py-0.5 text-[10px] font-semibold text-white leading-none"
+          style={{ backgroundColor: party.Color }}
+        >
+          {party.Code}
+        </span>
+      )}
+    </div>
   );
 }

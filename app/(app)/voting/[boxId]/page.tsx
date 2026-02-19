@@ -4,6 +4,7 @@ import { use } from "react";
 import Link from "next/link";
 import { useGroup } from "@/lib/hooks/use-group";
 import { useConstituencies } from "@/lib/hooks/use-constituencies";
+import { useParties } from "@/lib/hooks/use-parties";
 import { useBallotBoxes } from "@/lib/hooks/use-ballot-boxes";
 import { useBoxVoters } from "@/lib/hooks/use-ballot-boxes";
 import { TurnoutCard } from "@/components/voting/turnout-card";
@@ -45,6 +46,7 @@ export default function BoxDetailPage({ params }: BoxDetailPageProps) {
 
   const { data: group, isLoading: groupLoading } = useGroup();
   const { data: allConstituencies } = useConstituencies();
+  const { data: parties } = useParties();
 
   const groupConstituencyIds = group?.Constituencies ?? [];
   const groupConstituencies = (allConstituencies ?? []).filter((c) =>
@@ -164,6 +166,7 @@ export default function BoxDetailPage({ params }: BoxDetailPageProps) {
           boxId={boxId}
           constituencyId={constituencyId}
           candidates={group?.Candidates ?? []}
+          parties={parties ?? []}
         />
       )}
     </Page>
