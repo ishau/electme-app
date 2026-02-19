@@ -7,6 +7,7 @@ import {
   YAxis,
   Tooltip,
   ResponsiveContainer,
+  CartesianGrid,
   PieChart,
   Pie,
   Cell,
@@ -21,6 +22,7 @@ import { outreachMethodLabel, outreachOutcomeLabel } from "@/lib/utils";
 import { DashboardSkeleton } from "@/components/shared/loading-skeleton";
 
 const WEEKDAY_LABELS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+const TOOLTIP_STYLE = { fontSize: 13, borderRadius: 8, border: "none", boxShadow: "0 4px 12px rgba(0,0,0,0.1)", padding: "8px 12px" };
 
 const OUTCOME_COLORS: Record<string, string> = {
   positive: "#22c55e",
@@ -103,7 +105,7 @@ export default function OutreachPage() {
         <StatCard title="Last 90 Days" value={totalDayContacts} icon={CalendarDays} />
       </div>
 
-      {/* Contact Activity Heatmap (CSS - Recharts doesn't support this natively) */}
+      {/* Contact Activity Heatmap */}
       <Card>
         <CardHeader>
           <CardTitle className="text-base">Contact Activity (Last 90 Days)</CardTitle>
@@ -151,16 +153,18 @@ export default function OutreachPage() {
           </CardHeader>
           <CardContent>
             {methodData.length > 0 ? (
-              <ResponsiveContainer width="100%" height={Math.max(methodData.length * 35, 120)}>
-                <BarChart data={methodData} layout="vertical" margin={{ left: 0, right: 12, top: 0, bottom: 0 }}>
+              <ResponsiveContainer width="100%" height={Math.max(methodData.length * 42, 140)}>
+                <BarChart data={methodData} layout="vertical" margin={{ left: 0, right: 16, top: 4, bottom: 4 }}>
+                  <CartesianGrid horizontal={false} strokeDasharray="3 3" stroke="#e5e7eb" opacity={0.5} />
                   <XAxis type="number" hide />
-                  <YAxis type="category" dataKey="name" width={100} tick={{ fontSize: 11 }} axisLine={false} tickLine={false} />
+                  <YAxis type="category" dataKey="name" width={100} tick={{ fontSize: 12 }} axisLine={false} tickLine={false} />
                   <Tooltip
+                    cursor={{ fill: "rgba(0,0,0,0.04)" }}
                     // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     formatter={(value: any) => [Number(value).toLocaleString(), "Contacts"]}
-                    contentStyle={{ fontSize: 12 }}
+                    contentStyle={TOOLTIP_STYLE}
                   />
-                  <Bar dataKey="count" fill="#3b82f6" radius={[0, 4, 4, 0]} barSize={16} />
+                  <Bar dataKey="count" fill="#3b82f6" radius={[0, 6, 6, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             ) : (
@@ -175,16 +179,18 @@ export default function OutreachPage() {
           </CardHeader>
           <CardContent>
             {outcomeData.length > 0 ? (
-              <ResponsiveContainer width="100%" height={220}>
+              <ResponsiveContainer width="100%" height={280}>
                 <PieChart>
                   <Pie
                     data={outcomeData}
                     cx="50%"
                     cy="50%"
-                    innerRadius={50}
-                    outerRadius={75}
+                    innerRadius={70}
+                    outerRadius={100}
                     dataKey="value"
-                    paddingAngle={2}
+                    paddingAngle={3}
+                    strokeWidth={2}
+                    stroke="#fff"
                     label={({ name, percent }) => `${name} ${((percent ?? 0) * 100).toFixed(0)}%`}
                   >
                     {outcomeData.map((entry, i) => (
@@ -194,7 +200,7 @@ export default function OutreachPage() {
                   <Tooltip
                     // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     formatter={(value: any) => [Number(value).toLocaleString(), "Contacts"]}
-                    contentStyle={{ fontSize: 12 }}
+                    contentStyle={TOOLTIP_STYLE}
                   />
                 </PieChart>
               </ResponsiveContainer>
@@ -212,7 +218,7 @@ export default function OutreachPage() {
             <CardTitle className="text-base">Team Activity</CardTitle>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={Math.max(team.length * 40, 120)}>
+            <ResponsiveContainer width="100%" height={Math.max(team.length * 48, 140)}>
               <BarChart
                 data={team.map((t) => ({
                   name: t.ContactedBy,
@@ -223,12 +229,14 @@ export default function OutreachPage() {
                   unique: t.UniqueContacted,
                 }))}
                 layout="vertical"
-                margin={{ left: 0, right: 12, top: 0, bottom: 0 }}
+                margin={{ left: 0, right: 16, top: 4, bottom: 4 }}
               >
+                <CartesianGrid horizontal={false} strokeDasharray="3 3" stroke="#e5e7eb" opacity={0.5} />
                 <XAxis type="number" tick={{ fontSize: 11 }} axisLine={false} tickLine={false} />
-                <YAxis type="category" dataKey="name" width={90} tick={{ fontSize: 11 }} axisLine={false} tickLine={false} />
+                <YAxis type="category" dataKey="name" width={90} tick={{ fontSize: 12 }} axisLine={false} tickLine={false} />
                 <Tooltip
-                  contentStyle={{ fontSize: 12 }}
+                  cursor={{ fill: "rgba(0,0,0,0.04)" }}
+                  contentStyle={TOOLTIP_STYLE}
                   // eslint-disable-next-line @typescript-eslint/no-explicit-any
                   formatter={(value: any, name: any) => [value, name]}
                   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -239,7 +247,7 @@ export default function OutreachPage() {
                       : String(label);
                   }}
                 />
-                <Legend iconType="square" iconSize={10} wrapperStyle={{ fontSize: 11 }} />
+                <Legend iconType="square" iconSize={10} wrapperStyle={{ fontSize: 11, paddingTop: 8 }} />
                 <Bar dataKey="Positive" stackId="a" fill="#22c55e" />
                 <Bar dataKey="Neutral" stackId="a" fill="#facc15" />
                 <Bar dataKey="Negative" stackId="a" fill="#ef4444" />
