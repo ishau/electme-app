@@ -495,6 +495,23 @@ export interface Demographics {
   ByConstituency: ConstituencyCount[];
 }
 
+// New Voter Stats (age 18-20)
+export interface NewVoterStats {
+  Total: number;
+  BySex: SexBreakdown;
+  ByAge: { Age: number; Count: number }[];
+  ByConstituency: ConstituencyCount[];
+  ByIsland: IslandCount[];
+  SupportBreakdown?: {
+    Assessed: number;
+    StrongSupporter: number;
+    Leaning: number;
+    Undecided: number;
+    SoftOpposition: number;
+    HardOpposition: number;
+  };
+}
+
 // Affiliation source values
 export type AffiliationSource = "self_declared" | "observed" | "voter_list" | "unknown";
 
