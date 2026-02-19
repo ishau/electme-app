@@ -3,10 +3,13 @@
 import {
   BarChart,
   Bar,
+  LineChart,
+  Line,
   XAxis,
   YAxis,
   Tooltip,
   ResponsiveContainer,
+  CartesianGrid,
   Legend,
   Cell,
 } from "recharts";
@@ -26,6 +29,9 @@ const SUPPORT_LEVELS = [
   { key: "SoftOpposition" as const, color: SUPPORT_LEVEL_HEX.soft_opposition, label: "Soft Opp" },
   { key: "HardOpposition" as const, color: SUPPORT_LEVEL_HEX.hard_opposition, label: "Hard Opp" },
 ];
+
+const TOOLTIP_STYLE = { fontSize: 13, borderRadius: 8, border: "none", boxShadow: "0 4px 12px rgba(0,0,0,0.1)", padding: "8px 12px" };
+const truncate = (s: string, max: number) => s.length > max ? s.slice(0, max - 1) + "…" : s;
 
 export default function CampaignPage() {
   const { data: group, isLoading: groupLoading } = useGroup();
@@ -66,7 +72,8 @@ export default function CampaignPage() {
 
   // Constituency comparison: transform for stacked bar
   const constData = (constSupport ?? []).map((c) => ({
-    name: c.ConstituencyName,
+    name: truncate(c.ConstituencyName, 18),
+    fullName: c.ConstituencyName,
     ...c,
   }));
 
@@ -81,19 +88,21 @@ export default function CampaignPage() {
             <CardTitle className="text-base">Outreach Funnel</CardTitle>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={180}>
-              <BarChart data={funnelData} layout="vertical" margin={{ left: 0, right: 12, top: 0, bottom: 0 }}>
+            <ResponsiveContainer width="100%" height={240}>
+              <BarChart data={funnelData} layout="vertical" margin={{ left: 0, right: 16, top: 4, bottom: 4 }}>
+                <CartesianGrid horizontal={false} strokeDasharray="3 3" stroke="#e5e7eb" opacity={0.5} />
                 <XAxis type="number" hide />
-                <YAxis type="category" dataKey="name" width={90} tick={{ fontSize: 12 }} axisLine={false} tickLine={false} />
+                <YAxis type="category" dataKey="name" width={95} tick={{ fontSize: 12 }} axisLine={false} tickLine={false} />
                 <Tooltip
+                  cursor={{ fill: "rgba(0,0,0,0.04)" }}
                   // eslint-disable-next-line @typescript-eslint/no-explicit-any
                   formatter={(value: any) => [
                     `${Number(value).toLocaleString()} (${totalVoters > 0 ? ((Number(value) / totalVoters) * 100).toFixed(1) : 0}%)`,
                     "Count",
                   ]}
-                  contentStyle={{ fontSize: 12 }}
+                  contentStyle={TOOLTIP_STYLE}
                 />
-                <Bar dataKey="value" radius={[0, 4, 4, 0]} barSize={20}>
+                <Bar dataKey="value" radius={[0, 6, 6, 0]}>
                   {funnelData.map((entry, i) => (
                     <Cell key={i} fill={entry.color} />
                   ))}
@@ -111,26 +120,30 @@ export default function CampaignPage() {
             <CardTitle className="text-base">Support Trend (Last 12 Weeks)</CardTitle>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={260}>
-              <BarChart data={trendData} margin={{ left: 0, right: 0, top: 0, bottom: 0 }}>
-                <XAxis dataKey="week" tick={{ fontSize: 10 }} axisLine={false} tickLine={false} />
-                <YAxis tick={{ fontSize: 11 }} axisLine={false} tickLine={false} width={35} />
-                <Tooltip contentStyle={{ fontSize: 12 }} />
+            <ResponsiveContainer width="100%" height={320}>
+              <LineChart data={trendData} margin={{ left: 0, right: 12, top: 4, bottom: 4 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" opacity={0.5} />
+                <XAxis dataKey="week" tick={{ fontSize: 11 }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fontSize: 11 }} axisLine={false} tickLine={false} width={40} />
+                <Tooltip contentStyle={TOOLTIP_STYLE} />
                 <Legend
-                  iconType="square"
-                  iconSize={10}
-                  wrapperStyle={{ fontSize: 11 }}
+                  iconType="circle"
+                  iconSize={8}
+                  wrapperStyle={{ fontSize: 11, paddingTop: 8 }}
                 />
                 {SUPPORT_LEVELS.map((lvl) => (
-                  <Bar
+                  <Line
                     key={lvl.key}
+                    type="monotone"
                     dataKey={lvl.key}
-                    stackId="a"
-                    fill={lvl.color}
+                    stroke={lvl.color}
+                    strokeWidth={2.5}
+                    dot={{ r: 3, fill: lvl.color }}
+                    activeDot={{ r: 5 }}
                     name={lvl.label}
                   />
                 ))}
-              </BarChart>
+              </LineChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>
@@ -143,7 +156,7 @@ export default function CampaignPage() {
             <CardTitle className="text-base">Support by Candidate</CardTitle>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={Math.max(candidateStats.length * 50, 120)}>
+            <ResponsiveContainer width="100%" height={Math.max(candidateStats.length * 48, 160)}>
               <BarChart
                 data={candidateStats.map((cs) => {
                   const cand = candidateMap[cs.CandidateID];
@@ -153,12 +166,13 @@ export default function CampaignPage() {
                   };
                 })}
                 layout="vertical"
-                margin={{ left: 0, right: 12, top: 0, bottom: 0 }}
+                margin={{ left: 0, right: 16, top: 4, bottom: 4 }}
               >
+                <CartesianGrid horizontal={false} strokeDasharray="3 3" stroke="#e5e7eb" opacity={0.5} />
                 <XAxis type="number" tick={{ fontSize: 11 }} axisLine={false} tickLine={false} />
-                <YAxis type="category" dataKey="name" width={100} tick={{ fontSize: 11 }} axisLine={false} tickLine={false} />
-                <Tooltip contentStyle={{ fontSize: 12 }} />
-                <Legend iconType="square" iconSize={10} wrapperStyle={{ fontSize: 11 }} />
+                <YAxis type="category" dataKey="name" width={110} tick={{ fontSize: 12 }} axisLine={false} tickLine={false} />
+                <Tooltip cursor={{ fill: "rgba(0,0,0,0.04)" }} contentStyle={TOOLTIP_STYLE} />
+                <Legend iconType="square" iconSize={10} wrapperStyle={{ fontSize: 11, paddingTop: 8 }} />
                 {SUPPORT_LEVELS.map((lvl) => (
                   <Bar
                     key={lvl.key}
@@ -197,12 +211,18 @@ export default function CampaignPage() {
             <CardTitle className="text-base">Support by Constituency</CardTitle>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={Math.max(constData.length * 45, 120)}>
-              <BarChart data={constData} layout="vertical" margin={{ left: 0, right: 12, top: 0, bottom: 0 }}>
+            <ResponsiveContainer width="100%" height={Math.max(constData.length * 48, 160)}>
+              <BarChart data={constData} layout="vertical" margin={{ left: 0, right: 16, top: 4, bottom: 4 }}>
+                <CartesianGrid horizontal={false} strokeDasharray="3 3" stroke="#e5e7eb" opacity={0.5} />
                 <XAxis type="number" tick={{ fontSize: 11 }} axisLine={false} tickLine={false} />
-                <YAxis type="category" dataKey="name" width={120} tick={{ fontSize: 11 }} axisLine={false} tickLine={false} />
-                <Tooltip contentStyle={{ fontSize: 12 }} />
-                <Legend iconType="square" iconSize={10} wrapperStyle={{ fontSize: 11 }} />
+                <YAxis type="category" dataKey="name" width={140} tick={{ fontSize: 12 }} axisLine={false} tickLine={false} />
+                <Tooltip
+                  cursor={{ fill: "rgba(0,0,0,0.04)" }}
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  labelFormatter={(_label: any, payload: any) => payload?.[0]?.payload?.fullName ?? _label}
+                  contentStyle={TOOLTIP_STYLE}
+                />
+                <Legend iconType="square" iconSize={10} wrapperStyle={{ fontSize: 11, paddingTop: 8 }} />
                 {SUPPORT_LEVELS.map((lvl) => (
                   <Bar
                     key={lvl.key}
