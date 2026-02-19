@@ -113,7 +113,7 @@ export default function CandidateSupportPage() {
           <Select
             value={selectedCandidate}
             onValueChange={(v) => setSelectedCandidate(v ?? "")}
-            items={Object.fromEntries(candidates.map((c) => [c.ID, `${c.Name} (${c.CandidateType})`]))}
+            items={Object.fromEntries(candidates.map((c) => [c.ID, `${c.Name}${c.Nickname ? ` (${c.Nickname})` : ""} — ${c.CandidateType}`]))}
           >
             <SelectTrigger className="w-[300px] mt-1.5">
               <SelectValue placeholder="Select candidate" />
@@ -121,7 +121,7 @@ export default function CandidateSupportPage() {
             <SelectContent>
               {candidates.map((c) => (
                 <SelectItem key={c.ID} value={c.ID}>
-                  {c.Name} ({c.CandidateType})
+                  {c.Name}{c.Nickname ? ` (${c.Nickname})` : ""} — {c.CandidateType}
                 </SelectItem>
               ))}
             </SelectContent>

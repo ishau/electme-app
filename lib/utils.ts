@@ -203,23 +203,23 @@ export function sectorLabel(sector: string): string {
   switch (sector) {
     case "government":
       return "Government";
-    case "soe":
-      return "SOE";
-    case "private":
-      return "Private";
-    case "self_employed":
-      return "Self Employed";
-    case "resort":
-      return "Resort";
-    case "ngo":
-      return "NGO";
-    case "unemployed":
-      return "Unemployed";
-    case "retired":
-      return "Retired";
-    case "student":
-      return "Student";
+    case "fenaka":
+      return "Fenaka";
+    case "stelco":
+      return "Stelco";
+    case "road_corporation":
+      return "Road Corporation";
+    case "airport":
+      return "Airport";
+    case "other":
+      return "Other";
     default:
       return sector;
   }
+}
+
+/** Format candidate name with nickname: "#3 Ahmed (Bodu Ahmed)" */
+export function candidateDisplayName(c: { Name: string; Nickname?: string; Number: number }): string {
+  const nick = c.Nickname ? ` (${c.Nickname})` : "";
+  return `#${c.Number} ${c.Name}${nick}`;
 }

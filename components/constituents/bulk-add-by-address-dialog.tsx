@@ -26,7 +26,7 @@ import { SupportLevelBadge } from "@/components/campaign/support-level-badge";
 import { bulkLogSupport, bulkLogOutreach } from "@/lib/mutations";
 import { get } from "@/lib/api";
 import { useQueryClient, useQuery } from "@tanstack/react-query";
-import { cn } from "@/lib/utils";
+import { cn, candidateDisplayName } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import type { PaginatedResponse, Constituent, CandidateView, Party } from "@/lib/types";
 import { Check, Loader2 } from "lucide-react";
@@ -428,7 +428,7 @@ export function AddressSupportDialog({
                                     {party ? party.Code : "IDP"}
                                   </span>
                                   <span className="text-sm font-medium truncate">
-                                    #{c.Number} {c.Name}
+                                    {candidateDisplayName(c)}
                                   </span>
                                   {typeBadge && (
                                     <span className={cn("shrink-0 inline-flex items-center rounded border px-1 py-0.5 text-[10px] font-medium leading-none", typeBadge.className)}>

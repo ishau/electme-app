@@ -10,6 +10,8 @@ import { Badge } from "@/components/ui/badge";
 import { CandidateVoterSearch } from "@/components/candidates/candidate-voter-search";
 import { CandidateVoterTable } from "@/components/candidates/candidate-voter-table";
 import { DetailWithStatsSkeleton } from "@/components/shared/loading-skeleton";
+import { CandidateNicknameDialog } from "@/components/candidates/candidate-nickname-dialog";
+import { candidateDisplayName } from "@/lib/utils";
 import { useQueryStates, parseAsString } from "nuqs";
 
 const normalizeType = (t: string) => t.toLowerCase().replace(/\s+/g, "_");
@@ -53,7 +55,7 @@ export default function CandidateDetailPage() {
 
   return (
     <Page
-      title={`#${candidate.Number} ${candidate.Name}`}
+      title={candidateDisplayName(candidate)}
       description={
         <span className="flex items-center gap-2">
           {party && (
@@ -69,6 +71,9 @@ export default function CandidateDetailPage() {
       }
       actions={
         <div className="flex items-center gap-2">
+          {candidate.IsOwnCandidate && (
+            <CandidateNicknameDialog candidateId={candidateId} currentNickname={candidate.Nickname} />
+          )}
           {!candidate.IsOwnCandidate && <Badge variant="secondary">Competing</Badge>}
         </div>
       }
